@@ -17,19 +17,23 @@ int main()
   //partition sum
   image.draw_line(0,0,image.width()-1,0,black);
   image.draw_line(0,0,0,image.height()-1,black);
-  //set few points
+  //set few points (random and a double for error)
   int nb=10;
   CImg<unsigned char> ti(nb);
   CImg<unsigned char> tj(nb);
   ti.rand(1,width-1);
   tj.rand(1,height-1);
+  //introduce double (LUT error)
+  tj(1)=tj(4);
+  ti.print("ti");
+  tj.print("tj w 1 dlb");
   cimg_forX(ti,n)
   {
     int i=ti(n);
     int j=tj(n);
     image.draw_point(i,j,green);//IP
-    image.draw_point(i,0,green);//sum
-    image.draw_point(0,j,green);//sum
+    if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,green); else image.draw_point(i,0,red);//sum
+    if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,green); else image.draw_point(0,j,red);//sum
   }
   //zoom
   image.resize(-zoom*100,-zoom*100);
