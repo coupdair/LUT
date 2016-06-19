@@ -18,14 +18,19 @@ int main()
   image.draw_line(0,0,image.width()-1,0,black);
   image.draw_line(0,0,0,image.height()-1,black);
   //set few points
-  int i=123;int j=123;
-  image.draw_point(i,j,green);//IP
-  image.draw_point(i,0,green);//sum
-  image.draw_point(0,j,green);//sum
-  i=12;j=21;
-  image.draw_point(i,j,green);//IP
-  image.draw_point(i,0,green);//sum
-  image.draw_point(0,j,green);//sum
+  int nb=10;
+  CImg<unsigned char> ti(nb);
+  CImg<unsigned char> tj(nb);
+  ti.rand(1,width-1);
+  tj.rand(1,height-1);
+  cimg_forX(ti,n)
+  {
+    int i=ti(n);
+    int j=tj(n);
+    image.draw_point(i,j,green);//IP
+    image.draw_point(i,0,green);//sum
+    image.draw_point(0,j,green);//sum
+  }
   //zoom
   image.resize(-zoom*100,-zoom*100);
   //draw separations
