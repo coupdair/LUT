@@ -6,7 +6,7 @@ int main()
 {
   int width=253;
   int height=128;
-  int zoom=5;int step=zoom;
+  int zoom=6;int step=zoom;
   CImg<unsigned char> image(width,height,1,3);
   const unsigned char red[] = { 255,0,0 }, green[] = { 0,255,0 }, blue[] = { 0,0,255 },
     cP128[] = { 64,64,64 }, cP64[] = { 128,128,128 }, cP32[] = { 196,196,196 }, cP16[] = { 222,222,222 }, cP8[] = { 242,242,242 },
@@ -57,7 +57,7 @@ int main()
   //draw vertical lines
   for(int x=0; x<(int)(image.width()); x+=stepx)
     image.draw_line(x,0,x,image.height()-1,black);
-  image.display("zoom 5x");
-  image.save("253x128_5x.png");
+  image.display("zoom 6x");
+  image.save("LUT.png");
   return 0;
 }
