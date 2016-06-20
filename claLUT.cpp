@@ -82,10 +82,14 @@ int main()
     }
     //else add point
     CImg<unsigned char>  color(1,1,1,spectrum);color.draw_point(0,0,green);//RGB
-    color(V)=j;//V
+    color(P)=(i<129)?128:(i<129+64)?64:(i<129+64+32)?32:(i<129+64+32+16)?16:(i<129+64+32+16+8)?8:1;//Partition
+    color(SP)=i;//SubPartition TODO
+    color(V)=j;//Value
     image.draw_point(i,j,color.data());
-    if(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B])/*RGB*/ image.draw_point(i,0,color.data()); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
-    if(image(0,j,0,R)==black[R]&&image(0,j,0,G)==black[G]&&image(0,j,0,B)==black[B])/*RGB*/ image.draw_point(0,j,color.data()); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
+    if(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B])/*RGB*/ image.draw_point(i,0,color.data());
+    else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
+    if(image(0,j,0,R)==black[R]&&image(0,j,0,G)==black[G]&&image(0,j,0,B)==black[B])/*RGB*/ image.draw_point(0,j,color.data());
+    else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
   }//point selection by hand
   disp.close();
   //zoom
