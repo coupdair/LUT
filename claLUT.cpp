@@ -4,7 +4,7 @@ using namespace cimg_library;
 
 int main()
 {
-  int width=253;
+  int width=256;
   int height=128;
   int zoom=6;int step=zoom;
   CImg<unsigned char> image(width,height,1,3);
@@ -46,6 +46,7 @@ int main()
     if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,green); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
     if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,green); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
   }
+  image.display("raw data");
   //zoom
   image.resize(-zoom*100,-zoom*100);
   //draw separations
