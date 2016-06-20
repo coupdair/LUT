@@ -1,5 +1,5 @@
 #compile
-g++ -O0 -o claLUT claLUT.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include  -lm -L/usr/X11R6/lib -lpthread -lX11 && ./claLUT -h -I
+g++ -O0 -o claLUT claLUT.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include  -lm -L/usr/X11R6/lib -lpthread -lX11 && ./claLUT -h -I && cat claLUT.cpp | grep VERSION | head -n 1 | sed 's/#define VERSION //;s/"//g' > VERSION && cat VERSION
 #run
 ./claLUT -0 127 -1 253 -X true -Z 7 -o claLUT.png && display claLUT.png
 

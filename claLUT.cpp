@@ -1,9 +1,12 @@
 #include "CImg.h"
+#include <string>
 
-//! \todo [medium] _ add version (prg and CImg from Wiki).
+//! \todo [medium] . add version.
 //! \todo [low] _ read and check an external table.
 
 using namespace cimg_library;
+
+#define VERSION "v0.0.5"
 
 #define R 0
 #define G 1
@@ -139,12 +142,14 @@ int main(int argc,char **argv)
 {
   const int width=257;
   const int spectrum=6;
-  //command arguments, i.e. CLI option
-  cimg_usage("Check and Layout A LookUpTable.\n" \
-  "It uses different GNU libraries (see --info option)\n\n" \
-  "usage: ./claLUT -h -I\n" \
-  "\ncompilation date:" \
-  );//cimg_usage
+  ///command arguments, i.e. CLI option
+  cimg_usage(std::string("Check and Layout A LookUpTable.\n" \
+  " It uses different GNU libraries (see --info option)\n\n" \
+  " usage: ./claLUT -h -I\n" \
+  "        ./claLUT -0 128 -1 253 -X true -Z 7 -o claLUT.png\n" \
+  "\n version: "+std::string(VERSION)+"\n compilation date:" \
+  ).c_str());//cimg_usage
+
 //  const char* filename = cimg_option("-i","LUT.txt","Input text file");
   const char* imagefilename = cimg_option("-o","claLUT.png","Output image file");
   const int zoom=cimg_option("-Z",6,  "zoom factor for GUI or/and output");
