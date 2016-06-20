@@ -1,5 +1,8 @@
 #include "CImg.h"
 
+//! \todo [high] argv for zoom, IP range.
+//! \todo [low] read and check an external table.
+
 using namespace cimg_library;
 
 #define R 0
@@ -98,7 +101,7 @@ int main()
         if(other>1) image.draw_point(i,0,red);
         else image.draw_point(i,0,green);
         if(other==0) image.draw_point(i,0,black);
-        ///Sum
+        ///over all check (based on both updated 0 line and 0 column)
         other=0;
         cimg_for_inX(image,1,image.width(),x)
           if(image(x,0,0,R)==red[R]&&image(x,0,0,G)==red[G]&&image(x,0,0,B)==red[B])
