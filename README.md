@@ -57,6 +57,10 @@ e.g.
 ./claLUT
 #image output
 display claLUT.png
+
+#CLI options
+./claLUT -h -I
+./claLUT -v
 ~~~
 
 
