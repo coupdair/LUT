@@ -54,11 +54,19 @@ int main()
     point.print("point");
     int i=point(0);
     int j=point(1);
+    //break on key pressed
     if(i==-1||j==-1) break;
-    image.draw_point(i,j,blue);
-    if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,blue); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
-    if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,blue); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
-  }
+    //check point
+    if(image(i,j,0,0)==green[0]&&image(i,j,0,1)==green[1]&&image(i,j,0,2)==green[2])
+    {
+      image.draw_point(i,j,black);
+      continue;
+    }
+    //else
+    image.draw_point(i,j,green);
+    if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,green); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
+    if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,green); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
+  }//point selection by hand
   //zoom
   image.resize(-zoom*100,-zoom*100);
   //draw separations
