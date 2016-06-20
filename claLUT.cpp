@@ -88,20 +88,22 @@ void guiLUT(CImg<T>&image,int zoom
 
 int main(int argc,char **argv)
 {
+  const int width=257;
+  const int spectrum=6;
+  //command arguments
   cimg_usage("Check and Layout A LookUpTable");
 //  const char* filename = cimg_option("-i","LUT.txt","Input text file");
   const char* imagefilename = cimg_option("-o","claLUT.png","Output image file");
-  const int value0=cimg_option("-0",1,  "start value (e.g. 1)");
-  const int value1=cimg_option("-1",128,"stop  value (e.g. 128)");
-  const bool GUI=cimg_option("-X",true,"show interactive window (default True).");
+  const int zoom=cimg_option("-Z",6,  "zoom factor for GUI or/and output");
+  const int value0=cimg_option("-0",1,  "start value");
+  const int value1=cimg_option("-1",128,"stop  value");
+  const bool GUI=cimg_option("-X",true,"show interactive window.");
   const bool help=cimg_option("-h",false,"print Help.");
 //  const bool help2=cimg_option("--help",false,0);// This is a hidden option
   if(help) return 0;
 
-  int width=257;
   int height=value1-value0+1;
-  const int spectrum=6;
-  int zoom=7;int step=zoom;
+  int step=zoom;
   CImg<unsigned char> image(width,height,1,spectrum);
   //                              R   G   B    P  SP   V
   const unsigned char red[] = { 255,  0,  0,   0,  0,  0 }
@@ -145,7 +147,7 @@ int main(int argc,char **argv)
   }
   //value
   cimg_forXY(image,x,y)
-    image(x,y,0,V)=y;
+    image(x,y,0,V)=y+value0-1;
   //partition sum
   image.draw_line(0,0,image.width()-1,0,black);//line
   image.draw_line(0,0,0,image.height()-1,black);//column
