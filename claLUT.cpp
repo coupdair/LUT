@@ -5,69 +5,63 @@ using namespace cimg_library;
 #define R 0
 #define G 1
 #define B 2
-#define V  3 //Value, i.e. IP
-#define P  4 //Partition
-#define SP 5 //SubPartition
+#define V  5 //Value, i.e. IP
+#define P  3 //Partition
+#define SP 4 //SubPartition
 
 int main()
 {
-  int width=256;
+  int width=257;
   int height=128;
   const int spectrum=6;
   int zoom=6;int step=zoom;
   CImg<unsigned char> image(width,height,1,spectrum);
-  //                              R   G   B    V
-  const unsigned char red[] = { 255,  0,  0, 255 }
-                  , green[] = { 0  ,255,  0, 255 }
-                  ,  blue[] = { 0  ,  0,255, 255 }
-                  , black[] = { 0  ,  0,  0, 255 }
-                  , white[] = { 222,222,222, 255 }
-                  , cP128[] = { 64 , 64, 64, 255 }
-                  , cP64[]  = { 128,128,128, 255 }
-                  , cP32[]  = { 196,196,196, 255 }
-                  , cP16[]  = { 222,222,222, 255 }
-                  , cP8[]   = { 242,242,242, 255 }
+  //                              R   G   B    P  SP   V
+  const unsigned char red[] = { 255,  0,  0,   0,  0,  0 }
+                  , green[] = { 0  ,255,  0,   0,  0,  0 }
+                  ,  blue[] = { 0  ,  0,255,   0,  0,  0 }
+                  , black[] = { 0  ,  0,  0,   0,  0,  0 }
+                  , white[] = { 222,222,222,   0,  0,  0 }
+                  , cP128[] = {  64, 64, 64, 128,  0,255 }
+                  , cP64[]  = { 128,128,128,  64,  0,255 }
+                  , cP32[]  = { 196,196,196,  32,  0,255 }
+                  , cP16[]  = { 222,222,222,  16,  0,255 }
+                  , cP8[]   = { 255,255,255,   8,  0,255 }
+                  , cP1[]   = {  32, 32, 32,   1,  0,255 }
                   ;
-  //partition color
+  //partition
   {
-  image.fill(255);//Pall
-  int i=0,j=127;
+  //P128
+  int i=1,j=128,s;
   image.draw_rectangle(i,0,j,height,cP128);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P64
   i=j+1;j+=64;
   image.draw_rectangle(i,0,j,height,cP64);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P32
   i=j+1;j+=32;
   image.draw_rectangle(i,0,j,height,cP32);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P16
   i=j+1;j+=16;
   image.draw_rectangle(i,0,j,height,cP16);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P8
   i=j+1;j+=8;
   image.draw_rectangle(i,0,j,height,cP8);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P1
+  i=j+1;j+=8;
+  image.draw_rectangle(i,0,j,height,cP1);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
   }
-  //IP
+  //value
   cimg_forXY(image,x,y)
-    image(x,y,0,3)=y;
+    image(x,y,0,V)=y;
   //partition sum
   image.draw_line(0,0,image.width()-1,0,black);//line
   image.draw_line(0,0,0,image.height()-1,black);//column
-  //set few points (random and a double for error)
-  int nb=10;
-  CImg<unsigned char> ti(nb);
-  CImg<unsigned char> tj(nb);
-  ti.rand(1,width-1);
-  tj.rand(1,height-1);
-  //introduce double (LUT error)
-  tj(1)=tj(4);
-  ti.print("ti");
-  tj.print("tj w 1 dlb");
-  cimg_forX(ti,n)
-  {
-    int i=ti(n);
-    int j=tj(n);
-    CImg<unsigned char>  color(1,1,1,spectrum);color.draw_point(0,0,green);//RGB
-    color(V)=j;//V
-    image.draw_point(i,j,color.data());//IP
-    if(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B])/*RGB*/ image.draw_point(i,0,color.data()); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
-    if(image(0,j,0,R)==black[R]&&image(0,j,0,G)==black[G]&&image(0,j,0,B)==black[B])/*RGB*/ image.draw_point(0,j,color.data()); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
-  }
   //GUI
   //set other point(s) by mouse
   CImgDisplay disp(image.width()*zoom,image.height()*zoom);
