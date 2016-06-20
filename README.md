@@ -35,7 +35,7 @@ sudo apt-get install libpng-dev
 
 ## C++ compilation
 
-cf. `_info.txt`
+cf. [`_info.txt`]()
 
 e.g.
 
@@ -48,7 +48,7 @@ g++ -O0 -o claLUT claLUT.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100
 1. run binary: `claLUT`
 1. check results on pop up window or `claLUT.png` file.
 
-![claLUT image](claLUT.png),
+![claLUT image](claLUT.png)
 
 e.g.
 
