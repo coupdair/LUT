@@ -14,7 +14,7 @@ int main()
   int width=257;
   int height=128;
   const int spectrum=6;
-  int zoom=6;int step=zoom;
+  int zoom=7;int step=zoom;
   CImg<unsigned char> image(width,height,1,spectrum);
   //                              R   G   B    P  SP   V
   const unsigned char red[] = { 255,  0,  0,   0,  0,  0 }
@@ -27,7 +27,7 @@ int main()
                   , cP32[]  = { 196,196,196,  32,  0,255 }
                   , cP16[]  = { 222,222,222,  16,  0,255 }
                   , cP8[]   = { 255,255,255,   8,  0,255 }
-                  , cP1[]   = {  32, 32, 32,   1,  0,255 }
+                  , cP1[]   = {  48, 48, 48,   1,  0,255 }
                   ;
   //partition
   {
@@ -83,7 +83,7 @@ int main()
     //else add point
     CImg<unsigned char>  color(1,1,1,spectrum);color.draw_point(0,0,green);//RGB
     color(P)=(i<129)?128:(i<129+64)?64:(i<129+64+32)?32:(i<129+64+32+16)?16:(i<129+64+32+16+8)?8:1;//Partition
-    color(SP)=i;//SubPartition TODO
+    color(SP)=(i<129)?i:(i<129+64)?i-128:(i<129+64+32)?i-128-64:(i<129+64+32+16)?i-128-64-32:(i<129+64+32+16+8)?i-128-64-32-16:i-128-64-32-16-8;//SubPartition
     color(V)=j;//Value
     image.draw_point(i,j,color.data());
     if(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B])/*RGB*/ image.draw_point(i,0,color.data());
@@ -103,7 +103,7 @@ int main()
   //draw vertical lines
   for(int x=0; x<(int)(image.width()); x+=stepx)
     image.draw_line(x,0,x,image.height()-1,black);
-  image.display("zoom 6x");//zoom
+//  image.display("LUT");
   image.save("claLUT.png");
   return 0;
 }
