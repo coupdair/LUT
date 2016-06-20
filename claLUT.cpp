@@ -46,7 +46,17 @@ int main()
     if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,green); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
     if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,green); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
   }
-  image.display("raw data");
+  //GUI
+  //set other point by mouse
+  {
+    CImg<int> point=image.get_select("select point",0);
+    point.print("point");
+    int i=point(0);
+    int j=point(1);
+    image.draw_point(i,j,blue);
+    if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,blue); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
+    if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,blue); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
+  }
   //zoom
   image.resize(-zoom*100,-zoom*100);
   //draw separations
