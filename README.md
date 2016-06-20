@@ -33,6 +33,18 @@ sudo apt-get install imagemagick
 sudo apt-get install libpng-dev
 ~~~
 
+## git clone
+
+git for both `CImg` and `claLUT`
+
+~~~ { .bash }
+git clone https://github.com/dtschump/CImg.git
+git clone git@github.com:coupdair/claLUT.git
+#or
+git clone https://github.com/dtschump/CImg.git
+git clone https://github.com/coupdair/claLUT.git
+~~~
+
 ## C++ compilation
 
 cf. [`_info.txt`](_info.txt)
