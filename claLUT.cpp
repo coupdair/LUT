@@ -2,15 +2,32 @@
 
 using namespace cimg_library;
 
+#define R 0
+#define G 1
+#define B 2
+#define V  3 //Value, i.e. IP
+#define P  4 //Partition
+#define SP 5 //SubPartition
+
 int main()
 {
   int width=256;
   int height=128;
+  const int spectrum=6;
   int zoom=6;int step=zoom;
-  CImg<unsigned char> image(width,height,1,4);
-  const unsigned char red[] = { 255,0,0,255 }, green[] = { 0,255,0,255 }, blue[] = { 0,0,255,255 },
-    cP128[] = { 64,64,64,255 }, cP64[] = { 128,128,128,255 }, cP32[] = { 196,196,196,255 }, cP16[] = { 222,222,222,255 }, cP8[] = { 242,242,242,255 },
-    black[] = { 0,0,0,255 }, white[] = { 222,222,222,255 };
+  CImg<unsigned char> image(width,height,1,spectrum);
+  //                              R   G   B    V
+  const unsigned char red[] = { 255,  0,  0, 255 }
+                  , green[] = { 0  ,255,  0, 255 }
+                  ,  blue[] = { 0  ,  0,255, 255 }
+                  , black[] = { 0  ,  0,  0, 255 }
+                  , white[] = { 222,222,222, 255 }
+                  , cP128[] = { 64 , 64, 64, 255 }
+                  , cP64[]  = { 128,128,128, 255 }
+                  , cP32[]  = { 196,196,196, 255 }
+                  , cP16[]  = { 222,222,222, 255 }
+                  , cP8[]   = { 242,242,242, 255 }
+                  ;
   //partition color
   {
   image.fill(255);//Pall
@@ -29,8 +46,8 @@ int main()
   cimg_forXY(image,x,y)
     image(x,y,0,3)=y;
   //partition sum
-  image.draw_line(0,0,image.width()-1,0,black);
-  image.draw_line(0,0,0,image.height()-1,black);
+  image.draw_line(0,0,image.width()-1,0,black);//line
+  image.draw_line(0,0,0,image.height()-1,black);//column
   //set few points (random and a double for error)
   int nb=10;
   CImg<unsigned char> ti(nb);
@@ -45,11 +62,11 @@ int main()
   {
     int i=ti(n);
     int j=tj(n);
-    CImg<unsigned char>  color(1,1,1,4);color.draw_point(0,0,green);
-    color(3)=j;
+    CImg<unsigned char>  color(1,1,1,spectrum);color.draw_point(0,0,green);//RGB
+    color(V)=j;//V
     image.draw_point(i,j,color.data());//IP
-    if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,color.data()); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
-    if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,color.data()); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
+    if(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B])/*RGB*/ image.draw_point(i,0,color.data()); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
+    if(image(0,j,0,R)==black[R]&&image(0,j,0,G)==black[G]&&image(0,j,0,B)==black[B])/*RGB*/ image.draw_point(0,j,color.data()); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
   }
   //GUI
   //set other point(s) by mouse
@@ -64,17 +81,17 @@ int main()
     //break on key pressed or display close
     if(i==-1||j==-1) break;
     //check point
-    if(image(i,j,0,0)==green[0]&&image(i,j,0,1)==green[1]&&image(i,j,0,2)==green[2])
+    if(image(i,j,0,R)==green[R]&&image(i,j,0,G)==green[G]&&image(i,j,0,B)==green[B])//RGB
     {//remove point
       image.draw_point(i,j,black);
       continue;
     }
     //else add point
-    unsigned char color[4];strcpy((char*)color,(char*)green);
-    color[3]=j;
-    image.draw_point(i,j,color);
-    if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,color); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
-    if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,color); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
+    CImg<unsigned char>  color(1,1,1,spectrum);color.draw_point(0,0,green);//RGB
+    color(V)=j;//V
+    image.draw_point(i,j,color.data());
+    if(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B])/*RGB*/ image.draw_point(i,0,color.data()); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
+    if(image(0,j,0,R)==black[R]&&image(0,j,0,G)==black[G]&&image(0,j,0,B)==black[B])/*RGB*/ image.draw_point(0,j,color.data()); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
   }//point selection by hand
   disp.close();
   //zoom
@@ -88,7 +105,7 @@ int main()
   //draw vertical lines
   for(int x=0; x<(int)(image.width()); x+=stepx)
     image.draw_line(x,0,x,image.height()-1,black);
-  image.display("zoom 6x");
+  image.display("zoom 6x");//zoom
   image.save("claLUT.png");
   return 0;
 }
