@@ -12,6 +12,55 @@ using namespace cimg_library;
 #define P  3 //Partition
 #define SP 4 //SubPartition
 
+//! fill empty for LUT
+/**
+ * fill empty LUT, i.e. background values.
+**/
+template<typename T>
+void fillLUT(CImg<T>&image, const int value0
+  , const T* cP128
+  , const T* cP64
+  , const T* cP32
+  , const T* cP16
+  , const T* cP8
+  , const T* cP1
+  , const T* black
+  )
+{
+  const int height=image.height();
+  //partition
+  //P128
+  int i=1,j=128,s;
+  image.draw_rectangle(i,0,j,height,cP128);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P64
+  i=j+1;j+=64;
+  image.draw_rectangle(i,0,j,height,cP64);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P32
+  i=j+1;j+=32;
+  image.draw_rectangle(i,0,j,height,cP32);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P16
+  i=j+1;j+=16;
+  image.draw_rectangle(i,0,j,height,cP16);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P8
+  i=j+1;j+=8;
+  image.draw_rectangle(i,0,j,height,cP8);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //P1
+  i=j+1;j+=8;
+  image.draw_rectangle(i,0,j,height,cP1);
+  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
+  //value
+  cimg_forXY(image,x,y)
+    image(x,y,0,V)=y+value0-1;
+  //partition sum
+  image.draw_line(0,0,image.width()-1,0,black);//line
+  image.draw_line(0,0,0,image.height()-1,black);//column
+}//fillLUT
+
 //! GUI for LUT
 /**
  * interactive LUT for checking, correct and/or create points.
@@ -102,7 +151,7 @@ int main(int argc,char **argv)
 //  const bool help2=cimg_option("--help",false,0);// This is a hidden option
   if(help) return 0;
 
-  int height=value1-value0+1;
+  int height=value1-value0+2;
   int step=zoom;
   CImg<unsigned char> image(width,height,1,spectrum);
   //                              R   G   B    P  SP   V
@@ -118,39 +167,8 @@ int main(int argc,char **argv)
                   , cP8[]   = { 255,255,255,   8,  0,255 }
                   , cP1[]   = {  48, 48, 48,   1,  0,255 }
                   ;
-  //partition
-  {
-  //P128
-  int i=1,j=128,s;
-  image.draw_rectangle(i,0,j,height,cP128);
-  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
-  //P64
-  i=j+1;j+=64;
-  image.draw_rectangle(i,0,j,height,cP64);
-  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
-  //P32
-  i=j+1;j+=32;
-  image.draw_rectangle(i,0,j,height,cP32);
-  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
-  //P16
-  i=j+1;j+=16;
-  image.draw_rectangle(i,0,j,height,cP16);
-  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
-  //P8
-  i=j+1;j+=8;
-  image.draw_rectangle(i,0,j,height,cP8);
-  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
-  //P1
-  i=j+1;j+=8;
-  image.draw_rectangle(i,0,j,height,cP1);
-  cimg_forY(image,y) {s=0;cimg_for_inX(image,i,j,x) image(x,y,0,SP)=++s;}
-  }
-  //value
-  cimg_forXY(image,x,y)
-    image(x,y,0,V)=y+value0-1;
-  //partition sum
-  image.draw_line(0,0,image.width()-1,0,black);//line
-  image.draw_line(0,0,0,image.height()-1,black);//column
+  //fill LUT
+  fillLUT(image,value0,cP128,cP64,cP32,cP16,cP8,cP1,black);
   //GUI
   if(GUI) guiLUT(image,zoom, green,red,black);
   //zoom
@@ -168,3 +186,4 @@ int main(int argc,char **argv)
   image.save(imagefilename);
   return 0;
 }
+
