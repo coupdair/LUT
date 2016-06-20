@@ -139,7 +139,7 @@ int main(int argc,char **argv)
 {
   const int width=257;
   const int spectrum=6;
-  //command arguments
+  //command arguments, i.e. CLI option
   cimg_usage("Check and Layout A LookUpTable.\n" \
   "It uses different GNU libraries (see --info option)\n\n" \
   "usage: ./claLUT -h -I\n" \
@@ -151,7 +151,10 @@ int main(int argc,char **argv)
   const int value0=cimg_option("-0",1,  "start value");
   const int value1=cimg_option("-1",128,"stop  value");
   ///standard options
-  const bool GUI=cimg_option("-X",true,"show interactive window.");
+  #if cimg_display!=0
+  const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
+  bool show=cimg_option("--show",show_X,"show GUI (or -X option)");show=show_X|show;//same --show or -X option
+  #endif
   const bool show_h   =cimg_option("-h",    false,NULL);//-h hidden option
         bool show_help=cimg_option("--help",show_h,"help (or -h option)");show_help=show_h|show_help; //same --help or -h option
   bool show_info=cimg_option("-I",false,NULL);//-I hidden option
@@ -180,7 +183,11 @@ int main(int argc,char **argv)
   //read LUT from setup table
 //  if(filename!=NULL) {CImg<unsigned char> table;read_table(filename,table);fill_LUT(table,image);}
   //GUI
-  if(GUI) guiLUT(image,zoom, green,red,black);
+  #if cimg_display!=0
+  if(show) guiLUT(image,zoom, green,red,black);
+  #else
+  image.print("image (as no X)");
+  #endif
   //zoom
   image.resize(-zoom*100,-zoom*100);
   //draw separations
