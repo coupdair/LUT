@@ -1,5 +1,6 @@
 #include "CImg.h"
 
+//! \todo [medium] _ add version (prg and CImg from Wiki).
 //! \todo [low] _ read and check an external table.
 
 using namespace cimg_library;
