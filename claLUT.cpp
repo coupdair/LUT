@@ -47,12 +47,14 @@ int main()
     if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,green); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
   }
   //GUI
-  //set other point by mouse
+  //set other point(s) by mouse
+  while(true)
   {
-    CImg<int> point=image.get_select("select point",0);
+    CImg<int> point=image.get_select("select point(s), exit on any key.",0,0,true);
     point.print("point");
     int i=point(0);
     int j=point(1);
+    if(i==-1||j==-1) break;
     image.draw_point(i,j,blue);
     if(image(i,0,0,0)==black[0]&&image(i,0,0,1)==black[1]&&image(i,0,0,2)==black[2]) image.draw_point(i,0,blue); else {image.draw_point(i,0,red);image.draw_point(0,0,red);}//sum
     if(image(0,j,0,0)==black[0]&&image(0,j,0,1)==black[1]&&image(0,j,0,2)==black[2]) image.draw_point(0,j,blue); else {image.draw_point(0,j,red);image.draw_point(0,0,red);}//sum
