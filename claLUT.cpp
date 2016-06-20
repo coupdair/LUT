@@ -140,16 +140,24 @@ int main(int argc,char **argv)
   const int width=257;
   const int spectrum=6;
   //command arguments
-  cimg_usage("Check and Layout A LookUpTable");
+  cimg_usage("Check and Layout A LookUpTable.\n" \
+  "It uses different GNU libraries (see --info option)\n\n" \
+  "usage: ./claLUT -h -I\n" \
+  "\ncompilation date:" \
+  );//cimg_usage
 //  const char* filename = cimg_option("-i","LUT.txt","Input text file");
   const char* imagefilename = cimg_option("-o","claLUT.png","Output image file");
   const int zoom=cimg_option("-Z",6,  "zoom factor for GUI or/and output");
   const int value0=cimg_option("-0",1,  "start value");
   const int value1=cimg_option("-1",128,"stop  value");
+  ///standard options
   const bool GUI=cimg_option("-X",true,"show interactive window.");
-  const bool help=cimg_option("-h",false,"print Help.");
-//  const bool help2=cimg_option("--help",false,0);// This is a hidden option
-  if(help) return 0;
+  const bool show_h   =cimg_option("-h",    false,NULL);//-h hidden option
+        bool show_help=cimg_option("--help",show_h,"help (or -h option)");show_help=show_h|show_help; //same --help or -h option
+  bool show_info=cimg_option("-I",false,NULL);//-I hidden option
+  if( cimg_option("--info",show_info,"show compilation options (or -I option)") ) {show_info=true;cimg_library::cimg::info();}//same --info or -I option
+  if(show_help) {/*print_help(std::cerr);*/return 0;}
+  //}CLI option
 
   int height=value1-value0+2;
   int step=zoom;
