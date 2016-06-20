@@ -1,7 +1,6 @@
 #include "CImg.h"
 
-//! \todo [high] . argv for zoom, IP range.
-//! \todo [low] read and check an external table.
+//! \todo [low] _ read and check an external table.
 
 using namespace cimg_library;
 
@@ -169,6 +168,8 @@ int main(int argc,char **argv)
                   ;
   //fill LUT
   fillLUT(image,value0,cP128,cP64,cP32,cP16,cP8,cP1,black);
+  //read LUT from setup table
+//  if(filename!=NULL) {CImg<unsigned char> table;read_table(filename,table);fill_LUT(table,image);}
   //GUI
   if(GUI) guiLUT(image,zoom, green,red,black);
   //zoom
