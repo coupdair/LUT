@@ -25,6 +25,9 @@ int main()
   i=j+1;j+=8;
   image.draw_rectangle(i,0,j,height,cP8);
   }
+  //IP
+  cimg_forXY(image,x,y)
+    image(x,y,0,3)=y;
   //partition sum
   image.draw_line(0,0,image.width()-1,0,black);
   image.draw_line(0,0,0,image.height()-1,black);
@@ -56,7 +59,6 @@ int main()
   {
     //get point
     CImg<int> point=image.get_select(disp,0,0,true);
-    point.print("point");
     int i=point(0);
     int j=point(1);
     //break on key pressed or display close
