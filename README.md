@@ -35,7 +35,7 @@ sudo apt-get install libpng-dev
 
 ## C++ compilation
 
-cf. [`_info.txt`]()
+cf. [`_info.txt`](_info.txt)
 
 e.g.
 
