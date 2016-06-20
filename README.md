@@ -12,11 +12,26 @@ c est la LUT, est-elle correcte ou non ?!
 
 ## external library
 
-- `CImg`
-     - XWindows via `X11` development library
-- `ImageMagick`
-     - `convert` for PNG
-- or `libPNG`
+- [`CImg`](http://www.cimg.eu/)
+     - XWindows via `X11` development library for window output
+
+~~~ { .bash }
+sudo apt-get install cimg-dev cimg-doc cimg-examples libxrandr-dev
+~~~
+
+- [`ImageMagick`](http://imagemagick.org) via `CImg`
+     - `convert` for PNG output
+
+~~~ { .bash }
+sudo apt-get install imagemagick
+~~~
+
+- or [`libPNG`](http://libpng.org/pub/png) via `CImg`
+     - embedded PNG output, need compilation option.
+
+~~~ { .bash }
+sudo apt-get install libpng-dev
+~~~
 
 ## C++ compilation
 
@@ -30,8 +45,8 @@ g++ -O0 -o claLUT claLUT.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100
 
 # use
 
-run binary: `claLUT`
-check results on pop up window or `claLUT.png` file.
+1. run binary: `claLUT`
+1. check results on pop up window or `claLUT.png` file.
 
 e.g.
 
