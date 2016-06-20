@@ -1,6 +1,6 @@
 #include "CImg.h"
 
-//! \todo [high] argv for zoom, IP range.
+//! \todo [high] . argv for zoom, IP range.
 //! \todo [low] read and check an external table.
 
 using namespace cimg_library;
@@ -12,10 +12,20 @@ using namespace cimg_library;
 #define P  3 //Partition
 #define SP 4 //SubPartition
 
-int main()
+int main(int argc,char **argv)
 {
+  cimg_usage("Check and Layout A LookUpTable");
+//  const char* filename = cimg_option("-i","LUT.txt","Input text file");
+  const char* imagefilename = cimg_option("-o","claLUT.png","Output image file");
+  const int value0=cimg_option("-0",1,  "start value (e.g. 1)");
+  const int value1=cimg_option("-1",128,"stop  value (e.g. 128)");
+//  const bool GUI=cimg_option("-X",false,"show interactive window.");
+  const bool help=cimg_option("-h",false,"print Help.");
+//  const bool help2=cimg_option("--help",false,0);// This is a hidden option
+  if(help) return 0;
+
   int width=257;
-  int height=128;
+  int height=value1-value0+1;
   const int spectrum=6;
   int zoom=7;int step=zoom;
   CImg<unsigned char> image(width,height,1,spectrum);
@@ -138,6 +148,6 @@ int main()
   for(int x=0; x<(int)(image.width()); x+=stepx)
     image.draw_line(x,0,x,image.height()-1,black);
 //  image.display("LUT");
-  image.save("claLUT.png");
+  image.save(imagefilename);
   return 0;
 }
