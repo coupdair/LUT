@@ -58,6 +58,6 @@ int main()
   for(int x=0; x<(int)(image.width()); x+=stepx)
     image.draw_line(x,0,x,image.height()-1,black);
   image.display("zoom 6x");
-  image.save("LUT.png");
+  image.save("claLUT.png");
   return 0;
 }
