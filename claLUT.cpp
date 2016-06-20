@@ -78,8 +78,39 @@ int main()
     if(image(i,j,0,R)==green[R]&&image(i,j,0,G)==green[G]&&image(i,j,0,B)==green[B])//RGB
     {//remove point
       image.draw_point(i,j,black);
+      if(!(image(i,0,0,R)==black[R]&&image(i,0,0,G)==black[G]&&image(i,0,0,B)==black[B]))/*RGB*/
+      {//check other points
+        //same line
+        int other=0;
+        cimg_for_inX(image,1,image.width(),x)
+          if(image(x,j,0,R)==green[R]&&image(x,j,0,G)==green[G]&&image(x,j,0,B)==green[B])
+            ++other;
+        ///sum
+        if(other>1) image.draw_point(0,j,red);
+        else image.draw_point(0,j,green);
+        if(other==0) image.draw_point(0,j,black);
+        //same column
+        other=0;
+        cimg_for_inY(image,1,image.height(),y)
+          if(image(i,y,0,R)==green[R]&&image(i,y,0,G)==green[G]&&image(i,y,0,B)==green[B])
+            ++other;
+        ///sum
+        if(other>1) image.draw_point(i,0,red);
+        else image.draw_point(i,0,green);
+        if(other==0) image.draw_point(i,0,black);
+        ///Sum
+        other=0;
+        cimg_for_inX(image,1,image.width(),x)
+          if(image(x,0,0,R)==red[R]&&image(x,0,0,G)==red[G]&&image(x,0,0,B)==red[B])
+            ++other;
+        cimg_for_inY(image,1,image.height(),y)
+          if(image(0,y,0,R)==red[R]&&image(0,y,0,G)==red[G]&&image(0,y,0,B)==red[B])
+            ++other;
+        if(other>0) image.draw_point(0,0,red);
+        else image.draw_point(0,0,black);
+      }
       continue;
-    }
+    }//remove point
     //else add point
     CImg<unsigned char>  color(1,1,1,spectrum);color.draw_point(0,0,green);//RGB
     color(P)=(i<129)?128:(i<129+64)?64:(i<129+64+32)?32:(i<129+64+32+16)?16:(i<129+64+32+16+8)?8:1;//Partition
