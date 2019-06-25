@@ -1,12 +1,6 @@
-# Check and Layout A LookUpTable
+# description
 
-both check the validity and show the layout of a LUT.
-
-- Layout the LUT as a matrix (i.e. kind of digital 2D plot).
-- Check columns and line for duplicates, i.e. errors in setup.
-
-c est la LUT, est-elle correcte ou non ?!
-
+TODO
 
 # compile
 
@@ -52,27 +46,10 @@ cf. [`_info.txt`](_info.txt)
 e.g.
 
 ~~~ { .bash }
-g++ -O0 -o claLUT claLUT.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include  -lm -L/usr/X11R6/lib -lpthread -lX11 
+make
 ~~~
 
 # use
 
-1. run binary: `claLUT`
-1. check results on pop up window or `claLUT.png` file.
-
-![claLUT image](claLUT.png)
-
-e.g.
-
-~~~ { .bash }
-#run with window output
-./claLUT
-#image output
-display claLUT.png
-
-#CLI options
-./claLUT -h -I
-./claLUT -v
-~~~
-
+TODO
 
