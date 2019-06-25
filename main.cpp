@@ -2,12 +2,15 @@
 #include <iostream>
 #include <string>
 
-//! \todo [medium] OpenMP
+//! \todo [medium] . OpenMP: big lock
+//OpenMP
+#include <omp.h>
+
 //! \todo [low] gen+store
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.2"
+#define VERSION "v0.0.3d"
 
 #define S 0 //sample
 
@@ -41,17 +44,53 @@ int main(int argc,char **argv)
 
   //! circular buffer
   CImgList<unsigned char> images(nbuffer,width,1,1,1);
+  //locking
+  omp_lock_t lck;
+  omp_init_lock(&lck);
+  //! access and status of buffer
+  CImg<unsigned char> access(nbuffer,1,1,1);
+
+  #pragma omp parallel shared(lck,images)
+  {
+  int id=omp_get_thread_num(),tn=omp_get_num_threads();
   for(int n=0,i=0;i<count;++i,++n)
   {
-    //fill image
-    images[n].fill(i);
-    //save image
-    CImg<char> nfilename(1024);
-    cimg::number_filename(imagefilename,i,6,nfilename);
-    images[n].save_cimg(nfilename);
+    switch(id)
+    {
+      case 0:
+      {//generate
+        //locked section
+        {
+        omp_set_lock(&lck);
+        printf("t%d/%d: filling image #%d ...",id,tn,i);fflush(stdout);
+        //fill image
+        images[n].fill(i);
+        printf(" done\n");fflush(stdout);
+        omp_unset_lock(&lck);
+        }//lock
+        break;
+      }//generate
+      case 1:
+      {//store
+        //locked section
+        {
+        omp_set_lock(&lck);
+        printf("t%d/%d: saving image #%d ...",id,tn,i);fflush(stdout);
+        //save image
+        CImg<char> nfilename(1024);
+        cimg::number_filename(imagefilename,i,6,nfilename);
+        images[n].save_cimg(nfilename);
+        printf(" done\n");fflush(stdout);
+        omp_unset_lock(&lck);
+        }//lock
+        break;
+      }//store
+    }//switch(id)
     //circular buffer
     if(n==nbuffer-1) n=-1;
   }//vector loop
+  }//parallel section
+
 //  images.print("CImgList");
   return 0;
 }//main
