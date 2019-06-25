@@ -2,13 +2,13 @@
 #include <iostream>
 #include <string>
 
-//! \todo [high] v clean
+//! \todo [high] . save images
 //! \todo [medium] OpenMP
 //! \todo [low] gen+store
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.0"
+#define VERSION "v0.0.1"
 
 #define S 0 //sample
 
@@ -18,7 +18,7 @@ int main(int argc,char **argv)
   cimg_usage(std::string("generate and store data.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./store -h -I\n" \
-  "        ./store -s 1024 -n 123 -X true -o sample.cimg\n" \
+  "        ./store -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg\n" \
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
@@ -42,9 +42,13 @@ int main(int argc,char **argv)
   CImg<unsigned char> image(width,1,1,1);
   for(int i=0;i<count;++i)
   {
+    //fill image
     image.fill(i);
-    image.save(imagefilename);
+    //save image
+    CImg<char> nfilename(1024);
+    cimg::number_filename(imagefilename,i,6,nfilename);
+    image.save_cimg(nfilename);
   }//vector loop
   return 0;
-}
+}//main
 
