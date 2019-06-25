@@ -2,13 +2,12 @@
 #include <iostream>
 #include <string>
 
-//! \todo [high] . save images
 //! \todo [medium] OpenMP
 //! \todo [low] gen+store
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.1"
+#define VERSION "v0.0.2d"
 
 #define S 0 //sample
 
@@ -25,6 +24,7 @@ int main(int argc,char **argv)
   const char* imagefilename = cimg_option("-o","sample.cimg","output file name");
   const int width=cimg_option("-s",1024,  "size   of vector");
   const int count=cimg_option("-n",123,   "number of vector");
+  const int nbuffer=cimg_option("-b",12,  "size   of vector buffer (total size is b*s)");
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -39,16 +39,20 @@ int main(int argc,char **argv)
   if(show_help) {/*print_help(std::cerr);*/return 0;}
   //}CLI option
 
-  CImg<unsigned char> image(width,1,1,1);
-  for(int i=0;i<count;++i)
+  //! circular buffer
+  CImgList<unsigned char> images(nbuffer,width,1,1,1);
+  for(int n=0,i=0;i<count;++i,++n)
   {
     //fill image
-    image.fill(i);
+    images[n].fill(i);
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(imagefilename,i,6,nfilename);
-    image.save_cimg(nfilename);
+    images[n].save_cimg(nfilename);
+    //circular buffer
+    if(n==nbuffer-1) n=-1;
   }//vector loop
+  images.print("CImgList");
   return 0;
 }//main
 
