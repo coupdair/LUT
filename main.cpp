@@ -7,7 +7,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.2d"
+#define VERSION "v0.0.2"
 
 #define S 0 //sample
 
@@ -52,7 +52,7 @@ int main(int argc,char **argv)
     //circular buffer
     if(n==nbuffer-1) n=-1;
   }//vector loop
-  images.print("CImgList");
+//  images.print("CImgList");
   return 0;
 }//main
 
