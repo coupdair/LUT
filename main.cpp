@@ -4,14 +4,43 @@
 
 //OpenMP
 #include <omp.h>
+#include <vector>
 
 //! \todo [high] class: CBaseOMPLock, +print, +progress, +buffer, +run: gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.4"
+#define VERSION "v0.0.5d"
 
 #define S 0 //sample
+
+class CBaseOMPLock
+{
+public:
+  std::string class_name;
+  int id;
+  int tn;
+
+  CBaseOMPLock(std::vector<omp_lock_t> &lock){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
+  virtual void unset_lock(){}
+  virtual void print(char* message, bool unset=true){printf("class=%s\n",class_name.c_str());printf(message);}
+};//CBaseOMPLock
+
+class CPrintOMPLock: public CBaseOMPLock
+{
+public:
+  omp_lock_t *p_print_lock;
+  CPrintOMPLock(std::vector<omp_lock_t> &lock):CBaseOMPLock(lock){class_name="CPrintOMPLock";if(lock.size()>0) p_print_lock=&(lock[0]);else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
+  virtual void unset_lock(){omp_unset_lock(p_print_lock);}
+  virtual void print(char* message, bool unset=true)
+  {//locked section
+    omp_set_lock(p_print_lock);
+    printf("class=%s\n",class_name.c_str());
+    printf("t%d/%d %s",id,tn,message);
+    fflush(stdout);
+    if(unset) omp_unset_lock(p_print_lock);
+  }//print
+};//CPrintOMPLock
 
 int main(int argc,char **argv)
 {
@@ -41,6 +70,12 @@ int main(int argc,char **argv)
   if(show_help) {/*print_help(std::cerr);*/return 0;}
   //}CLI option
 
+  //OpenMP locks
+  omp_lock_t print_lock;omp_init_lock(&print_lock);
+  std::vector<omp_lock_t> locks;locks.push_back(print_lock);
+  //OpenMP print
+  CPrintOMPLock pr(locks);
+
   //! circular buffer
   CImgList<unsigned int> images(nbuffer,width,1,1,1);
   images[0].fill(0);
@@ -48,25 +83,26 @@ int main(int argc,char **argv)
   //locking
   omp_lock_t lck;
   omp_init_lock(&lck);
+  locks.push_back(lck);
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stdout);
 
-  #pragma omp parallel shared(access,lck, images)
+  #pragma omp parallel shared(pr,print_lock,locks, access,lck, images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   for(int n=0,i=0;i<count;++i,++n)
   {
-/*
-  if(id<2)
+/**/
+  if(id<2)//2 for 2 threads
   {//locked section
-  omp_set_lock(&lck);
-  printf("t%d/%d 4 B%02d #%04d: ",id,tn,n,i);
-  access.print("access",false);fflush(stdout);
-  omp_unset_lock(&lck);
+  pr.print(" message ",false);
+  printf("4 B%02d #%04d: ",id,tn,n,i);fflush(stdout);
+  access.print("access",false);fflush(stderr);
+  pr.unset_lock();
   }//lock
-*/
+/**/
     switch(id)
     {
       case 0:
