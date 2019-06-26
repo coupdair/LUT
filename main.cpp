@@ -2,15 +2,14 @@
 #include <iostream>
 #include <string>
 
-//! \todo [medium] . OpenMP: big lock
 //OpenMP
 #include <omp.h>
 
-//! \todo [low] gen+store
+//! \todo [high] class: CBaseOMPLock, +print, +progress, +buffer, +run: gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.4e"
+#define VERSION "v0.0.4"
 
 #define S 0 //sample
 
