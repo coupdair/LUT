@@ -92,13 +92,19 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(pr,print_lock,locks, access,lck, images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
+  #pragma omp single
+  {
+  if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
+  else {printf("info: running %d threads\n",tn);fflush(stdout);}
+  }//single
   for(int n=0,i=0;i<count;++i,++n)
   {
 /**/
   if(id<2)//2 for 2 threads
   {//locked section
   pr.print(" message ",false);
-  printf("4 B%02d #%04d: ",id,tn,n,i);fflush(stdout);
+  printf("|t%d/%d|",id,tn);//temp
+  printf("4 B%02d #%04d: ",n,i);fflush(stdout);
   access.print("access",false);fflush(stderr);
   pr.unset_lock();
   }//lock
