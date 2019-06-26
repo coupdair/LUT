@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.5"
+#define VERSION "v0.0.6d"
 
 #define S 0 //sample
 
@@ -89,7 +89,7 @@ int main(int argc,char **argv)
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stdout);
 
-  #pragma omp parallel shared(pr,print_lock,locks, access,lck, images)
+  #pragma omp parallel shared(pr, access,lck, images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   #pragma omp single
