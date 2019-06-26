@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.4d"
+#define VERSION "v0.0.4e"
 
 #define S 0 //sample
 
@@ -27,7 +27,7 @@ int main(int argc,char **argv)
   const char* imagefilename = cimg_option("-o","sample.cimg","output file name");
   const int width=cimg_option("-s",1024,  "size   of vector");
   const int count=cimg_option("-n",123,   "number of vector");
-  const int nbuffer=cimg_option("-b",12,  "size   of vector buffer (total size is b*s)");
+  const int nbuffer=cimg_option("-b",12,  "size   of vector buffer (total size is b*s*4 Bytes)");
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -43,7 +43,9 @@ int main(int argc,char **argv)
   //}CLI option
 
   //! circular buffer
-  CImgList<unsigned char> images(nbuffer,width,1,1,1);
+  CImgList<unsigned int> images(nbuffer,width,1,1,1);
+  images[0].fill(0);
+  images[0].print("image",false);
   //locking
   omp_lock_t lck;
   omp_init_lock(&lck);
@@ -57,6 +59,7 @@ int main(int argc,char **argv)
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   for(int n=0,i=0;i<count;++i,++n)
   {
+/*
   if(id<2)
   {//locked section
   omp_set_lock(&lck);
@@ -64,6 +67,7 @@ int main(int argc,char **argv)
   access.print("access",false);fflush(stdout);
   omp_unset_lock(&lck);
   }//lock
+*/
     switch(id)
     {
       case 0:
@@ -93,7 +97,7 @@ int main(int argc,char **argv)
           access[n]=0x1;//filled
 
           //debug misc.
-          printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+//          printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
 
           omp_unset_lock(&lck);
         }//lock
@@ -128,7 +132,7 @@ int main(int argc,char **argv)
           access[n]=0x0;//free
 
           //debug misc.
-          printf("S%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+//          printf("S%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
 
           omp_unset_lock(&lck);
         }//lock
