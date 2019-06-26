@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.3d"
+#define VERSION "v0.0.3"
 
 #define S 0 //sample
 
@@ -49,40 +49,89 @@ int main(int argc,char **argv)
   omp_init_lock(&lck);
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
+  access.fill(0);//free
 
-  #pragma omp parallel shared(lck,images)
+  #pragma omp parallel shared(access,lck, images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   for(int n=0,i=0;i<count;++i,++n)
   {
+  if(id<2)
+  {//locked section
+  omp_set_lock(&lck);
+  printf("t%d/%d 4 B%02d #%04d ",id,tn,n,i);
+  access.print("access",false);fflush(stdout);
+  omp_unset_lock(&lck);
+  }//lock
     switch(id)
     {
       case 0:
       {//generate
+        int c=0;
+        unsigned char a=99;
+        do
+        {//waiting for free
         //locked section
         {
-        omp_set_lock(&lck);
-        printf("t%d/%d: filling image #%d ...",id,tn,i);fflush(stdout);
+          omp_set_lock(&lck);
+          a=access[n];
+          if(a==0x0)/*free*/ access[n]=0xF;//filling
+          omp_unset_lock(&lck);
+        }//lock
+          ++c;
+        }while(a!=0x0);//waiting for free
+
         //fill image
         images[n].fill(i);
-        printf(" done\n");fflush(stdout);
-        omp_unset_lock(&lck);
+
+        //locked section
+        {
+          omp_set_lock(&lck);
+          //debug
+          if(access[n]!=0xF)/*filling*/ {printf("error: code error, acces should be 0xF i.e. Filling for buffer#%d (presently is is 0x%x)",n,access[n]);omp_unset_lock(&lck);exit(99);}
+          access[n]=0x1;//filled
+
+          //debug misc.
+          //! \todo setup print wait count, i.e. \c c
+
+          omp_unset_lock(&lck);
         }//lock
         break;
       }//generate
       case 1:
       {//store
+        int c=0;
+        unsigned char a=99;
+        do
+        {//waiting for filled
         //locked section
         {
-        omp_set_lock(&lck);
-        printf("t%d/%d: saving image #%d ...",id,tn,i);fflush(stdout);
+          omp_set_lock(&lck);
+          a=access[n];
+          if(a==0x1)/*filled*/ access[n]=0x5;//storing
+          omp_unset_lock(&lck);
+        }//lock
+          ++c;
+        }while(a!=0x1);//waiting for filled
+
         //save image
         CImg<char> nfilename(1024);
         cimg::number_filename(imagefilename,i,6,nfilename);
         images[n].save_cimg(nfilename);
-        printf(" done\n");fflush(stdout);
-        omp_unset_lock(&lck);
+
+        //locked section
+        {
+          omp_set_lock(&lck);
+          //debug
+          if(access[n]!=0x5)/*storing*/ {printf("error: code error, acces should be 0x5 i.e. Storing for buffer#%d (presently is is 0x%x)",n,access[n]);omp_unset_lock(&lck);exit(99);}
+          access[n]=0x0;//free
+
+          //debug misc.
+          //! \todo setup print wait count, i.e. \c c
+
+          omp_unset_lock(&lck);
         }//lock
+
         break;
       }//store
     }//switch(id)
