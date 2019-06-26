@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.3"
+#define VERSION "v0.0.4d"
 
 #define S 0 //sample
 
@@ -50,6 +50,7 @@ int main(int argc,char **argv)
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
   access.fill(0);//free
+  access.print("access (free state)",false);fflush(stdout);
 
   #pragma omp parallel shared(access,lck, images)
   {
@@ -59,7 +60,7 @@ int main(int argc,char **argv)
   if(id<2)
   {//locked section
   omp_set_lock(&lck);
-  printf("t%d/%d 4 B%02d #%04d ",id,tn,n,i);
+  printf("t%d/%d 4 B%02d #%04d: ",id,tn,n,i);
   access.print("access",false);fflush(stdout);
   omp_unset_lock(&lck);
   }//lock
@@ -67,7 +68,7 @@ int main(int argc,char **argv)
     {
       case 0:
       {//generate
-        int c=0;
+        unsigned int c=0;
         unsigned char a=99;
         do
         {//waiting for free
@@ -92,7 +93,7 @@ int main(int argc,char **argv)
           access[n]=0x1;//filled
 
           //debug misc.
-          //! \todo setup print wait count, i.e. \c c
+          printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
 
           omp_unset_lock(&lck);
         }//lock
@@ -100,7 +101,7 @@ int main(int argc,char **argv)
       }//generate
       case 1:
       {//store
-        int c=0;
+        unsigned int c=0;
         unsigned char a=99;
         do
         {//waiting for filled
@@ -127,7 +128,7 @@ int main(int argc,char **argv)
           access[n]=0x0;//free
 
           //debug misc.
-          //! \todo setup print wait count, i.e. \c c
+          printf("S%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
 
           omp_unset_lock(&lck);
         }//lock
@@ -140,7 +141,8 @@ int main(int argc,char **argv)
   }//vector loop
   }//parallel section
 
-//  images.print("CImgList");
+  access.print("access (free state)",false);fflush(stdout);
+  images.print("CImgList",false);
   return 0;
 }//main
 
