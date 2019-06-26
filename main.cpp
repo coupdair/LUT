@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.5d"
+#define VERSION "v0.0.5"
 
 #define S 0 //sample
 
@@ -21,7 +21,7 @@ public:
   int id;
   int tn;
 
-  CBaseOMPLock(std::vector<omp_lock_t> &lock){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
+  CBaseOMPLock(std::vector<omp_lock_t*> &lock){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
   virtual void unset_lock(){}
   virtual void print(char* message, bool unset=true){printf("class=%s\n",class_name.c_str());printf(message);}
 };//CBaseOMPLock
@@ -30,7 +30,7 @@ class CPrintOMPLock: public CBaseOMPLock
 {
 public:
   omp_lock_t *p_print_lock;
-  CPrintOMPLock(std::vector<omp_lock_t> &lock):CBaseOMPLock(lock){class_name="CPrintOMPLock";if(lock.size()>0) p_print_lock=&(lock[0]);else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
+  CPrintOMPLock(std::vector<omp_lock_t*> &lock):CBaseOMPLock(lock){class_name="CPrintOMPLock";if(lock.size()>0) p_print_lock=lock[0];else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
   virtual void unset_lock(){omp_unset_lock(p_print_lock);}
   virtual void print(char* message, bool unset=true)
   {//locked section
@@ -72,7 +72,7 @@ int main(int argc,char **argv)
 
   //OpenMP locks
   omp_lock_t print_lock;omp_init_lock(&print_lock);
-  std::vector<omp_lock_t> locks;locks.push_back(print_lock);
+  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);
   //OpenMP print
   CPrintOMPLock pr(locks);
 
@@ -83,7 +83,7 @@ int main(int argc,char **argv)
   //locking
   omp_lock_t lck;
   omp_init_lock(&lck);
-  locks.push_back(lck);
+  locks.push_back(&lck);
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
   access.fill(0);//free
