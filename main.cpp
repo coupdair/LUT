@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.6d"
+#define VERSION "v0.0.6e"
 
 #define S 0 //sample
 
@@ -41,6 +41,30 @@ public:
     if(unset) omp_unset_lock(p_print_lock);
   }//print
 };//CPrintOMPLock
+
+class CAccessOMPLock: public CBaseOMPLock
+{
+public:
+  omp_lock_t *p_access_lock;
+  CAccessOMPLock(std::vector<omp_lock_t*> &lock):CBaseOMPLock(lock){class_name="CAccessOMPLock";if(lock.size()>0) p_access_lock=lock[0];else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
+  virtual void unset_lock(){omp_unset_lock(p_access_lock);}
+  virtual void wait_for_status(unsigned char &what, int status, int new_status)
+  {
+    unsigned int c=0;
+    unsigned char a=99;
+    do
+    {//waiting for status
+      //locked section
+      {
+        omp_set_lock(p_access_lock);
+        a=what;
+        if(a==status) what=new_status;
+        omp_unset_lock(p_access_lock);
+      }//lock
+      ++c;
+    }while(a!=status);//waiting for free
+  }//wait_for_status
+};//CAccessOMPLock
 
 int main(int argc,char **argv)
 {
@@ -80,10 +104,11 @@ int main(int argc,char **argv)
   CImgList<unsigned int> images(nbuffer,width,1,1,1);
   images[0].fill(0);
   images[0].print("image",false);
-  //locking
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  locks.push_back(&lck);
+  //access locking
+  omp_lock_t lck;omp_init_lock(&lck);
+  locks.clear();locks.push_back(&lck);
+  CAccessOMPLock lacces(locks);
+
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
   access.fill(0);//free
@@ -113,19 +138,7 @@ int main(int argc,char **argv)
     {
       case 0:
       {//generate
-        unsigned int c=0;
-        unsigned char a=99;
-        do
-        {//waiting for free
-        //locked section
-        {
-          omp_set_lock(&lck);
-          a=access[n];
-          if(a==0x0)/*free*/ access[n]=0xF;//filling
-          omp_unset_lock(&lck);
-        }//lock
-          ++c;
-        }while(a!=0x0);//waiting for free
+        lacces.wait_for_status(access[n],0x0,0xF);//free,filling
 
         //fill image
         images[n].fill(i);
