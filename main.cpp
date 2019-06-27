@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.8e"
+#define VERSION "v0.0.8f"
 
 #define S 0 //sample
 
@@ -22,17 +22,16 @@ public:
   int tn;
 
   CBaseOMPLock(){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
-  CBaseOMPLock(std::vector<omp_lock_t*> &lock){CBaseOMPLock();}
+  CBaseOMPLock(omp_lock_t* lock){CBaseOMPLock();/*warning*/lock=0x0;}
   virtual void unset_lock(){}
-  virtual void print(char* message, bool unset=true){printf("class=%s\n",class_name.c_str());printf(message);}
+  virtual void print(char* message, bool unset=true){printf("class=%s\n",class_name.c_str());printf(message);/*warning*/unset=true;}
 };//CBaseOMPLock
 
 class CPrintOMPLock: public CBaseOMPLock
 {
 public:
   omp_lock_t *p_print_lock;
-  CPrintOMPLock(std::vector<omp_lock_t*> &lock):CBaseOMPLock(lock){class_name="CPrintOMPLock";if(lock.size()>0) p_print_lock=lock[0];else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
-//  CPrintOMPLock(omp_lock_t* lock){std::vector<omp_lock_t*> locks;locks.push_back(lock);CPrintOMPLock(locks);}
+  CPrintOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){class_name="CPrintOMPLock"; p_print_lock=lock;}
   virtual void unset_lock(){omp_unset_lock(p_print_lock);}
   virtual void print(char* message, bool unset=true)
   {//locked section
@@ -49,8 +48,7 @@ class CAccessOMPLock: public CBaseOMPLock
 {
 public:
   omp_lock_t *p_access_lock;
-  CAccessOMPLock(std::vector<omp_lock_t*> &lock):CBaseOMPLock(lock){class_name="CAccessOMPLock";if(lock.size()>0) p_access_lock=lock[0];else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
-  CAccessOMPLock(omp_lock_t* lock){std::vector<omp_lock_t*> locks;locks.push_back(lock);CAccessOMPLock((std::vector<omp_lock_t*>)locks);}
+  CAccessOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){class_name="CAccessOMPLock"; p_access_lock=lock;}
   virtual void unset_lock(){omp_unset_lock(p_access_lock);}
   virtual void wait_for_status(unsigned char &what, int status, int new_status, unsigned int &c)
   {
@@ -92,7 +90,7 @@ public:
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
 
-  CDataGenerator(std::vector<omp_lock_t*> &lock) : lprint(lock/*[0]*/), laccess(lock/*[1]*/) {class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  CDataGenerator(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]) {class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
     //wait lock
@@ -145,9 +143,8 @@ int main(int argc,char **argv)
 
   //OpenMP locks
   omp_lock_t print_lock;omp_init_lock(&print_lock);
-  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);
   //OpenMP print
-  CPrintOMPLock pr(locks);
+  CPrintOMPLock pr(&print_lock);
 
   //! circular buffer
   CImgList<unsigned int> images(nbuffer,width,1,1,1);
@@ -155,8 +152,7 @@ int main(int argc,char **argv)
   images[0].print("image",false);
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
-  locks.clear();locks.push_back(&lck);
-  CAccessOMPLock lacces(locks);
+  CAccessOMPLock lacces(&lck);
 
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
@@ -164,7 +160,7 @@ int main(int argc,char **argv)
   access.print("access (free state)",false);fflush(stderr);
 
   //! generate data
-  locks.clear();locks.push_back(&print_lock);locks.push_back(&lck);
+  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
   CDataGenerator generate(locks);
 
   #pragma omp parallel shared(pr, access,lck, images)
