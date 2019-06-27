@@ -144,7 +144,6 @@ int main(int argc,char **argv)
   //OpenMP locks
   omp_lock_t print_lock;omp_init_lock(&print_lock);
   //OpenMP print
-  CPrintOMPLock pr(&print_lock);
 
   //! circular buffer
   CImgList<unsigned int> images(nbuffer,width,1,1,1);
@@ -152,7 +151,6 @@ int main(int argc,char **argv)
   images[0].print("image",false);
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
-  CAccessOMPLock lacces(&lck);
 
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
@@ -163,9 +161,11 @@ int main(int argc,char **argv)
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
   CDataGenerator generate(locks);
 
-  #pragma omp parallel shared(pr, access,lck, images)
+  #pragma omp parallel shared(print_lock,lck, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
+  CPrintOMPLock  pr(&print_lock);
+  CAccessOMPLock lacces(&lck);
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
