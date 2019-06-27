@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.0d"
+#define VERSION "v0.1.0e"
 
 #define S 0 //sample
 
@@ -67,20 +67,21 @@ public:
   }//wait_for_status
 
 
-  virtual void set_status(unsigned char &what, int old_status, int status, /*info:*/ unsigned int i, unsigned int n, unsigned int c)
+  virtual void set_status(unsigned char &what, int old_status, int status, /*info:*/ char me, unsigned int i, unsigned int n, unsigned int c)
   {//locked section
     omp_set_lock(p_access_lock);
     //debug
     if(what!=old_status)/*filling*/ {printf("error: code error, acces should be 0x%x i.e. Filling for buffer#%d (presently is is 0x%x)",old_status,n,what);omp_unset_lock(p_access_lock);exit(99);}
     what=status;//filled
 
-    omp_unset_lock(p_access_lock);
-
-    //! \todo [high] need print lock
+    //! \todo [high] need print lock and move after "omp_unset_lock(p_access_lock);"
     if(debug)
     {
-      printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+      printf("%c%d/%d 4 B%02d #%04d wait=%d\n",me,id,tn,n,i,c);fflush(stdout);
     }//debug
+
+    omp_unset_lock(p_access_lock);
+
   }//set_status
 
 
@@ -112,7 +113,7 @@ public:
     images[n].fill(i);
 
     //set filled
-    laccess.set_status(access[n],0xF,0x1, i,n,c);//filling,filled
+    laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);//filling,filled
   }//iteration
 };//CDataGenerator
 
@@ -147,7 +148,7 @@ public:
     images[n].save_cimg(nfilename);
 
     //set filled
-    laccess.set_status(access[n],0x5,0x0, i,n,c);//storing,free
+    laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//storing,free
   }//iteration
 };//CDataStore
 
