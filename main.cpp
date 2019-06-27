@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.8f"
+#define VERSION "v0.0.8"
 
 #define S 0 //sample
 
@@ -102,8 +102,35 @@ public:
 
     //set filled
     laccess.set_status(access[n],0xF,0x1, i,n,c);//filling,filled
-  }
+  }//iteration
 };//CDataGenerator
+
+
+class CDataStore
+{
+public:
+  std::string class_name;
+  CPrintOMPLock  lprint;
+  CAccessOMPLock laccess;
+  std::string file_name;
+
+  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename) : lprint(lock[0]), laccess(lock[1]) {class_name="CDataStore";file_name=imagefilename;if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  {
+    //wait lock
+    unsigned int c=0;
+    laccess.wait_for_status(access[n],0x1,0x5, c);//filled,storing
+
+    //save image
+    CImg<char> nfilename(1024);
+    cimg::number_filename(file_name.c_str(),i,6,nfilename);
+    images[n].save_cimg(nfilename);
+
+    //set filled
+    laccess.set_status(access[n],0x5,0x0, i,n,c);//storing,free
+  }//iteration
+};//CDataStore
+
 
 int main(int argc,char **argv)
 {
@@ -144,6 +171,7 @@ int main(int argc,char **argv)
   //OpenMP locks
   omp_lock_t print_lock;omp_init_lock(&print_lock);
   //OpenMP print
+  CPrintOMPLock  pr(&print_lock);//temp
 
   //! circular buffer
   CImgList<unsigned int> images(nbuffer,width,1,1,1);
@@ -159,13 +187,12 @@ int main(int argc,char **argv)
 
   //! generate data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
-  CDataGenerator generate(locks);
 
-  #pragma omp parallel shared(print_lock,lck, access,images)
+  #pragma omp parallel shared(pr, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CPrintOMPLock  pr(&print_lock);
-  CAccessOMPLock lacces(&lck);
+  CDataGenerator generate(locks);
+  CDataStore     store(locks,imagefilename);
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
@@ -192,17 +219,7 @@ int main(int argc,char **argv)
       }//generate
       case 1:
       {//store
-        //wait lock
-        unsigned int c=0;
-        lacces.wait_for_status(access[n],0x1,0x5, c);//filled,storing
-
-        //save image
-        CImg<char> nfilename(1024);
-        cimg::number_filename(imagefilename,i,6,nfilename);
-        images[n].save_cimg(nfilename);
-
-        //set filled
-        lacces.set_status(access[n],0x5,0x0, i,n,c);//storing,free
+        store.iteration(access,images, n,i);
         break;
       }//store
     }//switch(id)
