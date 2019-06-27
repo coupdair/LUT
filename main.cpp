@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.8"
+#define VERSION "v0.0.9d"
 
 #define S 0 //sample
 
@@ -21,8 +21,8 @@ public:
   int id;
   int tn;
 
-  CBaseOMPLock(){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
-  CBaseOMPLock(omp_lock_t* lock){CBaseOMPLock();/*warning*/lock=0x0;}
+  CBaseOMPLock(omp_lock_t* lock){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
+//  CBaseOMPLock(omp_lock_t* lock){CBaseOMPLock();/*warning*/lock=0x0;}
   virtual void unset_lock(){}
   virtual void print(char* message, bool unset=true){printf("class=%s\n",class_name.c_str());printf(message);/*warning*/unset=true;}
 };//CBaseOMPLock
