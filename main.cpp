@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.9d"
+#define VERSION "v0.0.9"
 
 #define S 0 //sample
 
@@ -20,11 +20,13 @@ public:
   std::string class_name;
   int id;
   int tn;
+  bool debug;
 
-  CBaseOMPLock(omp_lock_t* lock){class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads();}
+  CBaseOMPLock(omp_lock_t* lock){debug=false;class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads(); if(debug) printf("t%d/%d,class=%s\n",id,tn,class_name.c_str());
+}
 //  CBaseOMPLock(omp_lock_t* lock){CBaseOMPLock();/*warning*/lock=0x0;}
   virtual void unset_lock(){}
-  virtual void print(char* message, bool unset=true){printf("class=%s\n",class_name.c_str());printf(message);/*warning*/unset=true;}
+  virtual void print(char* message, bool unset=true){printf("t%d/%d ",id,tn); if(debug) printf(",class=%s\n",class_name.c_str());printf(message);/*warning*/unset=true;}
 };//CBaseOMPLock
 
 class CPrintOMPLock: public CBaseOMPLock
@@ -36,7 +38,7 @@ public:
   virtual void print(char* message, bool unset=true)
   {//locked section
     omp_set_lock(p_print_lock);
-    printf("class=%s\n",class_name.c_str());
+    if(debug) printf("class=%s\n",class_name.c_str());
     printf("t%d/%d %s",id,tn,message);
     fflush(stdout);
     if(unset) omp_unset_lock(p_print_lock);
@@ -170,8 +172,6 @@ int main(int argc,char **argv)
 
   //OpenMP locks
   omp_lock_t print_lock;omp_init_lock(&print_lock);
-  //OpenMP print
-  CPrintOMPLock  pr(&print_lock);//temp
 
   //! circular buffer
   CImgList<unsigned int> images(nbuffer,width,1,1,1);
@@ -188,7 +188,7 @@ int main(int argc,char **argv)
   //! generate data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
-  #pragma omp parallel shared(pr, access,images)
+  #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataGenerator generate(locks);
@@ -198,13 +198,15 @@ int main(int argc,char **argv)
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
+
+  //OpenMP print
+  CPrintOMPLock  pr(&print_lock);//temp
   for(int n=0,i=0;i<count;++i,++n)
   {
 /**/
   if(id<2)//2 for 2 threads
   {//locked section
-  pr.print(" message ",false);
-  printf("|t%d/%d|",id,tn);//temp
+  pr.print("",false);
   printf("4 B%02d #%04d: ",n,i);fflush(stdout);
   access.print("access",false);fflush(stderr);
   pr.unset_lock();
