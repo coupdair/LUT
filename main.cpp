@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.7"
+#define VERSION "v0.0.8d"
 
 #define S 0 //sample
 
@@ -41,6 +41,7 @@ public:
     if(unset) omp_unset_lock(p_print_lock);
   }//print
 };//CPrintOMPLock
+
 
 class CAccessOMPLock: public CBaseOMPLock
 {
@@ -80,6 +81,28 @@ public:
 
 
 };//CAccessOMPLock
+
+class CDataGenerator
+{
+public:
+  std::string class_name;
+  CPrintOMPLock  lprint;
+  CAccessOMPLock laccess;
+
+  CDataGenerator(std::vector<omp_lock_t*> &lock) : lprint(lock), laccess(lock) {class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  {
+    //wait lock
+    unsigned int c=0;
+    laccess.wait_for_status(access[n],0x0,0xF, c);//free,filling
+
+    //fill image
+    images[n].fill(i);
+
+    //set filled
+    laccess.set_status(access[n],0xF,0x1, i,n,c);//filling,filled
+  }
+};//CDataGenerator
 
 int main(int argc,char **argv)
 {
@@ -137,6 +160,10 @@ int main(int argc,char **argv)
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
+  //! generate data
+  locks.clear();locks.push_back(&print_lock);locks.push_back(&lck);
+  CDataGenerator generate(locks);
+
   #pragma omp parallel shared(pr, access,lck, images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
@@ -161,15 +188,7 @@ int main(int argc,char **argv)
     {
       case 0:
       {//generate
-        //wait lock
-        unsigned int c=0;
-        lacces.wait_for_status(access[n],0x0,0xF, c);//free,filling
-
-        //fill image
-        images[n].fill(i);
-
-        //set filled
-        lacces.set_status(access[n],0xF,0x1, i,n,c);//filling,filled
+        generate.iteration(access,images, n,i);
         break;
       }//generate
       case 1:
