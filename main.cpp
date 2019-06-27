@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.6e"
+#define VERSION "v0.0.6f"
 
 #define S 0 //sample
 
@@ -48,9 +48,8 @@ public:
   omp_lock_t *p_access_lock;
   CAccessOMPLock(std::vector<omp_lock_t*> &lock):CBaseOMPLock(lock){class_name="CAccessOMPLock";if(lock.size()>0) p_access_lock=lock[0];else{printf("code error: locks should have at least 1 lock for %s class.",class_name.c_str());exit(99);}}
   virtual void unset_lock(){omp_unset_lock(p_access_lock);}
-  virtual void wait_for_status(unsigned char &what, int status, int new_status)
+  virtual void wait_for_status(unsigned char &what, int status, int new_status, unsigned int &c)
   {
-    unsigned int c=0;
     unsigned char a=99;
     do
     {//waiting for status
@@ -138,7 +137,8 @@ int main(int argc,char **argv)
     {
       case 0:
       {//generate
-        lacces.wait_for_status(access[n],0x0,0xF);//free,filling
+        unsigned int c=0;
+        lacces.wait_for_status(access[n],0x0,0xF,c);//free,filling
 
         //fill image
         images[n].fill(i);
@@ -151,7 +151,7 @@ int main(int argc,char **argv)
           access[n]=0x1;//filled
 
           //debug misc.
-//          printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+          printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
 
           omp_unset_lock(&lck);
         }//lock
@@ -160,18 +160,7 @@ int main(int argc,char **argv)
       case 1:
       {//store
         unsigned int c=0;
-        unsigned char a=99;
-        do
-        {//waiting for filled
-        //locked section
-        {
-          omp_set_lock(&lck);
-          a=access[n];
-          if(a==0x1)/*filled*/ access[n]=0x5;//storing
-          omp_unset_lock(&lck);
-        }//lock
-          ++c;
-        }while(a!=0x1);//waiting for filled
+        lacces.wait_for_status(access[n],0x1,0x5,c);//filled,storing
 
         //save image
         CImg<char> nfilename(1024);
@@ -186,7 +175,7 @@ int main(int argc,char **argv)
           access[n]=0x0;//free
 
           //debug misc.
-//          printf("S%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+          printf("S%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
 
           omp_unset_lock(&lck);
         }//lock
