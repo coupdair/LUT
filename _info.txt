@@ -4,4 +4,6 @@ make gui
 make nogui
 
 #run
+./store -c 2 -s 4096 -b   6 -n 12
+./store      -s 4096 -b 123 -n 1234
 

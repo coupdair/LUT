@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.6"
+#define VERSION "v0.0.7"
 
 #define S 0 //sample
 
@@ -92,9 +92,10 @@ int main(int argc,char **argv)
   ).c_str());//cimg_usage
 
   const char* imagefilename = cimg_option("-o","sample.cimg","output file name");
-  const int width=cimg_option("-s",1024,  "size   of vector");
-  const int count=cimg_option("-n",123,   "number of vector");
-  const int nbuffer=cimg_option("-b",12,  "size   of vector buffer (total size is b*s*4 Bytes)");
+  const int width=cimg_option("-s",1024, "size   of vector");
+  const int count=cimg_option("-n",123,  "number of vector");
+  const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
+  const int threadCount=cimg_option("-c",0,"thread count");
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -108,6 +109,13 @@ int main(int argc,char **argv)
   if( cimg_option("--version",show_version,"show version (or -v option)") ) {show_version=true;std::cout<<VERSION<<std::endl;return 0;}//same --version or -v option
   if(show_help) {/*print_help(std::cerr);*/return 0;}
   //}CLI option
+
+  //OpenMP
+  if(threadCount>0)
+  {//user number of thread
+    omp_set_dynamic(0);
+    omp_set_num_threads(threadCount);
+  }//user
 
   //OpenMP locks
   omp_lock_t print_lock;omp_init_lock(&print_lock);
@@ -127,7 +135,7 @@ int main(int argc,char **argv)
   //! access and status of buffer
   CImg<unsigned char> access(nbuffer,1,1,1);
   access.fill(0);//free
-  access.print("access (free state)",false);fflush(stdout);
+  access.print("access (free state)",false);fflush(stderr);
 
   #pragma omp parallel shared(pr, access,lck, images)
   {
@@ -185,7 +193,7 @@ int main(int argc,char **argv)
   }//vector loop
   }//parallel section
 
-  access.print("access (free state)",false);fflush(stdout);
+  access.print("access (free state)",false);fflush(stderr);
   images.print("CImgList",false);
   return 0;
 }//main
