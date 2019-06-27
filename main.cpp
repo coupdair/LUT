@@ -6,11 +6,11 @@
 #include <omp.h>
 #include <vector>
 
-//! \todo [high] class: CBaseOMPLock, +print, +progress, +buffer, +run: gen,store
+//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.9"
+#define VERSION "v0.1.0d"
 
 #define S 0 //sample
 
@@ -22,9 +22,7 @@ public:
   int tn;
   bool debug;
 
-  CBaseOMPLock(omp_lock_t* lock){debug=false;class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads(); if(debug) printf("t%d/%d,class=%s\n",id,tn,class_name.c_str());
-}
-//  CBaseOMPLock(omp_lock_t* lock){CBaseOMPLock();/*warning*/lock=0x0;}
+  CBaseOMPLock(omp_lock_t* lock){debug=false;class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads(); if(debug) printf("t%d/%d,class=%s\n",id,tn,class_name.c_str());/*warning*/lock=0x0;}
   virtual void unset_lock(){}
   virtual void print(char* message, bool unset=true){printf("t%d/%d ",id,tn); if(debug) printf(",class=%s\n",class_name.c_str());printf(message);/*warning*/unset=true;}
 };//CBaseOMPLock
@@ -50,7 +48,7 @@ class CAccessOMPLock: public CBaseOMPLock
 {
 public:
   omp_lock_t *p_access_lock;
-  CAccessOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){class_name="CAccessOMPLock"; p_access_lock=lock;}
+  CAccessOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){debug=true;class_name="CAccessOMPLock"; p_access_lock=lock;}
   virtual void unset_lock(){omp_unset_lock(p_access_lock);}
   virtual void wait_for_status(unsigned char &what, int status, int new_status, unsigned int &c)
   {
@@ -76,10 +74,13 @@ public:
     if(what!=old_status)/*filling*/ {printf("error: code error, acces should be 0x%x i.e. Filling for buffer#%d (presently is is 0x%x)",old_status,n,what);omp_unset_lock(p_access_lock);exit(99);}
     what=status;//filled
 
-    //debug misc.
-    printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
-
     omp_unset_lock(p_access_lock);
+
+    //! \todo [high] need print lock
+    if(debug)
+    {
+      printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+    }//debug
   }//set_status
 
 
@@ -89,12 +90,20 @@ class CDataGenerator
 {
 public:
   std::string class_name;
+  bool debug;
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
 
-  CDataGenerator(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]) {class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  CDataGenerator(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
+    if(debug)
+    {
+      lprint.print("",false);
+      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      access.print("access",false);fflush(stderr);
+      lprint.unset_lock();
+    }
     //wait lock
     unsigned int c=0;
     laccess.wait_for_status(access[n],0x0,0xF, c);//free,filling
@@ -112,13 +121,22 @@ class CDataStore
 {
 public:
   std::string class_name;
+  bool debug;
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
   std::string file_name;
 
-  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename) : lprint(lock[0]), laccess(lock[1]) {class_name="CDataStore";file_name=imagefilename;if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataStore";file_name=imagefilename;if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
+    if(debug)
+    {
+      lprint.print("",false);
+      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      access.print("access",false);fflush(stderr);
+      lprint.unset_lock();
+    }
+
     //wait lock
     unsigned int c=0;
     laccess.wait_for_status(access[n],0x1,0x5, c);//filled,storing
@@ -199,19 +217,8 @@ int main(int argc,char **argv)
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-  //OpenMP print
-  CPrintOMPLock  pr(&print_lock);//temp
   for(int n=0,i=0;i<count;++i,++n)
   {
-/**/
-  if(id<2)//2 for 2 threads
-  {//locked section
-  pr.print("",false);
-  printf("4 B%02d #%04d: ",n,i);fflush(stdout);
-  access.print("access",false);fflush(stderr);
-  pr.unset_lock();
-  }//lock
-/**/
     switch(id)
     {
       case 0:
