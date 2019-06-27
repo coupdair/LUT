@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.0.6f"
+#define VERSION "v0.0.6"
 
 #define S 0 //sample
 
@@ -63,6 +63,22 @@ public:
       ++c;
     }while(a!=status);//waiting for free
   }//wait_for_status
+
+
+  virtual void set_status(unsigned char &what, int old_status, int status, /*info:*/ unsigned int i, unsigned int n, unsigned int c)
+  {//locked section
+    omp_set_lock(p_access_lock);
+    //debug
+    if(what!=old_status)/*filling*/ {printf("error: code error, acces should be 0x%x i.e. Filling for buffer#%d (presently is is 0x%x)",old_status,n,what);omp_unset_lock(p_access_lock);exit(99);}
+    what=status;//filled
+
+    //debug misc.
+    printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
+
+    omp_unset_lock(p_access_lock);
+  }//set_status
+
+
 };//CAccessOMPLock
 
 int main(int argc,char **argv)
@@ -137,49 +153,30 @@ int main(int argc,char **argv)
     {
       case 0:
       {//generate
+        //wait lock
         unsigned int c=0;
-        lacces.wait_for_status(access[n],0x0,0xF,c);//free,filling
+        lacces.wait_for_status(access[n],0x0,0xF, c);//free,filling
 
         //fill image
         images[n].fill(i);
 
-        //locked section
-        {
-          omp_set_lock(&lck);
-          //debug
-          if(access[n]!=0xF)/*filling*/ {printf("error: code error, acces should be 0xF i.e. Filling for buffer#%d (presently is is 0x%x)",n,access[n]);omp_unset_lock(&lck);exit(99);}
-          access[n]=0x1;//filled
-
-          //debug misc.
-          printf("G%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
-
-          omp_unset_lock(&lck);
-        }//lock
+        //set filled
+        lacces.set_status(access[n],0xF,0x1, i,n,c);//filling,filled
         break;
       }//generate
       case 1:
       {//store
+        //wait lock
         unsigned int c=0;
-        lacces.wait_for_status(access[n],0x1,0x5,c);//filled,storing
+        lacces.wait_for_status(access[n],0x1,0x5, c);//filled,storing
 
         //save image
         CImg<char> nfilename(1024);
         cimg::number_filename(imagefilename,i,6,nfilename);
         images[n].save_cimg(nfilename);
 
-        //locked section
-        {
-          omp_set_lock(&lck);
-          //debug
-          if(access[n]!=0x5)/*storing*/ {printf("error: code error, acces should be 0x5 i.e. Storing for buffer#%d (presently is is 0x%x)",n,access[n]);omp_unset_lock(&lck);exit(99);}
-          access[n]=0x0;//free
-
-          //debug misc.
-          printf("S%d/%d 4 B%02d #%04d wait=%d\n",id,tn,n,i,c);fflush(stdout);
-
-          omp_unset_lock(&lck);
-        }//lock
-
+        //set filled
+        lacces.set_status(access[n],0x5,0x0, i,n,c);//storing,free
         break;
       }//store
     }//switch(id)
