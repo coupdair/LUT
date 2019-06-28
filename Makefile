@@ -5,3 +5,9 @@ gui: main.cpp
 nogui: main.cpp
 	g++ -O0 -o store   main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -fopenmp -Dcimg_display=0 && ./store -h -I && ./store -v > VERSION
 
+run:
+	./store -c 2 -s 4096 -b   6 -n 12
+
+clean:
+	rm sample_??????.cimg
+

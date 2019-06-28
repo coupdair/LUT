@@ -5,5 +5,15 @@ make nogui
 
 #run
 ./store -c 2 -s 4096 -b   6 -n 12
+./store      -s 4096 -b  16 -n 123
 ./store      -s 4096 -b 123 -n 1234
+
+#show wait
+##Generate
+./store      -s 4096 -b  16 -n 123 2>/dev/null | grep 'G'
+##Store
+./store      -s 4096 -b  16 -n 123 2>/dev/null | grep 'S'
+
+#show buffer status
+./store      -s 4096 -b  16 -n 123 >/dev/null
 
