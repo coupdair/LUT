@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.0e"
+#define VERSION "v0.1.0f"
 
 #define S 0 //sample
 
@@ -22,9 +22,9 @@ public:
   int tn;
   bool debug;
 
-  CBaseOMPLock(omp_lock_t* lock){debug=false;class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads(); if(debug) printf("t%d/%d,class=%s\n",id,tn,class_name.c_str());/*warning*/lock=0x0;}
+  CBaseOMPLock(omp_lock_t* lock){debug=false;class_name="CBaseOMPLock";id=omp_get_thread_num();tn=omp_get_num_threads(); if(debug) printf("t%d/%d,class=%s\n",id,tn,class_name.c_str());/*warning*/if(1) printf("%p",(void*)lock);}
   virtual void unset_lock(){}
-  virtual void print(char* message, bool unset=true){printf("t%d/%d ",id,tn); if(debug) printf(",class=%s\n",class_name.c_str());printf(message);/*warning*/unset=true;}
+  virtual void print(const char* message, bool unset=true){printf("t%d/%d ",id,tn); if(debug) printf(",class=%s\n",class_name.c_str());printf(message /*warning*/,unset);}
 };//CBaseOMPLock
 
 class CPrintOMPLock: public CBaseOMPLock
@@ -33,7 +33,7 @@ public:
   omp_lock_t *p_print_lock;
   CPrintOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){class_name="CPrintOMPLock"; p_print_lock=lock;}
   virtual void unset_lock(){omp_unset_lock(p_print_lock);}
-  virtual void print(char* message, bool unset=true)
+  virtual void print(const char* message, bool unset=true)
   {//locked section
     omp_set_lock(p_print_lock);
     if(debug) printf("class=%s\n",class_name.c_str());
@@ -50,7 +50,7 @@ public:
   omp_lock_t *p_access_lock;
   CAccessOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){debug=true;class_name="CAccessOMPLock"; p_access_lock=lock;}
   virtual void unset_lock(){omp_unset_lock(p_access_lock);}
-  virtual void wait_for_status(unsigned char &what, int status, int new_status, unsigned int &c)
+  virtual void wait_for_status(unsigned char &what, const int status, const int new_status, unsigned int &c)
   {
     unsigned char a=99;
     do
