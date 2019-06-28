@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.1e"
+#define VERSION "v0.1.1f"
 
 #define S 0 //sample
 
@@ -175,7 +175,7 @@ public:
 
     //save image
     CImg<char> nfilename(1024);
-    cimg::number_filename(file_name.c_str(),i,6,nfilename);
+    cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
     images[n].save_cimg(nfilename);
 
     //set filled
