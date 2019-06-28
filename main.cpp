@@ -6,11 +6,11 @@
 #include <omp.h>
 #include <vector>
 
-//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: gen,store
+//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, . +run: base_run, gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.0"
+#define VERSION "v0.1.1d"
 
 #define S 0 //sample
 
@@ -95,7 +95,17 @@ public:
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
 
-  CDataGenerator(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  CDataGenerator(std::vector<omp_lock_t*> &lock)
+  : lprint(lock[0]), laccess(lock[1])
+  {
+    debug=true;
+    class_name="CDataGenerator";
+    if(lock.size()<2)
+    {
+      printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());
+      exit(99);
+    }//error exit
+  }//constructor
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
     if(debug)
@@ -126,8 +136,20 @@ public:
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
   std::string file_name;
+  int file_name_digit;
 
-  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataStore";file_name=imagefilename;if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, int digit)
+  : lprint(lock[0]), laccess(lock[1])
+  {
+    debug=true;
+    class_name="CDataStore";
+    file_name=imagefilename;
+    file_name_digit=digit;
+    if(lock.size()<2)
+    {
+      printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);
+    }//error exit
+  }//constructor
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
     if(debug)
@@ -163,7 +185,8 @@ int main(int argc,char **argv)
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
-  const char* imagefilename = cimg_option("-o","sample.cimg","output file name");
+  const char* imagefilename = cimg_option("-o","sample.cimg","output file name (e.g. \"-o data.cimg -d 3\" gives data_???.cimg)");
+  const int digit=cimg_option("-d",6,  "number of digit for file names");
   const int width=cimg_option("-s",1024, "size   of vector");
   const int count=cimg_option("-n",123,  "number of vector");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
@@ -211,7 +234,7 @@ int main(int argc,char **argv)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataGenerator generate(locks);
-  CDataStore     store(locks,imagefilename);
+  CDataStore     store(locks,imagefilename,digit);
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}

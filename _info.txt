@@ -1,3 +1,6 @@
+#help
+cat store_help.output
+
 #compile
 make
 make gui
