@@ -10,7 +10,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.1d"
+#define VERSION "v0.1.1e"
 
 #define S 0 //sample
 
@@ -87,24 +87,40 @@ public:
 
 };//CAccessOMPLock
 
-class CDataGenerator
+class CDataAccess
 {
 public:
   std::string class_name;
   bool debug;
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
-
-  CDataGenerator(std::vector<omp_lock_t*> &lock)
+  CDataAccess(std::vector<omp_lock_t*> &lock)
   : lprint(lock[0]), laccess(lock[1])
   {
     debug=true;
-    class_name="CDataGenerator";
+    class_name="CDataAccess";
+  }//constructor
+  virtual void check_locks(std::vector<omp_lock_t*> &lock)
+  {
     if(lock.size()<2)
     {
       printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());
       exit(99);
     }//error exit
+  }//constructor
+
+};//CDataGenerator
+
+class CDataGenerator: public CDataAccess
+{
+public:
+
+  CDataGenerator(std::vector<omp_lock_t*> &lock)
+  : CDataAccess(lock)
+  {
+    debug=true;
+    class_name="CDataGenerator";
+    check_locks(lock);
   }//constructor
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
@@ -128,27 +144,20 @@ public:
 };//CDataGenerator
 
 
-class CDataStore
+class CDataStore: public CDataAccess
 {
 public:
-  std::string class_name;
-  bool debug;
-  CPrintOMPLock  lprint;
-  CAccessOMPLock laccess;
   std::string file_name;
   int file_name_digit;
 
   CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, int digit)
-  : lprint(lock[0]), laccess(lock[1])
+  : CDataAccess(lock)
   {
     debug=true;
     class_name="CDataStore";
     file_name=imagefilename;
     file_name_digit=digit;
-    if(lock.size()<2)
-    {
-      printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);
-    }//error exit
+    check_locks(lock);
   }//constructor
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
