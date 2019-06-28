@@ -6,11 +6,11 @@
 #include <omp.h>
 #include <vector>
 
-//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, . +run: base_run, gen,store
+//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.1f"
+#define VERSION "v0.1.1"
 
 #define S 0 //sample
 
@@ -94,6 +94,8 @@ public:
   bool debug;
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
+  enum ACCESS_STATUS_OR_STATE {STATUS_FREE=0x0,STATUS_FILLED=0x1, STATE_FILLING=0xF,STATE_STORING=0x5};
+
   CDataAccess(std::vector<omp_lock_t*> &lock)
   : lprint(lock[0]), laccess(lock[1])
   {
@@ -108,7 +110,6 @@ public:
       exit(99);
     }//error exit
   }//constructor
-
 };//CDataGenerator
 
 class CDataGenerator: public CDataAccess
@@ -133,13 +134,13 @@ public:
     }
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],0x0,0xF, c);//free,filling
+    laccess.wait_for_status(access[n],STATUS_FREE,STATE_FILLING, c);//free,filling
 
     //fill image
     images[n].fill(i);
 
     //set filled
-    laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);//filling,filled
+    laccess.set_status(access[n],STATE_FILLING,STATUS_FILLED, class_name[5],i,n,c);//filling,filled
   }//iteration
 };//CDataGenerator
 
@@ -171,7 +172,7 @@ public:
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],0x1,0x5, c);//filled,storing
+    laccess.wait_for_status(access[n],STATUS_FILLED,STATE_STORING, c);//filled,storing
 
     //save image
     CImg<char> nfilename(1024);
@@ -179,7 +180,7 @@ public:
     images[n].save_cimg(nfilename);
 
     //set filled
-    laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//storing,free
+    laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//storing,free
   }//iteration
 };//CDataStore
 
