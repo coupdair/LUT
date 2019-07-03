@@ -1,0 +1,14 @@
+#compile
+make
+make gui
+make nogui
+
+#run
+./generate -c 2 -s 4096 -b   6 -n 12
+./generate      -s 4096 -b 123 -n 1234
+
+#perfs
+#/home/ducretf 4096 wait=200000
+#/tmp 4096 (2^12) wait=1
+#     8192 (2^13) wait=6500
+#/dev/shm 67108864 (2^26) wait=1 (can't put more, CImg can't write more)
