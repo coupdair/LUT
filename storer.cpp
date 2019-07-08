@@ -112,7 +112,6 @@ public:
 
     //wait lock
     unsigned int c=0;
-    std::cout << "wait?" << std::endl;
     laccess.wait_for_status(access[n],0x1,0x5, c);//filled,storing
     // in the main, the iteration function is called in a for function in which n changes so every term of the access CImg is
     // called by in the iteration function
@@ -123,10 +122,47 @@ public:
     images[n].save_cimg(nfilename);
 
     //set filled
-    std::cout << "set?" << std::endl;
     laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//storing,free
   }//iteration
 };//CDataStore
+
+
+class CDataStore2	//other Store class to see how locks work
+{
+public:
+  std::string class_name;
+  bool debug;
+  CPrintOMPLock  lprint;
+  CAccessOMPLock laccess;
+  std::string file_name;
+
+  CDataStore2(std::vector<omp_lock_t*> &lock,std::string imagefilename) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataStore";file_name=imagefilename;if(lock.size()<2) {printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());exit(99);}}
+  //creation of locks according to the locks in the locks vector
+  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  {
+    if(debug)
+    {
+      lprint.print("",false); //print function of the print lock
+      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      access.print("access",false);fflush(stderr);
+      lprint.unset_lock();
+    }
+
+    //wait lock
+    unsigned int c=0;
+    laccess.wait_for_status(access[n],0x0,0xF, c);//filled,storing
+    // in the main, the iteration function is called in a for function in which n changes so every term of the access CImg is
+    // called by in the iteration function
+
+    //save image
+    CImg<char> nfilename(1024);
+    cimg::number_filename(file_name.c_str(),i,6,nfilename);
+    images[n].save_cimg(nfilename);
+
+    //set filled
+    laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);//storing,free
+  }//iteration
+};//CDataStore2
 
 
 
@@ -196,6 +232,7 @@ int main(int argc,char **argv)
 
   //CDataGenerator generate(locks);
   CDataStore     store(locks,imagefilename);
+  CDataStore2     store2(locks,imagefilename);
 
   #pragma omp single	//this part of the code will only be executed by one thread, only once.
   {
@@ -210,13 +247,12 @@ int main(int argc,char **argv)
       case 0:
       {//generate
 //        generate.iteration(access,images, n,i);
-	std::cout << "0?" << std::endl;
+	store2.iteration(access,images, n,i);
         break;
       }//generate
       case 1:
       {//store
 	store.iteration(access,images, n,i);
-	std::cout << "1?" << std::endl;
         break;
       }//store
     }//switch(id)
