@@ -106,12 +106,41 @@ public:
     }
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],0x0,0xF, c);//free,filli
+    laccess.wait_for_status(access[n],0x0,0xF, c);//waiting for the other thread to finish (he will send a lock value of 0x0
+
+    //fill image
+    images[n].fill(i);//fills all pixels of the image with value i
+    //set filled
+    laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);//setting the lock value to 0x1 so the other thread can start
+  }//iteration
+};//CDataGenerator
+
+class CDataGenerator2
+{
+public:
+  std::string class_name;
+  bool debug;
+  CPrintOMPLock  lprint;
+  CAccessOMPLock laccess;
+
+  CDataGenerator2(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
+  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  {
+    if(debug)
+    {
+      lprint.print("",false);
+      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      access.print("access",false);fflush(stderr);
+      lprint.unset_lock();
+    }
+    //wait lock
+    unsigned int c=0;
+    laccess.wait_for_status(access[n],0x1,0x5, c);//same thing than the other thread but with different values
 
     //fill image
     images[n].fill(i);
     //set filled
-    laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);
+    laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//same thing than the other thread but with different values
   }//iteration
 };//CDataGenerator
 
@@ -122,11 +151,10 @@ int main(int argc, char **argv)
   	cimg_usage(std::string("generate data.\n" \
   	" It uses different GNU libraries (see --info option)\n\n" \
   	" usage: ./generate -h -I\n" \
-  	"        ./generate -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg\n" \
-  	"\n version: "+std::string(VERSION)+"\n compilation date:" \
-  	).c_str());//cimg_usage
+  	"        ./generate -s 1024 -n 123 -X true -o sample.png && ls sample_000???.png\n" \
+  	"\n version: "+std::string(VERSION)+"\n compilation date: ").c_str());//cimg_usage
 
-	const char* imagefilename = cimg_option("-o","sample.cimg","output file name");
+	const char* imagefilename = cimg_option("-o","sample.png","output file name");
 	const int width=cimg_option("-s",1024, "size   of vector");
 	const int count=cimg_option("-n",123,  "number of vector");
 	const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
@@ -179,6 +207,7 @@ int main(int argc, char **argv)
 	{
 	int id=omp_get_thread_num(),tn=omp_get_num_threads();
 	CDataGenerator generate(locks);
+	CDataGenerator2 generate2(locks);
 
 	#pragma omp single
   	{
@@ -196,11 +225,11 @@ int main(int argc, char **argv)
               break;
       	    }//generate
       	    case 1:
-      	    /*{//store
-	      store.iteration(access,images, n,i);
+      	    {//store
+	      //store.iteration(access,images, n,i);
+              generate2.iteration(access,images, n,i);
               break;
-      	    }//store*/
-	      std::cout << 1 << std::endl;
+      	    }//store
     	  }//switch(id)
     	  //circular buffer
     	  if(n==nbuffer-1) n=-1;
