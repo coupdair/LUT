@@ -116,10 +116,13 @@ public:
     // in the main, the iteration function is called in a for function in which n changes so every term of the access CImg is
     // called by in the iteration function
 
+    //generator
+    //images[n].fill(i%256);
+
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,6,nfilename);
-    images[n].save_cimg(nfilename);
+    images[n].save_png(nfilename);
 
     //set filled
     laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//storing,free
@@ -157,7 +160,7 @@ public:
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,6,nfilename);
-    images[n].save_cimg(nfilename);
+    images[n].save_png(nfilename);
 
     //set filled
     laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);//storing,free
@@ -173,11 +176,11 @@ int main(int argc,char **argv)
   cimg_usage(std::string("generate and store data.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./store -h -I\n" \
-  "        ./store -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg\n" \
+  "        ./store -s 1024 -n 123 -X true -o sample.png && convert -append sample*.png result.png" \
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
-  const char* imagefilename = cimg_option("-o","sample.cimg","output file name");
+  const char* imagefilename = cimg_option("-o","sample.png","output file name");
   const int width=cimg_option("-s",1024, "size   of vector");
   const int count=cimg_option("-n",123,  "number of vector");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
@@ -224,7 +227,7 @@ int main(int argc,char **argv)
 											// that will create custom locks in 
 											//the CDataStore constructor
 
-  #pragma omp parallel shared(print_lock, access,images)	//threadCount parallel threads created, sharing the print 
+  #pragma omp parallel shared(print_lock,access,images)	//threadCount parallel threads created, sharing the print 
 								//lock, the lock vector and the image that will stock the 
 														//result
   {
@@ -246,13 +249,13 @@ int main(int argc,char **argv)
     {
       case 0:
       {//generate
-//        generate.iteration(access,images, n,i);
-	store2.iteration(access,images, n,i);
+//        generate.iteration(access,images,n,i);
+	store2.iteration(access,images,n,i);
         break;
       }//generate
       case 1:
       {//store
-	store.iteration(access,images, n,i);
+	store.iteration(access,images,n,i);
         break;
       }//store
     }//switch(id)
