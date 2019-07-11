@@ -1,10 +1,25 @@
 #include "CImg.h"
-#include <iostream>
 #include <string>
 
 //OpenMP
 #include <omp.h>
+
+//UDP
+#include <boost/asio/ip/udp.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include "UDP/high_res_clock.hpp"
+
+using boost::asio::ip::udp;
+using boost::posix_time::ptime;
+using boost::posix_time::microsec_clock;
+
+//Multiple usage
 #include <vector>
+#include <iostream>
 
 
 using namespace cimg_library;
@@ -115,16 +130,34 @@ public:
   }//iteration
 };//CDataGenerator
 
-class CDataGenerator2
+class CDataSender
 {
 public:
   std::string class_name;
   bool debug;
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
+  boost::asio::io_service io_service;
+  udp::socket socket;
+  udp::endpoint target;
 
-  CDataGenerator2(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataGenerator";if(lock.size()<2) {printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());exit(99);}}
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  CDataSender(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, bool spin) : lprint(lock[0]), laccess(lock[1]), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
+  {
+    debug=true;
+    class_name="CDataSender";
+    if(lock.size()<2) 
+    {
+      printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());
+      exit(99);
+    }
+    if (spin)
+    {
+      udp::socket::non_blocking_io nbio(true);
+      socket.io_control(nbio);
+    }
+    target.port(port);
+  }
+  virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> write_buf, int n, int i, boost::uint64_t wait)
   {
     if(debug)
     {
@@ -137,8 +170,15 @@ public:
     unsigned int c=0;
     laccess.wait_for_status(access[n],0x1,0x5, c);//same thing than the other thread but with different values
 
-    //fill image
-    images[n].fill(i);
+    //send data by udp
+    //filling udp buffer
+    for(unsigned int j=0;j<write_buf.size();++j) write_buf[j]=i;
+
+    boost::system::error_code ec;
+    socket.send_to(boost::asio::buffer(write_buf), target, 0, ec);
+    boost::uint64_t time_hr = high_res_clock();
+    while ((high_res_clock()-time_hr)<wait) {}
+
     //set filled
     laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//same thing than the other thread but with different values
   }//iteration
@@ -148,17 +188,24 @@ public:
 int main(int argc, char **argv)
 {
 	///command arguments, i.e. CLI option
-  	cimg_usage(std::string("generate data.\n" \
+  	cimg_usage(std::string("generate data and send it via UDP.\n" \
   	" It uses different GNU libraries (see --info option)\n\n" \
   	" usage: ./generate -h -I\n" \
-  	"        ./generate -s 1024 -n 123 -X true -o sample.png && ls sample_000???.png\n" \
+  	"        ./generate -s 1024 -n 123 -X true -i 10.10.15.1 -p 1234567 -sp 1 -w 123456" \
   	"\n version: "+std::string(VERSION)+"\n compilation date: ").c_str());//cimg_usage
 
-	const char* imagefilename = cimg_option("-o","sample.png","output file name");
-	const int width=cimg_option("-s",1024, "size   of vector");
-	const int count=cimg_option("-n",123,  "number of vector");
+	//const char* imagefilename = cimg_option("-o","sample.png","output file name");
+	const int width=cimg_option("-s",1024, "size of udp buffer");
+	const int count=cimg_option("-n",123,  "number of frames");
 	const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
 	const int threadCount=cimg_option("-c",0,"thread count");
+	const unsigned short port=cimg_option("-p",1234567,"port where the packets are send on the receiving device");
+	const std::string ip=cimg_option("-i", "10.10.15.1", "ip address of the receiver");
+	const bool spin=cimg_option("-sp", 1, "type of udp sending, possible values : {0 (block)|1 (spin)}");
+	const int twait=cimg_option("-w", 123456, "waiting time between udp frames");
+
+	//conversion of twait into a boost::uint64_t
+	const boost::uint64_t wait=static_cast<std::size_t>(twait);
 
 	#if cimg_display!=0
 	const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -177,6 +224,9 @@ int main(int argc, char **argv)
 	if(show_help) {/*print_help(std::cerr);*/return 0;}
 	//end of CLI options
 
+	//UDP initialization
+	std::vector<unsigned char> write_buf(width);
+
 	//OpenMP
 	if(threadCount>0)
 	{//user number of thread
@@ -190,8 +240,6 @@ int main(int argc, char **argv)
 
 	//! circular buffer
 	CImgList<unsigned int> images(nbuffer,width,1,1,1);
-	images[0].fill(0);
-	images[0].print("image",false);
 	//access locking
 	omp_lock_t lck;omp_init_lock(&lck);
 
@@ -207,7 +255,7 @@ int main(int argc, char **argv)
 	{
 	int id=omp_get_thread_num(),tn=omp_get_num_threads();
 	CDataGenerator generate(locks);
-	CDataGenerator2 generate2(locks);
+	CDataSender sender(locks, ip, port, spin);
 
 	#pragma omp single
   	{
@@ -225,9 +273,9 @@ int main(int argc, char **argv)
               break;
       	    }//generate
       	    case 1:
-      	    {//store
-	      //store.iteration(access,images, n,i);
-              generate2.iteration(access,images, n,i);
+      	    {//send
+              //generate2.iteration(access,images, n,i);
+              sender.iteration(access, write_buf, n, i, wait);
               break;
       	    }//store
     	  }//switch(id)
