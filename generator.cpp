@@ -171,9 +171,6 @@ public:
     laccess.wait_for_status(access[n],0x1,0x5, c);//same thing than the other thread but with different values
 
     //send data by udp
-    //filling udp buffer
-    for(unsigned int j=0;j<write_buf.size();++j) write_buf[j]=i;
-
     boost::system::error_code ec;
     socket.send_to(boost::asio::buffer(write_buf), target, 0, ec);
     boost::uint64_t time_hr = high_res_clock();
@@ -183,6 +180,17 @@ public:
     laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);//same thing than the other thread but with different values
   }//iteration
 };//CDataGenerator
+
+//Function to copy the data in a CImg in a vector
+std::vector<unsigned char> copy(CImg<unsigned int> img)
+{
+	std::vector<unsigned char> result;
+	for(int i=0; i<img.width(); ++i)
+	{
+		result.push_back(static_cast<unsigned char>(img[i]));
+	}
+	return result;
+}
 
 
 int main(int argc, char **argv)
@@ -224,8 +232,13 @@ int main(int argc, char **argv)
 	if(show_help) {/*print_help(std::cerr);*/return 0;}
 	//end of CLI options
 
-	//UDP initialization
+	//CImg circular buffer (nbuffer lines, width columns)
+	CImgList<unsigned int> images(nbuffer,width,1,1,1);
+
+	//UDP_buffer initialization
 	std::vector<unsigned char> write_buf(width);
+
+//////////TODO : no UDP vector, data directly collected from the circular buffer///////////////
 
 	//OpenMP
 	if(threadCount>0)
@@ -238,8 +251,6 @@ int main(int argc, char **argv)
 	//OpenMP locks
 	omp_lock_t print_lock;omp_init_lock(&print_lock);
 
-	//! circular buffer
-	CImgList<unsigned int> images(nbuffer,width,1,1,1);
 	//access locking
 	omp_lock_t lck;omp_init_lock(&lck);
 
@@ -275,6 +286,7 @@ int main(int argc, char **argv)
       	    case 1:
       	    {//send
               //generate2.iteration(access,images, n,i);
+              write_buf = copy(images[n]);
               sender.iteration(access, write_buf, n, i, wait);
               break;
       	    }//store
