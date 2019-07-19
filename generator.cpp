@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 	{
 	int id=omp_get_thread_num(),tn=omp_get_num_threads();
 	CDataGenerator generate(locks);
-	CDataSender sender(locks, ip, port, spin);
+	CDataSender send(locks, ip, port, spin);
 
 	#pragma omp single
   	{
@@ -287,7 +287,7 @@ int main(int argc, char **argv)
       	    {//send
               //generate2.iteration(access,images, n,i);
               write_buf = copy(images[n]);
-              sender.iteration(access, write_buf, n, i, wait);
+              send.iteration(access, write_buf, n, i, wait);
               break;
       	    }//store
     	  }//switch(id)
