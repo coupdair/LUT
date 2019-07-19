@@ -8,6 +8,7 @@ using namespace cimg_library;
 //thread lock
 #include "CDataAccess.hpp"
 
+template<typename Tdata, typename Taccess>
 class CDataStore: public CDataAccess
 {
 public:
@@ -23,7 +24,7 @@ public:
     file_name_digit=digit;
     check_locks(lock);
   }//constructor
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
     if(debug)
     {
