@@ -46,6 +46,18 @@ public:
     //set filled
     laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//storing,free
   }//iteration
+
+  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
+  {
+    int nbuffer=images.size();
+    for(int n=0,i=0;i<count;++i,++n)
+    {
+      this->iteration(access,images, n,i);
+      //circular buffer
+       if(n==nbuffer-1) n=-1;
+     }//vector loop
+  }//run
+
 };//CDataStore
 
 

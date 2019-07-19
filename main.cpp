@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.4"
+#define VERSION "v0.1.5d"
 
 #define S 0 //sample
 
@@ -83,32 +83,27 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataGenerator<Tdata,Taccess> generate(locks);
-  CDataStore<    Tdata,Taccess> store(locks,imagefilename,digit);
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-  for(int n=0,i=0;i<count;++i,++n)
+  switch(id)
   {
-    switch(id)
-    {
-      case 0:
-      {//generate
-        generate.iteration(access,images, n,i);
-        break;
-      }//generate
-      case 1:
-      {//store
-        store.iteration(access,images, n,i);
-        break;
-      }//store
-    }//switch(id)
-    //circular buffer
-    if(n==nbuffer-1) n=-1;
-  }//vector loop
+    case 0:
+    {//generate
+      CDataGenerator<Tdata,Taccess> generate(locks);
+      generate.run(access,images, count);
+      break;
+    }//generate
+    case 1:
+    {//store
+      CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
+      store.run(access,images, count);
+      break;
+    }//store
+  }//switch(id)
   }//parallel section
 
   access.print("access (free state)",false);fflush(stderr);
