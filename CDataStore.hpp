@@ -8,7 +8,7 @@ using namespace cimg_library;
 //thread lock
 #include "CDataAccess.hpp"
 
-template<typename Tdata, typename Taccess>
+template<typename Tdata, typename Taccess=unsigned char>
 class CDataStore: public CDataAccess
 {
 public:

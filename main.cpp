@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.3"
+#define VERSION "v0.1.4d"
 
 #define S 0 //sample
 
@@ -79,8 +79,8 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataGenerator<unsigned int,unsigned char> generate(locks);
-  CDataStore<    unsigned int,unsigned char> store(locks,imagefilename,digit);
+  CDataGenerator<unsigned int> generate(locks);
+  CDataStore<    unsigned int> store(locks,imagefilename,digit);
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
