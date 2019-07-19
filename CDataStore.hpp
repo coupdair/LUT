@@ -24,6 +24,8 @@ public:
     file_name_digit=digit;
     this->check_locks(lock);
   }//constructor
+
+  //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
     if(this->debug)

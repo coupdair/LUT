@@ -21,11 +21,13 @@ public:
     check_locks(lock);
   }//constructor
 
+  //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
-    std::cout<< __FILE__<<"/"<<__func__<<" empty, should be implemented in inherited class."<<std::endl<<std::flush;
+    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<", iter="<<i<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
   };//iteration
 
+  //! run for loop
   virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
   {
     int nbuffer=images.size();

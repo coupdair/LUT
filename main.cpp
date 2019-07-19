@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.5e"
+#define VERSION "v0.1.5"
 
 #define S 0 //sample
 
@@ -77,7 +77,7 @@ int main(int argc,char **argv)
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
-  //! generate data
+  //! thread locks
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
   #pragma omp parallel shared(print_lock, access,images)
@@ -89,6 +89,7 @@ int main(int argc,char **argv)
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
+  //run threads
   switch(id)
   {
     case 0:
