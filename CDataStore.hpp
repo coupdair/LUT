@@ -6,37 +6,37 @@
 using namespace cimg_library;
 
 //thread lock
-#include "CDataAccess.hpp"
+#include "CDataBuffer.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataStore: public CDataAccess
+class CDataStore: public CDataBuffer<Tdata, Taccess>
 {
 public:
   std::string file_name;
   int file_name_digit;
 
   CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, int digit)
-  : CDataAccess(lock)
+  : CDataBuffer<Tdata, Taccess>(lock)
   {
-    debug=true;
-    class_name="CDataStore";
+    this->debug=true;
+    this->class_name="CDataStore";
     file_name=imagefilename;
     file_name_digit=digit;
-    check_locks(lock);
+    this->check_locks(lock);
   }//constructor
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
-    if(debug)
+    if(this->debug)
     {
-      lprint.print("",false);
+      this->lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
+      this->lprint.unset_lock();
     }
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FILLED,STATE_STORING, c);//filled,storing
+    this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
 
     //save image
     CImg<char> nfilename(1024);
@@ -44,19 +44,8 @@ public:
     images[n].save_cimg(nfilename);
 
     //set filled
-    laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//storing,free
+    this->laccess.set_status(access[n],this->STATE_STORING,this->STATUS_FREE, this->class_name[5],i,n,c);//storing,free
   }//iteration
-
-  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
-  {
-    int nbuffer=images.size();
-    for(int n=0,i=0;i<count;++i,++n)
-    {
-      this->iteration(access,images, n,i);
-      //circular buffer
-       if(n==nbuffer-1) n=-1;
-     }//vector loop
-  }//run
 
 };//CDataStore
 
