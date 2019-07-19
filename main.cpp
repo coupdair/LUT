@@ -17,9 +17,13 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.4d"
+#define VERSION "v0.1.4"
 
 #define S 0 //sample
+
+//types
+typedef unsigned char Taccess;
+typedef unsigned int  Tdata;
 
 int main(int argc,char **argv)
 {
@@ -62,14 +66,14 @@ int main(int argc,char **argv)
   omp_lock_t print_lock;omp_init_lock(&print_lock);
 
   //! circular buffer
-  CImgList<unsigned int> images(nbuffer,width,1,1,1);
+  CImgList<Tdata> images(nbuffer,width,1,1,1);
   images[0].fill(0);
   images[0].print("image",false);
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
 
   //! access and status of buffer
-  CImg<unsigned char> access(nbuffer,1,1,1);
+  CImg<Taccess> access(nbuffer,1,1,1);
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
@@ -79,8 +83,8 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataGenerator<unsigned int> generate(locks);
-  CDataStore<    unsigned int> store(locks,imagefilename,digit);
+  CDataGenerator<Tdata,Taccess> generate(locks);
+  CDataStore<    Tdata,Taccess> store(locks,imagefilename,digit);
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
