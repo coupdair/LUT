@@ -9,113 +9,17 @@
 #include <omp.h>
 #include <vector>
 
-#include "thread_lock.hpp"
+//thread lock
+#include "CDataGenerator.hpp"
+#include "CDataStore.hpp"
 
 //! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.2d"
+#define VERSION "v0.1.2"
 
 #define S 0 //sample
-
-class CDataAccess
-{
-public:
-  std::string class_name;
-  bool debug;
-  CPrintOMPLock  lprint;
-  CAccessOMPLock laccess;
-  enum ACCESS_STATUS_OR_STATE {STATUS_FREE=0x0,STATUS_FILLED=0x1, STATE_FILLING=0xF,STATE_STORING=0x5};
-
-  CDataAccess(std::vector<omp_lock_t*> &lock)
-  : lprint(lock[0]), laccess(lock[1])
-  {
-    debug=true;
-    class_name="CDataAccess";
-  }//constructor
-  virtual void check_locks(std::vector<omp_lock_t*> &lock)
-  {
-    if(lock.size()<2)
-    {
-      printf("code error: locks should have at least 2 lock for %s class.",class_name.c_str());
-      exit(99);
-    }//error exit
-  }//constructor
-};//CDataGenerator
-
-class CDataGenerator: public CDataAccess
-{
-public:
-
-  CDataGenerator(std::vector<omp_lock_t*> &lock)
-  : CDataAccess(lock)
-  {
-    debug=true;
-    class_name="CDataGenerator";
-    check_locks(lock);
-  }//constructor
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
-  {
-    if(debug)
-    {
-      lprint.print("",false);
-      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
-      access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
-    }
-    //wait lock
-    unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FREE,STATE_FILLING, c);//free,filling
-
-    //fill image
-    images[n].fill(i);
-
-    //set filled
-    laccess.set_status(access[n],STATE_FILLING,STATUS_FILLED, class_name[5],i,n,c);//filling,filled
-  }//iteration
-};//CDataGenerator
-
-
-class CDataStore: public CDataAccess
-{
-public:
-  std::string file_name;
-  int file_name_digit;
-
-  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, int digit)
-  : CDataAccess(lock)
-  {
-    debug=true;
-    class_name="CDataStore";
-    file_name=imagefilename;
-    file_name_digit=digit;
-    check_locks(lock);
-  }//constructor
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
-  {
-    if(debug)
-    {
-      lprint.print("",false);
-      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
-      access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
-    }
-
-    //wait lock
-    unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FILLED,STATE_STORING, c);//filled,storing
-
-    //save image
-    CImg<char> nfilename(1024);
-    cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
-    images[n].save_cimg(nfilename);
-
-    //set filled
-    laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//storing,free
-  }//iteration
-};//CDataStore
-
 
 int main(int argc,char **argv)
 {

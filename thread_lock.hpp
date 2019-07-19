@@ -81,5 +81,5 @@ public:
 
 };//CAccessOMPLock
 
-#endif _THREAD_LOCK_
+#endif //_THREAD_LOCK_
 
