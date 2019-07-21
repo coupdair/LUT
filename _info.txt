@@ -1,14 +1,23 @@
+#help
+cat store_help.output
+
 #compile
 make
 make gui
 make nogui
 
 #run
-./store -c 2 -s 4096 -b   6 -n 12
-./store      -s 4096 -b 123 -n 1234
+./store.X      -s 1024 -n 123 -X true -o sample.png -p 1234567
+./store   -c 2 -s 4096 -b   6 -n 12                 -p 1234567
+./store        -s 4096 -b  16 -n 123                -p 1234567
+./store        -s 4096 -b 123 -n 1234               -p 1234567
 
-#perfs
-#/home/ducretf 4096 wait=200000
-#/tmp 4096 (2^12) wait=1
-#     8192 (2^13) wait=6500
-#/dev/shm 67108864 (2^26) wait=1 (can't put more, CImg can't write more)
+#show wait
+##Receive
+./store      -s 4096 -b  16 -n 123 2>/dev/null | grep 'R'
+##Store
+./store      -s 4096 -b  16 -n 123 2>/dev/null | grep 'S'
+
+#show buffer status
+./store      -s 4096 -b  16 -n 123 >/dev/null
+

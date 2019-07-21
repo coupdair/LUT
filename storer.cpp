@@ -1,15 +1,32 @@
 #include "CImg.h"
-#include <iostream>
 #include <string>
-
-//OpenMP
-#include <omp.h>
-#include <vector>
-
 
 using namespace cimg_library;
 
+//OpenMP
+#include <omp.h>
+
+//UDP
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include "allocator.hpp"
+
+using boost::asio::ip::udp;
+
+#include "yield.hpp"
+
+//Multiple usage
+#include <iostream>
+#include <vector>
+
 #define VERSION "v0.1.0e"
+
+#define TIMER_DELAY 543
 
 #define S 0 //sample
 
@@ -130,18 +147,123 @@ public:
 };//CDataStore
 
 
-class CDataStore2	//other Store class to see how locks work
+
+class udp_server : coroutine
+{
+public:
+  udp_server(boost::asio::io_service& io_service,
+    unsigned short port, std::size_t buf_size) :
+  socket_(io_service, udp::endpoint(udp::v4(), port)),
+  buffer_(buf_size)
+  {
+    count_=0;
+  }
+
+  void operator()(boost::system::error_code ec, std::size_t n = 0)
+  {
+    //infinite loop for receive (and send back)
+    reenter (this) for (;;)
+    {
+      yield socket_.async_receive_from(
+          boost::asio::buffer(buffer_),
+          sender_, ref(this));
+      if (!ec)
+      {
+        count_++;
+        //reading index as first 64bit of frame
+        boost::uint64_t *p_index=(boost::uint64_t*)(buffer_.data());
+        boost::uint64_t index=*p_index;
+        std::printf("receive   #%d as #%d\r",index,count_);
+      }
+    }//infinite loop
+  }
+
+  friend void* asio_handler_allocate(std::size_t n, udp_server* s)
+  {
+    return s->allocator_.allocate(n);
+  }
+
+  friend void asio_handler_deallocate(void* p, std::size_t, udp_server* s)
+  {
+    s->allocator_.deallocate(p);
+  }
+
+  struct ref
+  {
+    explicit ref(udp_server* p)
+      : p_(p)
+    {
+    }
+
+    void operator()(boost::system::error_code ec, std::size_t n = 0)
+    {
+      (*p_)(ec, n);
+    }
+
+  private:
+    udp_server* p_;
+
+    friend void* asio_handler_allocate(std::size_t n, ref* r)
+    {
+      return asio_handler_allocate(n, r->p_);
+    }
+
+    friend void asio_handler_deallocate(void* p, std::size_t n, ref* r)
+    {
+      asio_handler_deallocate(p, n, r->p_);
+    }
+  };//ref
+
+private:
+  udp::socket socket_;
+  std::vector<unsigned char> buffer_;
+  udp::endpoint sender_;
+  allocator allocator_;
+  //! count received
+  unsigned int count_;
+};//udp_server
+
+#include "unyield.hpp"
+
+class CDataReceiver	//UDP receiver class
 {
 public:
   std::string class_name;
   bool debug;
   CPrintOMPLock  lprint;
   CAccessOMPLock laccess;
-  std::string file_name;
+  //std::string file_name;
+  boost::asio::io_service io_service;
+  boost::posix_time::time_duration interval;
+  boost::asio::deadline_timer timer_;
 
-  CDataStore2(std::vector<omp_lock_t*> &lock,std::string imagefilename) : lprint(lock[0]), laccess(lock[1]) {debug=true;class_name="CDataStore";file_name=imagefilename;if(lock.size()<2) {printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());exit(99);}}
+  CDataReceiver(std::vector<omp_lock_t*> &lock) : lprint(lock[0]), laccess(lock[1]), io_service(1), interval(boost::posix_time::milliseconds(TIMER_DELAY)), timer_(io_service,interval)
+  {
+    debug=true;
+    class_name="CDataReceiver";
+    if(lock.size()<2)
+    {
+      printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());
+      exit(99);
+    }
+  }
+
+  void timer_init()
+  {
+    timer_.expires_at(timer_.expires_at()+interval);
+    timer_.async_wait(timer_handler);
+  }
+
+  void timer_handler(const boost::system::error_code& error)
+  {
+    std::cout.flush();
+    std::cerr.flush();
+    //start timer
+    timer_init();
+  }//timer_handler
+
   //creation of locks according to the locks in the locks vector
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+  virtual void iteration(CImg<unsigned char> &access, int n, int i)
   {
     if(debug)
     {
@@ -157,17 +279,30 @@ public:
     // in the main, the iteration function is called in a for function in which n changes so every term of the access CImg is
     // called by in the iteration function
 
-    //save image
-    CImg<char> nfilename(1024);
-    cimg::number_filename(file_name.c_str(),i,6,nfilename);
-    images[n].save_png(nfilename);
+    //get udp packet
+    //todo
+    yield socket_.async_receive_from(
+        boost::asio::buffer(buffer_),
+        sender_, ref(this));
+
+    if (!ec)
+    {
+      count_++;
+      //reading index as first 64bit of frame
+      boost::uint64_t *p_index=(boost::uint64_t*)(buffer_.data());
+      boost::uint64_t index=*p_index;
+      std::printf("receive   #%d as #%d\r",index,count_);
+    }
+    if start
+    if (spin)
+      for (;;) io_service.poll();
+    else
+      io_service.run();
 
     //set filled
     laccess.set_status(access[n],0xF,0x1, class_name[5],i,n,c);//storing,free
   }//iteration
-};//CDataStore2
-
-
+};//CDataReceiver
 
 
 int main(int argc,char **argv)
@@ -176,15 +311,18 @@ int main(int argc,char **argv)
   cimg_usage(std::string("generate and store data.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./store -h -I\n" \
-  "        ./store -s 1024 -n 123 -X true -o sample.png && convert -append sample*.png result.png" \
+  "        ./store -s 1024 -n 123 -X true -o sample.png -p 1234567 -sp 1 && convert -append sample*.png result.png" \
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
   const char* imagefilename = cimg_option("-o","sample.png","output file name");
-  const int width=cimg_option("-s",1024, "size   of vector");
-  const int count=cimg_option("-n",123,  "number of vector");
+  const int width=cimg_option("-s",1024, "size   of udp buffer");
+  const int count=cimg_option("-n",123,  "number of frames");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
   const int threadCount=cimg_option("-c",0,"thread count");
+  const unsigned short port=cimg_option("-p", 1234567, "port where the udp packets are received")
+  const bool spin=cimg_option("-sp", 1, "type of udp sending, possible values : {0 (block)|1 (spin)}");
+
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -235,7 +373,7 @@ int main(int argc,char **argv)
 
   //CDataGenerator generate(locks);
   CDataStore     store(locks,imagefilename);
-  CDataStore2     store2(locks,imagefilename);
+  CDataReceiver  receiver(locks);
 
   #pragma omp single	//this part of the code will only be executed by one thread, only once.
   {
