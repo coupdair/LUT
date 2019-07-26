@@ -60,7 +60,7 @@ public:
     while ((high_res_clock()-time_hr)<wait) {}
 
     //set free
-    laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);
+    laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
   }//iteration
 };//CDataSender
 
