@@ -9,11 +9,11 @@ nogui: main.cpp thread_lock.hpp
 	./store -h 2> store_help.output
 
 run:
-	./store -c 2 -s 4096 -b   6 -n 12 -p 1234567
+	./store -c 2 -s 1024 -b   6 -n 12 -p 1234
 
 clear:
-	rm sample_??????.png
+	rm samples/*
 
 clean:
-	rm store.X store sample_??????.png
+	rm store.X store samples/*
 

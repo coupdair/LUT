@@ -12,6 +12,9 @@
 #include <vector>
 #include "allocator.hpp"
 
+//Test
+#include <iostream>
+
 using boost::asio::ip::udp;
 
 class udp_server : coroutine
@@ -27,7 +30,7 @@ public:
 
   }
 
-  void operator()(boost::system::error_code ec, std::vector<unsigned char> rec_buf, std::size_t n = 0)
+  void operator()(boost::system::error_code ec, std::vector<unsigned char> *rec_buf, std::size_t n = 0)
   {
     //infinite loop for receive (and send back)
     reenter (this) for (;;)
@@ -43,7 +46,8 @@ public:
         boost::uint64_t index=*p_index;
         //std::printf("receive   #%d as #%d\r",index,count_);
         //std::cout << int(buffer_[0]) << " " << int(buffer_[20]) << std::endl;
-        for(unsigned int i=0; i<buffer_.size(); ++i){rec_buf.push_back(buffer_[i]);}
+        for(unsigned int i=0; i<buffer_.size(); ++i){rec_buf->push_back(buffer_[i]);}
+	//std::cout<<std::endl<<static_cast<int>(rec_buf[0])<< " in udp_server_class" << std::endl;
 //        std::printf("receive   #%d size=%d\r",count_,buffer_.size());std::cout<<std::flush;
         //change buffer
 //        for (std::size_t i = 0; i < n; ++i) buffer_[i] = ~buffer_[i];
@@ -73,7 +77,9 @@ public:
 
     void operator()(boost::system::error_code ec, std::size_t n = 0)
     {
-      std::vector<unsigned char> rec_buf;
+      std::vector<unsigned char> *rec_buf(0);
+      std::vector<unsigned char> rec_vec;
+      rec_buf= &rec_vec;
       (*p_)(ec, rec_buf, n);
     }
 

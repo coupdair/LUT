@@ -12,9 +12,9 @@ class CDataStore: public CDataAccess
 {
 public:
   std::string file_name;
-  int file_name_digit;
+  unsigned int file_name_digit;
 
-  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, int digit)
+  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, unsigned int digit)
   : CDataAccess(lock)
   {
     debug=true;
@@ -25,13 +25,13 @@ public:
   }//constructor
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
-    if(debug)
+    /*if(debug)
     {
       lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
       lprint.unset_lock();
-    }
+    }*/
 
     //wait lock
     unsigned int c=0;

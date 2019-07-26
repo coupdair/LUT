@@ -42,25 +42,33 @@ public:
 
   virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> rec_buf, int n, int i, boost::asio::io_service *io_service)
   {
-    if(debug)
+    /*if(debug)
     {
       lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
       lprint.unset_lock();
-    }
+    }*/
 
     //wait lock
     unsigned int c=0;
     laccess.wait_for_status(access[n],STATUS_FREE,STATE_RECEIVING, c);//free, receiving
 
-    //Getting the info in the buffer
-    (*s)(boost::system::error_code(), rec_buf);
-
+    rec_buf.clear();
 
     //if(spin)
     //définition en spin par défaut, block n'est pas adapté pour la programmation de processus parallèles
-    io_service->poll();
+    while(rec_buf.size()==0)
+    {
+      //Getting the info in the buffer
+      (*s)(boost::system::error_code(), &rec_buf);
+      if(rec_buf.size()!=0)
+      {
+        std::cout << std::endl << "Size : " << rec_buf.size() << " / value in CDataReceiver : " << rec_buf[0] << std::endl;
+      }
+      io_service->poll();
+    }
+    std::cout<<std::endl<<rec_buf[0]<<" received"<<std::endl;
 
     laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
 
