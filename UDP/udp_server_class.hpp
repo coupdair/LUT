@@ -46,7 +46,20 @@ public:
         boost::uint64_t index=*p_index;
         //std::printf("receive   #%d as #%d\r",index,count_);
         //std::cout << int(buffer_[0]) << " " << int(buffer_[20]) << std::endl;
-        for(unsigned int i=0; i<buffer_.size(); ++i){rec_buf->push_back(buffer_[i]);}
+        unsigned int c=0;
+        for(unsigned int i=0; i<buffer_.size(); ++i)
+        {
+          if(buffer_[i]!=NULL)				//handling the case in which no packet is sent
+            rec_buf->push_back(buffer_[i]);		//if a value is NULL, then we increment a counter that will count NULL values in the buffer
+          else
+          {
+            c++;
+            rec_buf->push_back(buffer_[i]);
+          }
+        }
+        if(c==buffer_.size())				//if c equals the size of the buffer, the buffer is completely empty.
+          rec_buf->clear();				//In that case, we clear the buffer and this iteration of udp_server() will not be taken into account (see the while loop in CDataReceiver.hpp file)
+
 	//std::cout<<std::endl<<static_cast<int>(rec_buf[0])<< " in udp_server_class" << std::endl;
 //        std::printf("receive   #%d size=%d\r",count_,buffer_.size());std::cout<<std::flush;
         //change buffer
