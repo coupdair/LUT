@@ -12,6 +12,10 @@ make nogui
 ./store        -s 4096 -b  16 -n 123                -p 1234567
 ./store        -s 4096 -b 123 -n 1234               -p 1234567
 
+or
+
+make run
+
 #show wait
 ##Receive
 ./store      -s 4096 -b  16 -n 123 2>/dev/null | grep 'R'

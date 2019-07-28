@@ -9,7 +9,7 @@ nogui: main.cpp thread_lock.hpp
 	./store -h 2> store_help.output
 
 run:
-	./store -c 2 -s 1024 -b   6 -n 12 -p 1234
+	./store -c 2 -s 1024 -b   6 -n 256 -p 1234
 
 clear:
 	rm samples/*
@@ -17,3 +17,5 @@ clear:
 clean:
 	rm store.X store samples/*
 
+display:
+	convert -append samples/sample*.png result.png && display result.png

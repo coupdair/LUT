@@ -63,7 +63,6 @@ void timer_handler(const boost::system::error_code& error)
 
 CImg<unsigned int> copy(std::vector<unsigned char> *vec)
 {
-  std::cout << std::endl << "vec->size() : " << vec->size() << std::endl;
   CImg<unsigned int> result(vec->size(), 1, 1 , 1);
   for(unsigned int i=0; i < vec->size(); ++i)
   {
@@ -140,7 +139,6 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(print_lock, access,images, receive)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  //std::cout << "id :" << id << ", tn : " << tn << std::endl;
   CDataStore     store(locks,imagefilename,digit);
   #pragma omp single
   {
@@ -160,19 +158,12 @@ int main(int argc,char **argv)
       case 0:
       {//generate
         receive.iteration(access,rec_buf, n,i, &io_service);
-        std::cout << "\nrec_buf.size() receive : " << rec_buf.size() << "\n";
         images[n]=copy(&rec_buf);
         break;
       }//generate
       case 1:
       {//store
-        std::cout << std::endl << "Size images before iter : " << images[n].size() << std::endl;
         store.iteration(access,images, n,i);
-	//std::cout << std::endl << "Size images after iter : " << images[n].size() << std::endl;
-        if(images[n].size()!=0)
-        {
-          std::cout << std::endl << "In store loop : value : " << images[n][0] << ", size : " << images[n].size() << std::endl;
-        }
         break;
       }//store
     }//switch(id)
