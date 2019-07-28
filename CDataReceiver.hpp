@@ -41,7 +41,7 @@ public:
     servers.push_back(s);
   }
 
-  virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> rec_buf, int n, int i, boost::asio::io_service *io_service)
+  virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> &rec_buf, int n, int i, boost::asio::io_service *io_service)
   {
     if(debug)
     {
@@ -77,8 +77,7 @@ public:
       else
         compare_vector=rec_buf;
     }
-    std::cout<<std::endl<<rec_buf[0]<<" received"<<std::endl;
-
+    //std::cout<<std::endl<<rec_buf[0]<<" received, size : " << rec_buf.size() <<std::endl;
     laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
 
   }//iteration

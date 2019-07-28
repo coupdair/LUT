@@ -61,13 +61,15 @@ void timer_handler(const boost::system::error_code& error)
 #include "CDataReceiver.hpp"
 #include "CDataStore.hpp"
 
-CImg<unsigned int> copy(std::vector<unsigned char> &vec)
+CImg<unsigned int> copy(std::vector<unsigned char> *vec)
 {
-  CImg<unsigned int> result(vec.size());
-  for(unsigned int i=0; i<vec.size(); ++i)
+  std::cout << std::endl << "vec->size() : " << vec->size() << std::endl;
+  CImg<unsigned int> result(vec->size(), 1, 1 , 1);
+  for(unsigned int i=0; i < vec->size(); ++i)
   {
-    result[i]=static_cast<unsigned int>(vec[i]);
+    result[i]=static_cast<unsigned int>((*vec)[i]);
   }
+  result.print("CImgCopy",false);
   return result;
 }
 
@@ -133,6 +135,8 @@ int main(int argc,char **argv)
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
   CDataReceiver  receive(locks, port, width, &io_service);
 
+  std::vector<unsigned char> rec_buf;//width);
+
   #pragma omp parallel shared(print_lock, access,images, receive)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
@@ -149,7 +153,6 @@ int main(int argc,char **argv)
     io_service.run();		//not adequate for parallel threads
   }*/
 
-  std::vector<unsigned char> rec_buf(0);//width);
   for(int n=0, i=0;;++i,++n)
   {
     switch(id)
@@ -157,13 +160,15 @@ int main(int argc,char **argv)
       case 0:
       {//generate
         receive.iteration(access,rec_buf, n,i, &io_service);
+        std::cout << "\nrec_buf.size() receive : " << rec_buf.size() << "\n";
+        images[n]=copy(&rec_buf);
         break;
       }//generate
       case 1:
       {//store
-        images[n]=copy(rec_buf);
+        std::cout << std::endl << "Size images before iter : " << images[n].size() << std::endl;
         store.iteration(access,images, n,i);
-	std::cout << std::endl << "Size images : " << images[n].size() << std::endl;
+	//std::cout << std::endl << "Size images after iter : " << images[n].size() << std::endl;
         if(images[n].size()!=0)
         {
           std::cout << std::endl << "In store loop : value : " << images[n][0] << ", size : " << images[n].size() << std::endl;
