@@ -34,6 +34,7 @@ public:
 
     //fill image
     images[n].fill(i);
+    std::cout << std::endl << i << " filled" << std::endl;
 
     //set filled
     laccess.set_status(access[n],STATE_FILLING,STATUS_FILLED, class_name[5],i,n,c);//filling,filled
