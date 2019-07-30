@@ -21,14 +21,13 @@ public:
   }//constructor
   virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
   {
-    /*if(debug)
+    if(debug)
     {
       lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
       lprint.unset_lock();
-    }*/
-    std::cout << std::endl << "Gene" << std::endl;
+    }
     //wait lock
     unsigned int c=0;
     laccess.wait_for_status(access[n],STATUS_FREE,STATE_FILLING, c);//free,filling

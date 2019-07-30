@@ -39,13 +39,13 @@ public:
 
   virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> write_buf, int n, int i, boost::uint64_t wait)
   {
-    /*if(debug)
+    if(debug)
     {
       lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
       lprint.unset_lock();
-    }*/
+    }
     //wait lock
     unsigned int c=0;
     laccess.wait_for_status(access[n],STATUS_FILLED,STATE_SENDING, c);//filled, sending
@@ -55,8 +55,6 @@ public:
     socket.send_to(boost::asio::buffer(write_buf), target, 0, ec);
     boost::uint64_t time_hr = high_res_clock();
     while ((high_res_clock()-time_hr)<wait) {}
-
-    std::cout << std::endl << "Send" << std::endl;
 
     //set free
     laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
