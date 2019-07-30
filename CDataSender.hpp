@@ -23,7 +23,7 @@ public:
   udp::socket socket;
   udp::endpoint target;
 
-  CDataSender(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, bool spin) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
+  CDataSender(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
   {
     debug=true;
     class_name="CDataSender";
@@ -32,23 +32,20 @@ public:
       printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());
       exit(99);
     }
-    if (spin)
-    {
-      udp::socket::non_blocking_io nbio(true);
-      socket.io_control(nbio);
-    }
+    udp::socket::non_blocking_io nbio(true);
+    socket.io_control(nbio);
     target.port(port);
   }//constructor
 
   virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> write_buf, int n, int i, boost::uint64_t wait)
   {
-    if(debug)
+    /*if(debug)
     {
       lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
       lprint.unset_lock();
-    }
+    }*/
     //wait lock
     unsigned int c=0;
     laccess.wait_for_status(access[n],STATUS_FILLED,STATE_SENDING, c);//filled, sending
@@ -59,10 +56,12 @@ public:
     boost::uint64_t time_hr = high_res_clock();
     while ((high_res_clock()-time_hr)<wait) {}
 
+    std::cout << std::endl << "Send" << std::endl;
+
     //set free
     laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
 
-    std::cout << std::endl << std::endl << i << " sent" << std::endl;
+    //std::cout << std::endl << std::endl << i << " sent" << std::endl;
   }//iteration
 };//CDataSender
 

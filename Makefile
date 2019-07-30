@@ -9,11 +9,8 @@ nogui: main.cpp thread_lock.hpp
 	./generate -h 2> generate_help.output
 
 run:
-	./generate -c 2 -s 4096 -b   6 -n 12
-
-clear:
-	rm sample_??????.cimg
+	./generate -c 2 -s 1024 -b   6 -n 12
 
 clean:
-	rm generate.X generate sample_??????.cimg
+	rm generate.X generate
 
