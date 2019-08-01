@@ -6,7 +6,7 @@
         ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234
 
  version: v0.1.2
- compilation date: (Jul 28 2019, 19:26:59)
+ compilation date: (Aug  1 2019, 15:20:50)
 
     [1m-o              [0;0;0m samples/sample.png       [0;32;59moutput file name (e.g. "-o data.png -d 3" gives data_???.png)[0;0;0m
     [1m-d              [0;0;0m 6                        [0;32;59mnumber of digit for file names[0;0;0m

@@ -64,11 +64,6 @@ public:
     {
       //Getting the info in the buffer
       (*s)(boost::system::error_code(), &rec_buf);
-      //std::cout << "rec_buf.size() : " << rec_buf.size() << std::endl;
-      /*if(rec_buf.size()!=0)
-      {
-        std::cout << std::endl << "Size : " << rec_buf.size() << " / value in CDataReceiver : " << rec_buf[0] << std::endl;
-      }*/
       io_service->poll();
       if(compare_vector==rec_buf)
       {
@@ -77,7 +72,6 @@ public:
       else
         compare_vector=rec_buf;
     }
-    //std::cout<<std::endl<<rec_buf[0]<<" received, size : " << rec_buf.size() <<std::endl;
     laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
 
   }//iteration

@@ -68,7 +68,6 @@ CImg<unsigned int> copy(std::vector<unsigned char> *vec)
   {
     result[i]=static_cast<unsigned int>((*vec)[i]);
   }
-  result.print("CImgCopy",false);
   return result;
 }
 
@@ -172,8 +171,6 @@ int main(int argc,char **argv)
   }//vector loop
   }//parallel section
 
-  access.print("access (free state)",false);fflush(stderr);
-  images.print("CImgList",false);
   return 0;
 }//main
 
