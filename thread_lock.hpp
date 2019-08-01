@@ -30,9 +30,9 @@ public:
   virtual void print(const char* message, bool unset=true)
   {//locked section
     omp_set_lock(p_print_lock);
-    /*if(debug) printf("class=%s\n",class_name.c_str());
+    if(debug) printf("class=%s\n",class_name.c_str());
     printf("t%d/%d %s",id,tn,message);
-    fflush(stdout);*/
+    fflush(stdout);
     if(unset) omp_unset_lock(p_print_lock);
   }//print
 };//CPrintOMPLock
@@ -71,7 +71,7 @@ public:
     //! \todo [high] need print lock and move after "omp_unset_lock(p_access_lock);"
     if(debug)
     {
-      //printf("%c%d/%d 4 B%02d #%04d wait=%d\n",me,id,tn,n,i,c);fflush(stdout);
+      printf("%c%d/%d 4 B%02d #%04d wait=%d\n",me,id,tn,n,i,c);fflush(stdout);
     }//debug
 
     omp_unset_lock(p_access_lock);

@@ -59,8 +59,8 @@ public:
     //set free
     laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
 
-    //std::cout << std::endl << std::endl << i << " sent" << std::endl;
   }//iteration
 };//CDataSender
 
 #endif
+

@@ -29,7 +29,6 @@ std::vector<unsigned char> copy(CImg<unsigned int> img)
   {
     result.push_back(static_cast<unsigned char>(img[i]));
   }
-  //std::cout << std::endl << "In copy (uc) : " << result[0] << std::endl << "In copy (ui) : " << img[0] << std::endl; 
   return result;
 }
 
@@ -37,7 +36,7 @@ std::vector<unsigned char> copy(CImg<unsigned int> img)
 int main(int argc,char **argv)
 {
   ///command arguments, i.e. CLI option
-  cimg_usage(std::string("generate and store data.\n" \
+  cimg_usage(std::string("generate and send data via UDP.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./generate -h\n" \
   "        ./generate -s 1024 -n 123 -X true -p 1234 -i 10.10.15.1 -w 1234657\n" \
@@ -47,12 +46,12 @@ int main(int argc,char **argv)
   //const char* imagefilename = cimg_option("-o","sample.cimg","output file name (e.g. \"-o data.cimg -d 3\" gives data_???.cimg)");
   //const int digit=cimg_option("-d",6,  "number of digit for file names");
   const int width=cimg_option("-s",1024, "size   of udp buffer");
-  const int count=cimg_option("-n",123,  "number of frames");
+  const int count=cimg_option("-n",256,  "number of frames");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
   const int threadCount=cimg_option("-c",2,"thread count");
   const unsigned short port=cimg_option("-p",1234,"port where the packets are send on the receiving device");
   const std::string ip=cimg_option("-i", "10.10.15.1", "ip address of the receiver");
-  const int twait=cimg_option("-w", 123456, "waiting time between udp frames");
+  const int twait=cimg_option("-w", 123456789, "waiting time between udp frames");
 
   //conversion of twait into a boost::uint64_t
   const boost::uint64_t wait=static_cast<std::size_t>(twait);
@@ -121,7 +120,6 @@ int main(int argc,char **argv)
       case 0:
       {//generate
         generate.iteration(access,images, n,i);
-        //std::cout << std::endl << "In images : " << images[n][0] << std::endl;
         break;
       }//generate
       case 1:
