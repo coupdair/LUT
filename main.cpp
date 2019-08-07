@@ -100,12 +100,13 @@ int main(int argc,char **argv)
   //! generate data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
-  CDataSender    send(locks,ip,port);
 
-  #pragma omp parallel shared(print_lock, access,images, send)
+  #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataGenerator generate(locks);
+  CDataSender    send(locks,ip,port);
+
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
