@@ -21,7 +21,7 @@ template<typename T>
 class Square: public Rectangle<T> {
   public:
     void set_values (int a)
-      { w=a; width=a; height=a;}
+      { this->w=a; this->width=a; this->height=a;}
  };
 
 class Triangle: public Polygon {
