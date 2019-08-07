@@ -15,10 +15,12 @@ class Rectangle: public Polygon {
       { return width * height; }
  };
 
+template<typename T>
 class Square: public Rectangle {
   public:
-    int area ()
-      { return width * width; }
+    T w;
+    void set_values (int a)
+      { w=a; width=a; height=a;}
  };
 
 class Triangle: public Polygon {
@@ -27,12 +29,13 @@ class Triangle: public Polygon {
       { return width * height / 2; }
   };
   
-int main () {
+int main ()
+{
   Rectangle rect;
-  Square square;
+  Square<int> square;
   Triangle trgl;
   rect.set_values (4,5);
-  square.set_values (4,0);
+  square.set_values (4);
   trgl.set_values (4,5);
   cout << rect.area() << '\n';
   cout << square.area() << '\n';
