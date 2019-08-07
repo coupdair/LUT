@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.5"
+#define VERSION "v0.1.6d"
 
 #define S 0 //sample
 
@@ -101,7 +101,13 @@ int main(int argc,char **argv)
     case 1:
     {//store
       CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
-      store.run(access,images, count);
+      store.run_loop(access,images, count);
+      break;
+    }//store
+    case 2:
+    {//store
+      CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
+      store.run_loop(access,images, count);
       break;
     }//store
   }//switch(id)
