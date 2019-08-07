@@ -2,41 +2,43 @@
 #include <iostream>
 using namespace std;
 
-template<typename T>
-class Polygon {
+class Polygon
+{
   public:
-    T width, height;
+    int width, height;
     void set_values (int a, int b)
       { width=a; height=b;}
- };
+};//Polygon
 
 template<typename T>
-class Rectangle: public Polygon<T> {
+class Rectangle: public Polygon
+{
   public:
     T w;
-    T area ()
+    int area ()
       { return width * height; }
- };
+};//Rectangle
 
 template<typename T>
-class Square: public Rectangle<T> {
+class Square: public Rectangle<T>
+{
   public:
-    void set_values (T a)
-      { w=a; width=a; height=a;}
- };
+    void set_values (int a)
+      { this->w=a; this->width=a; this->height=a;}
+};//Square
 
-template<typename T>
-class Triangle: public Polygon<T> {
+class Triangle: public Polygon
+{
   public:
-    T area ()
+    int area ()
       { return width * height / 2; }
-  };
+};//Triangle
   
 int main ()
 {
   Rectangle<int> rect;
   Square<int> square;
-  Triangle<int> trgl;
+  Triangle trgl;
   rect.set_values (4,5);
   square.set_values (4);
   trgl.set_values (4,5);
