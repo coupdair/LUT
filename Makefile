@@ -1,4 +1,7 @@
-all: nogui
+all: temp
+
+temp:
+	g++ this.cpp -o this && ./this
 	
 gui: main.cpp thread_lock.hpp
 	g++ -O0 -o store.X main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include  -lm -L/usr/X11R6/lib -lpthread -fopenmp -lX11 && ./store.X -h -I && ./store.X -v > VERSION

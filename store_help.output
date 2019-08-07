@@ -6,7 +6,7 @@
         ./store -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg
 
  version: v0.1.5
- compilation date: (Jul 19 2019, 16:36:25)
+ compilation date: (Aug  7 2019, 12:07:45)
 
     [1m-o              [0;0;0m sample.cimg              [0;32;59moutput file name (e.g. "-o data.cimg -d 3" gives data_???.cimg)[0;0;0m
     [1m-d              [0;0;0m 6                        [0;32;59mnumber of digit for file names[0;0;0m
