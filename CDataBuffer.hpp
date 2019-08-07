@@ -8,6 +8,12 @@ using namespace cimg_library;
 //thread lock
 #include "CDataAccess.hpp"
 
+//! base class intended to circular buffer sub-classes
+/**
+ * this base class declares \c constructor, \c iteration and \c run functions for circular buffer with shared access.
+ * It is implementing \c run functions, i.e. loop on circular buffer, so \c iteration should be defined in sub-classes.
+ * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
+**/
 template<typename Tdata, typename Taccess=unsigned char>
 class CDataBuffer: public CDataAccess
 {

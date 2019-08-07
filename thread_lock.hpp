@@ -8,6 +8,7 @@
 //OpenMP
 #include <omp.h>
 
+//! base lock (with OpenMP)
 class CBaseOMPLock
 {
 public:
@@ -21,6 +22,7 @@ public:
   virtual void print(const char* message, bool unset=true){printf("t%d/%d ",id,tn); if(debug) printf(",class=%s\n",class_name.c_str());printf(message /*warning*/,unset);}
 };//CBaseOMPLock
 
+//! print lock (with OpenMP)
 class CPrintOMPLock: public CBaseOMPLock
 {
 public:
@@ -37,7 +39,7 @@ public:
   }//print
 };//CPrintOMPLock
 
-
+//! access lock (with OpenMP)
 class CAccessOMPLock: public CBaseOMPLock
 {
 public:

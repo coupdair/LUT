@@ -8,6 +8,12 @@ using namespace cimg_library;
 //thread lock
 #include "CDataBuffer.hpp"
 
+//! store data from a shared circular buffer to files
+/**
+ * this storage data class implements \c iteration function on the data.
+ * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
+ * \todo [low] \c wait_for_status might be a locking process to ensure fastest unlocking for these storage classes.
+**/
 template<typename Tdata, typename Taccess=unsigned char>
 class CDataStore: public CDataBuffer<Tdata, Taccess>
 {

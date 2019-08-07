@@ -8,6 +8,11 @@ using namespace cimg_library;
 //thread lock
 #include "CDataBuffer.hpp"
 
+//! generate data into a shared circular buffer
+/**
+ * this generation data class implements \c iteration function on the data.
+ * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
+**/
 template<typename Tdata, typename Taccess=unsigned char>
 class CDataGenerator: public CDataBuffer<Tdata, Taccess>
 {

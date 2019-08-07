@@ -7,6 +7,12 @@
 //C++ STL container
 #include <vector>
 
+//! locks for data access
+/**
+ * this access lock class is embedding both print lock and data access lock.
+ * The status or state of the buffer is defined in \c ACCESS_STATUS_OR_STATE to specify e.g. which thread is currently accessing data.
+ * The locks may be checked using \c check_locks, this should be called in sub-classes or user classes.
+**/
 class CDataAccess
 {
 public:
