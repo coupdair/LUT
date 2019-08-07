@@ -9,16 +9,17 @@ class Polygon {
       { width=a; height=b;}
  };
 
+template<typename T>
 class Rectangle: public Polygon {
   public:
+    T w;
     int area ()
       { return width * height; }
  };
 
 template<typename T>
-class Square: public Rectangle {
+class Square: public Rectangle<T> {
   public:
-    T w;
     void set_values (int a)
       { w=a; width=a; height=a;}
  };
@@ -31,7 +32,7 @@ class Triangle: public Polygon {
   
 int main ()
 {
-  Rectangle rect;
+  Rectangle<int> rect;
   Square<int> square;
   Triangle trgl;
   rect.set_values (4,5);
