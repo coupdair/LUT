@@ -4,12 +4,10 @@
 //C++ base
 #include <iostream>
 #include <string>
+#include <vector>
 
 //OpenMP
 #include <omp.h>
-#include <vector>
-
-//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
 
 //UDP
 #include <boost/asio/deadline_timer.hpp>
@@ -22,13 +20,14 @@
 #include <vector>
 #include "UDP/allocator.hpp"
 
+//OpenCL
+#include <boost/compute.hpp>
+
 using namespace cimg_library;
-
-#define VERSION "v0.1.2"
-
-/*#define S 0 //sample*/
-
+namespace compute = boost::compute;
 using boost::asio::ip::udp;
+
+#define VERSION "v0.0.2"
 
 #include "UDP/yield.hpp"
 
@@ -60,6 +59,7 @@ void timer_handler(const boost::system::error_code& error)
 #include "UDP/unyield.hpp"
 #include "CDataReceiver.hpp"
 #include "CDataStore.hpp"
+#include "CDataProcessor.hpp"
 
 CImg<unsigned int> copy(std::vector<unsigned char> *vec)
 {
@@ -129,38 +129,46 @@ int main(int argc,char **argv)
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
-  //! generate data
+  //! receive data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
-  CDataReceiver  receive(locks, port, width, &io_service);
+  CDataReceiver  receive(locks, port, width, &io_service);  //CDataReceiver must be shared because 2 CDataReceiver can't communicate on the same port
 
   std::vector<unsigned char> rec_buf;//width);
 
-  #pragma omp parallel shared(print_lock, access,images, receive)
+  //Choosing the target for OpenCL computing
+  compute::device gpu = compute::system::default_device();
+
+  #pragma omp parallel shared(print_lock, access,images, receive, gpu)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataStore     store(locks,imagefilename,digit);
+  CDataProcessor process(locks, gpu, width, "addition/Asample.png", digit/*??????*/);
+
   #pragma omp single
   {
-  if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
+  if(tn<3) {printf("error: run error, this process need at least 3 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
-
-  /*if(!spin)
-  {
-    io_service.run();		//not adequate for parallel threads
-  }*/
 
   for(int n=0, i=0;;++i,++n)
   {
     switch(id)
     {
       case 0:
-      {//generate
+      {//receive
         receive.iteration(access,rec_buf, n,i, &io_service);
         images[n]=copy(&rec_buf);
         break;
-      }//generate
+      }//receive
       case 1:
+      {//process
+        if(n>0)
+          process.iteration(access,n,i, images[n-1], images[n]);
+        else
+          process.iteration(access,n,i, images[nbuffer-1], images[n]);
+        break;
+      }//process
+      case 2:
       {//store
         store.iteration(access,images, n,i);
         break;

@@ -35,7 +35,7 @@ public:
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_RECEIVED,STATE_STORING, c);//filled,storing
+    laccess.wait_for_status(access[n],STATUS_PROCESSED,STATE_STORING, c);//processed,storing
 
     //save image
     CImg<char> nfilename(1024);
