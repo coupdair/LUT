@@ -46,17 +46,21 @@ public:
   }//run
 
   //! run for loop
-  virtual void run_loop(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
+  virtual void concurrent_run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
   {
-    int nbuffer=images.size();
-    int i=0;
-    for(int n=0;n<nbuffer;++n)
+    std::cout<< __FILE__<<"/"<<__func__<<"(buffer=["<<access.width()<<","<<access.spectrum()<<"], buffer="<<images.size()<<", count="<<count")."<<std::endl<<std::flush;
+    if(access.spectrum()<2)
     {
-      this->iteration(access,images, n,i);
-      //circular buffer
-      if(n==nbuffer-1) n=-1;
+      printf("error: code error, this access container should have at least 2 variables, i.e. [status,index].\n",tn);
+      exit(99);
+    }//error
+    int nbuffer=images.size();
+//! \bug need test to stop an infinite loop (no more for)
+    for(int i=0;i<count;++i)
+    {
+      this->concurrent_iteration(access,images, n,i);
     }//vector loop
-  }//run_loop
+  }//concurrent_run
 
 };//CDataBuffer
 

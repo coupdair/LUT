@@ -55,6 +55,39 @@ public:
     this->laccess.set_status(access[n],this->STATE_STORING,this->STATUS_FREE, this->class_name[5],i,n,c);//storing,free
   }//iteration
 
+  //! search for one iteration
+  virtual void concurrent_iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int &n, int &i)
+  {
+    if(this->debug)
+    {
+      this->lprint.print("",false);
+      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      access.print("access",false);fflush(stderr);
+      this->lprint.unset_lock();
+    }
+
+    //wait lock
+    unsigned int c=0;
+    std::vector<Tdata> what=access.get;
+    std::vector<Taccess> index=access.get;
+
+/*
+//from /home/coudert/code.CImg/test_vectors/test.cpp
+  //shared data
+  img.assign(vec.data(),vec.size(),1,1,1,true);
+*/
+    this->laccess.search_for_status(what,n, index,i, this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
+//! \todo [high] need index in access
+
+    //save image
+    CImg<char> nfilename(1024);
+    cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
+    images[n].save_cimg(nfilename);
+
+    //set filled
+    this->laccess.set_status(access[n],this->STATE_STORING,this->STATUS_FREE, this->class_name[5],i,n,c);//storing,free
+  }//concurrent_iteration
+
 };//CDataStore
 
 

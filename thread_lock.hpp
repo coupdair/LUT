@@ -62,7 +62,9 @@ public:
     }while(a!=status);//waiting for free
   }//wait_for_status
 
-  virtual void search_for_status(std::vector<unsigned char> &what, int &index, const int status, const int new_status, unsigned int &c)
+  virtual void search_for_status(std::vector<unsigned char> &what, int &n
+    , std::vector<unsigned char> &index, int &d
+    , const int status, const int new_status, unsigned int &c)
   {
     unsigned char a=99;
     bool found=false;
@@ -71,17 +73,17 @@ public:
     {
       omp_set_lock(p_access_lock);
       //search for status
-      for(int i=index;i<what.size();++i)
+      for(int i=n;i<what.size();++i)
       {//searching for status
         a=what[i];
-        if(a==status) {what[i]=new_status;found=true;index=i;break;}
+        if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
         ++c;
       }//for loop
       if(!found)
-      for(int i=0;i<index;++i)
+      for(int i=0;i<n;++i)
       {//searching for status
         a=what[i];
-        if(a==status) {what[i]=new_status;found=true;index=i;break;}
+        if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
         ++c;
       }//for loop
      //! \bug [high] should be in a loop until done_status (to add)
