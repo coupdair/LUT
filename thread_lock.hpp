@@ -62,6 +62,34 @@ public:
     }while(a!=status);//waiting for free
   }//wait_for_status
 
+  virtual void search_for_status(std::vector<unsigned char> &what, int &index, const int status, const int new_status, unsigned int &c)
+  {
+    unsigned char a=99;
+    bool found=false;
+
+    //locked section
+    {
+      omp_set_lock(p_access_lock);
+      //search for status
+      for(int i=index;i<what.size();++i)
+      {//searching for status
+        a=what[i];
+        if(a==status) {what[i]=new_status;found=true;index=i;break;}
+        ++c;
+      }//for loop
+      if(!found)
+      for(int i=0;i<index;++i)
+      {//searching for status
+        a=what[i];
+        if(a==status) {what[i]=new_status;found=true;index=i;break;}
+        ++c;
+      }//for loop
+     //! \bug [high] should be in a loop until done_status (to add)
+     if(!found) printf("info: %s/%s work not found\n",__FILE__,__func__);fflush(stdout);
+      omp_unset_lock(p_access_lock);
+    }//lock
+  }//search_for_status
+
 
   virtual void set_status(unsigned char &what, int old_status, int status, /*info:*/ char me, unsigned int i, unsigned int n, unsigned int c)
   {//locked section

@@ -41,9 +41,22 @@ public:
     {
       this->iteration(access,images, n,i);
       //circular buffer
-       if(n==nbuffer-1) n=-1;
-     }//vector loop
+      if(n==nbuffer-1) n=-1;
+    }//vector loop
   }//run
+
+  //! run for loop
+  virtual void run_loop(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
+  {
+    int nbuffer=images.size();
+    int i=0;
+    for(int n=0;n<nbuffer;++n)
+    {
+      this->iteration(access,images, n,i);
+      //circular buffer
+      if(n==nbuffer-1) n=-1;
+    }//vector loop
+  }//run_loop
 
 };//CDataBuffer
 
