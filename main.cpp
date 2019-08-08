@@ -29,34 +29,6 @@ using boost::asio::ip::udp;
 
 #define VERSION "v0.0.2"
 
-#include "UDP/yield.hpp"
-
-boost::asio::io_service io_service(1);  ///!\ io_service is noncopyable, that means you should only refer to it via its address
-
-#define TIMER_DELAY 543
-
-boost::posix_time::time_duration interval(boost::posix_time::milliseconds(TIMER_DELAY));
-boost::asio::deadline_timer timer_(io_service,interval);
-
-void timer_handler(const boost::system::error_code& error);
-void timer_init()
-{
-  timer_.expires_at(timer_.expires_at()+interval);
-  timer_.async_wait(timer_handler);
-}//timer_init
-
-void timer_handler(const boost::system::error_code& error)
-{
-  std::cout.flush();
-  std::cerr.flush();
-  timer_init();
-}//timer_handler
-
-#include "UDP/udp_server_class.hpp"
-
-//////////////////////////////////////
-
-#include "UDP/unyield.hpp"
 #include "CDataReceiver.hpp"
 #include "CDataStore.hpp"
 #include "CDataProcessor.hpp"

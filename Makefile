@@ -20,4 +20,4 @@ clean:
 
 display:
 	convert -append samples/sample*.png result.png && display result.png &
-	convert -append addition/Asample*.png result_add.png && display result_add.png && display result_add.png
+	convert -append addition/Asample*.png result_add.png && display result_add.png
