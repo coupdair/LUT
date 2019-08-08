@@ -9,7 +9,8 @@ nogui: main.cpp thread_lock.hpp
 	./generate -h 2> generate_help.output
 
 run:
-	./generate -c 2 -s 12500 -b 12 -n 409600 -w 250000
+	#./generate -c 2 -s 12500 -b 12 -n 409600 -w 250000
+	./generate -c 2 -s 1024 -b 12 -n 256 -w 234567890
 
 clean:
 	rm generate.X generate

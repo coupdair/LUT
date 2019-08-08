@@ -100,7 +100,6 @@ int main(int argc,char **argv)
   //! generate data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
-
   #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
@@ -125,7 +124,8 @@ int main(int argc,char **argv)
       }//generate
       case 1:
       {//send
-        write_buf = copy(images[n]);
+	write_buf=copy(images[n]);
+//      copy(images[n].begin(), images[n].end(), back_inserter(write_buf));		//Ne fait pas ce qui est demandé
         send.iteration(access,write_buf, n,i, wait);
         break;
       }//send
