@@ -32,27 +32,27 @@ public:
   }//constructor
 
   //! one iteration for any loop
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
+  virtual void iteration(CImgList<Taccess> &access,CImgList<Tdata> &images, int n)
   {
     if(this->debug)
     {
       this->lprint.print("",false);
-      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      printf("4 B%02d #%04d: ",n,access(1,n));fflush(stdout);
       access.print("access",false);fflush(stderr);
       this->lprint.unset_lock();
     }
 
     //wait lock
     unsigned int c=0;
-    this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
+    this->laccess.wait_for_status(access(0,n),this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
 
     //save image
     CImg<char> nfilename(1024);
-    cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
+    cimg::number_filename(file_name.c_str(),access(1,n),file_name_digit,nfilename);
     images[n].save_cimg(nfilename);
 
     //set filled
-    this->laccess.set_status(access[n],this->STATE_STORING,this->STATUS_FREE, this->class_name[5],i,n,c);//storing,free
+    this->laccess.set_status(access(0,n),this->STATE_STORING,this->STATUS_FREE, this->class_name[5],access(1,n),n,c);//storing,free
   }//iteration
 
 /*

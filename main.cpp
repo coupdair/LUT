@@ -74,6 +74,7 @@ int main(int argc,char **argv)
 
   //! access and status of buffer
   std::vector<Taccess> v_access(nbuffer);
+  std::vector<Taccess> i_access(nbuffer);
   CImgList<Taccess> access(2);
 
   //! thread locks
@@ -83,10 +84,11 @@ int main(int argc,char **argv)
   {
   CDataBuffer<Tdata,Taccess> temp(locks);
   temp.init_access(v_access,access[0]);
+  temp.init_access(i_access,access[1]);
   access.print("access (free state)",false);fflush(stderr);
   }
 
-  #pragma omp parallel shared(print_lock, v_access,access,images)
+  #pragma omp parallel shared(print_lock, v_access,i_access,access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   #pragma omp single
@@ -102,14 +104,16 @@ int main(int argc,char **argv)
     {//generate
       CDataGenerator<Tdata,Taccess> generate(locks);
       generate.init_access(v_access,access[0]);
-      generate.run(access[0],images, count);
+      generate.init_access(i_access,access[1]);
+      generate.run(access,images, count);
       break;
     }//generate
     case 1:
     {//store
       CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
       store.init_access(v_access,access[0]);
-      store.run(access[0],images, count);
+      store.init_access(i_access,access[1]);
+      store.run(access,images, count);
       break;
     }//store
 /*

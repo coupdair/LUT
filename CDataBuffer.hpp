@@ -66,18 +66,18 @@ public:
 */
 
   //! one iteration for any loop
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
+  virtual void iteration(CImgList<Taccess> &access,CImgList<Tdata> &images, int n)
   {
-    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<", iter="<<i<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
+    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
   };//iteration
 
   //! run for loop
-  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
+  virtual void run(CImgList<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
   {
     int nbuffer=images.size();
     for(int n=0,i=0;i<count;++i,++n)
     {
-      this->iteration(access,images, n,i);
+      this->iteration(access,images, n);
       //circular buffer
       if(n==nbuffer-1) n=-1;
     }//vector loop
