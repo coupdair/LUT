@@ -17,13 +17,13 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.6e"
+#define VERSION "v0.1.6"
 
 #define S 0 //sample
 
 //types
-typedef unsigned char Taccess;
-typedef unsigned int  Tdata;
+typedef unsigned int Taccess;
+typedef unsigned int Tdata;
 
 int main(int argc,char **argv)
 {
