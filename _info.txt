@@ -20,3 +20,8 @@ make nogui
 #show buffer status
 ./store      -s 4096 -b  16 -n 123 >/dev/null
 
+#
+./store -c 3 -s 4096 -b 12 -n 24 &> access_vs_time.txt
+cat access_vs_time.txt | grep shared 
+cat access_vs_time.txt | grep 0xa3c430
+

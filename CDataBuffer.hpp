@@ -32,8 +32,8 @@ public:
     check_locks(lock);
     vector_access=NULL;
     vector_index=NULL;
-std::cout<< __FILE__<<"/"<<__func__<<" vector_access="<<this->vector_access<<std::endl<<std::flush;
-std::cout<< __FILE__<<"/"<<__func__<<" vector_index=" <<this->vector_index <<std::endl<<std::flush;
+//std::cout<< __FILE__<<"/"<<__func__<<" vector_access="<<this->vector_access<<std::endl<<std::flush;
+//std::cout<< __FILE__<<"/"<<__func__<<" vector_index=" <<this->vector_index <<std::endl<<std::flush;
   }//constructor
 
   //! inititialise cimg data on vector data

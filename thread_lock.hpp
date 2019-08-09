@@ -66,10 +66,10 @@ public:
     , std::vector<unsigned int> &index, unsigned int &d //output (unshared) current index
     , const int status, const int new_status, unsigned int &c)
   {
-std::cout<< __FILE__<<"/"<<__func__<<"(...,n="<<n<<",...)"<<std::endl<<std::flush;
+//std::cout<< __FILE__<<"/"<<__func__<<"(...,n="<<n<<",...)"<<std::endl<<std::flush;
 
-std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]"<<std::endl<<std::flush;
-std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<std::flush;
+//std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]"<<std::endl<<std::flush;
+//std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<std::flush;
 
     unsigned char a=99;
     bool found=false;
@@ -91,11 +91,10 @@ std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<st
         if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
       }//for loop
       ++c;
-     //! \bug [high] should be in a loop until done_status (to add)
-     if(!found) printf("info: %s/%s work not found\n",__FILE__,__func__);fflush(stdout);
+     //if(!found) printf("info: %s/%s work not found\n",__FILE__,__func__);fflush(stdout);
       omp_unset_lock(p_access_lock);
     }//lock
-    if(!found) {usleep(123);std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]=(";for(int j=0;j<what.size();++j) std::cout<<what[j]<<","; std::cout<<")"<<std::endl<<std::flush;}
+    if(!found) {usleep(123);/*std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]=(";for(int j=0;j<what.size();++j) std::cout<<what[j]<<","; std::cout<<")"<<std::endl<<std::flush;*/}
     }while(!found);
   }//search_for_status
 
