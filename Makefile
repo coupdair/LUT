@@ -9,7 +9,7 @@ nogui: main.cpp thread_lock.hpp
 	./store -h 2> store_help.output
 
 run:
-	./store -c 2 -s 4096 -b   6 -n 12
+	./store -c 3 -s 4096 -b   6 -n 12
 
 clear:
 	rm sample_??????.cimg

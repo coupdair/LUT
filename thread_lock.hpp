@@ -62,9 +62,8 @@ public:
     }while(a!=status);//waiting for free
   }//wait_for_status
 
-/*
-  virtual void search_for_status(std::vector<unsigned char> &what, int &n
-    , std::vector<unsigned int> &index, int &d
+  virtual void search_for_status(std::vector<unsigned int> &what, unsigned int &n
+    , std::vector<unsigned int> &index, unsigned int &d //output (unshared) current index
     , const int status, const int new_status, unsigned int &c)
   {
     unsigned char a=99;
@@ -74,14 +73,14 @@ public:
     {
       omp_set_lock(p_access_lock);
       //search for status
-      for(int i=n;i<what.size();++i)
+      for(unsigned int i=n;i<what.size();++i)
       {//searching for status
         a=what[i];
         if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
         ++c;
       }//for loop
       if(!found)
-      for(int i=0;i<n;++i)
+      for(unsigned int i=0;i<n;++i)
       {//searching for status
         a=what[i];
         if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
@@ -92,7 +91,6 @@ public:
       omp_unset_lock(p_access_lock);
     }//lock
   }//search_for_status
-*/
 
   void set_status(unsigned int &what, unsigned int old_status, unsigned int status, /*info:*/ char me, unsigned int i, unsigned int n, unsigned int c)
   {//locked section
