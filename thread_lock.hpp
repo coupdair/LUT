@@ -63,7 +63,7 @@ public:
   }//wait_for_status
 
   virtual void search_for_status(std::vector<unsigned char> &what, int &n
-    , std::vector<unsigned char> &index, int &d
+    , std::vector<unsigned int> &index, int &d
     , const int status, const int new_status, unsigned int &c)
   {
     unsigned char a=99;

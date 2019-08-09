@@ -27,6 +27,25 @@ public:
     check_locks(lock);
   }//constructor
 
+  //! setup access array
+  virtual void init_access(std::vector<Taccess> v_access,CImg<Taccess> &i_access)
+  {
+    
+  };//init_access
+
+  //! setup index array
+  virtual void init_index(std::vector<Tindex> v_index,CImg<Tindex> &i_index)
+  {
+    
+  };//init_access
+
+  //! setup access array
+  virtual void init_access(std::vector<Taccess> v_access,std::vector<Tindex> v_index, CImgList<Tindex> &access)
+  {
+    init_access(std::vector<Taccess> v_access,CImg<Taccess> &i_access)
+    init_index(std::vector<Tindex> v_index,CImg<Tindex> &i_index)
+  };//init_access
+
   //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
