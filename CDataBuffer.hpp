@@ -52,18 +52,16 @@ public:
     init_on_vector(v_access,i_access,vector_access);
   };//init_access
 
-/*
   //! setup access array
-  virtual void init_access(const std::vector<Taccess> &v_access,const std::vector<Taccess> &v_index, CImgList<Taccess> &access)
+  virtual void init_access(std::vector<Taccess> &v_access,std::vector<Taccess> &v_index, CImgList<Taccess> &access)
   {
     //values
     std::fill(v_access.begin(),v_access.end(),STATUS_FREE);
     std::fill(v_index.begin(), v_index.end(), STATUS_FREE);
     //shared data
-    init_on_vector(v_access,i_access, vector_access);
-    init_on_vector(v_index, i_index,  vector_index);
+    init_on_vector(v_access,access[0], vector_access);
+    init_on_vector(v_index, access[1],  vector_index);
   };//init_access
-*/
 
   //! one iteration for any loop
   virtual void iteration(CImgList<Taccess> &access,CImgList<Tdata> &images, int n)
