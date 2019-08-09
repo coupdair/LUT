@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.6d"
+#define VERSION "v0.1.6e"
 
 #define S 0 //sample
 
@@ -74,7 +74,7 @@ int main(int argc,char **argv)
 
   //! access and status of buffer
   std::vector<Taccess> v_access(nbuffer);
-  CImg<Taccess> access;
+  CImgList<Taccess> access(2);
 
   //! thread locks
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
@@ -82,7 +82,7 @@ int main(int argc,char **argv)
   //! print access values
   {
   CDataBuffer<Tdata,Taccess> temp(locks);
-  temp.init_access(v_access,access);
+  temp.init_access(v_access,access[0]);
   access.print("access (free state)",false);fflush(stderr);
   }
 
@@ -101,15 +101,15 @@ int main(int argc,char **argv)
     case 0:
     {//generate
       CDataGenerator<Tdata,Taccess> generate(locks);
-      generate.init_access(v_access,access);
-      generate.run(access,images, count);
+      generate.init_access(v_access,access[0]);
+      generate.run(access[0],images, count);
       break;
     }//generate
     case 1:
     {//store
       CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
-      store.init_access(v_access,access);
-      store.run(access,images, count);
+      store.init_access(v_access,access[0]);
+      store.run(access[0],images, count);
       break;
     }//store
 /*
