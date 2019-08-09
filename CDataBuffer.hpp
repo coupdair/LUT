@@ -32,6 +32,8 @@ public:
     check_locks(lock);
     vector_access=NULL;
     vector_index=NULL;
+std::cout<< __FILE__<<"/"<<__func__<<" vector_access="<<this->vector_access<<std::endl<<std::flush;
+std::cout<< __FILE__<<"/"<<__func__<<" vector_index=" <<this->vector_index <<std::endl<<std::flush;
   }//constructor
 
   //! inititialise cimg data on vector data
@@ -41,6 +43,7 @@ public:
     img.assign(vec.data(),vec.size(),1,1,1,true);
     //vector reference
     p_vec=&vec;
+std::cout<< __FILE__<<"/"<<__func__<<" vector="<<p_vec<<std::endl<<std::flush;
   };//init_cimg_on_vector
 
   //! setup access array
@@ -61,6 +64,8 @@ public:
     //shared data
     init_on_vector(v_access,access[0], vector_access);
     init_on_vector(v_index, access[1],  vector_index);
+std::cout<< __FILE__<<"/"<<__func__<<" vector_access="<<this->vector_access<<std::endl<<std::flush;
+std::cout<< __FILE__<<"/"<<__func__<<" vector_index=" <<this->vector_index <<std::endl<<std::flush;
   };//init_access
 
   //! one iteration for any loop

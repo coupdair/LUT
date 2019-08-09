@@ -68,6 +68,9 @@ public:
   {
 std::cout<< __FILE__<<"/"<<__func__<<"(...,n="<<n<<",...)"<<std::endl<<std::flush;
 
+std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]"<<std::endl<<std::flush;
+std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<std::flush;
+
     unsigned char a=99;
     bool found=false;
 

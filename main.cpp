@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.1.7g"
+#define VERSION "v0.1.7h"
 
 #define S 0 //sample
 
