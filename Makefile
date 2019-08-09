@@ -1,6 +1,6 @@
 all: CImgList
 
-CImgList:
+CImgList: CImgList.cpp
 	g++ CImgList.cpp -o CImgList -Dcimg_display=0 && ./CImgList
 
 gui: main.cpp thread_lock.hpp
