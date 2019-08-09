@@ -73,14 +73,20 @@ int main(int argc,char **argv)
   omp_lock_t lck;omp_init_lock(&lck);
 
   //! access and status of buffer
-  CImg<Taccess> access(nbuffer,1,1,1);
-  access.fill(0);//free
-  access.print("access (free state)",false);fflush(stderr);
+  std::vector<Taccess> v_access(nbuffer);
+  CImg<Taccess> access;
 
   //! thread locks
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
-  #pragma omp parallel shared(print_lock, access,images)
+  //! print access values
+  {
+  CDataBuffer<Tdata,Taccess> temp(locks);
+  temp.init_access(v_access,access);
+  access.print("access (free state)",false);fflush(stderr);
+  }
+
+  #pragma omp parallel shared(print_lock, v_access,access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   #pragma omp single
@@ -95,21 +101,25 @@ int main(int argc,char **argv)
     case 0:
     {//generate
       CDataGenerator<Tdata,Taccess> generate(locks);
+      generate.init_access(v_access,access);
       generate.run(access,images, count);
       break;
     }//generate
     case 1:
     {//store
       CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
-      store.run_loop(access,images, count);
+      store.init_access(v_access,access);
+      store.run(access,images, count);
       break;
     }//store
+/*
     case 2:
     {//store
       CDataStore<Tdata,Taccess> store(locks,imagefilename,digit);
-      store.run_loop(access,images, count);
+      store.concurrent_run(access,images, count);
       break;
     }//store
+*/
   }//switch(id)
   }//parallel section
 

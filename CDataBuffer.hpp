@@ -18,6 +18,11 @@ template<typename Tdata, typename Taccess=unsigned char>
 class CDataBuffer: public CDataAccess
 {
 public:
+  //access buffers
+  //! access buffer as vector
+  std::vector<Taccess> *vector_access;
+  //! index  buffer as vector
+  std::vector<Taccess> *vector_index;
 
   CDataBuffer(std::vector<omp_lock_t*> &lock)
   : CDataAccess(lock)
@@ -25,26 +30,40 @@ public:
     debug=true;
     class_name="CDataBuffer";
     check_locks(lock);
+    vector_access=NULL;
+    vector_index=NULL;
   }//constructor
 
-  //! setup access array
-  virtual void init_access(std::vector<Taccess> v_access,CImg<Taccess> &i_access)
+  //! inititialise cimg data on vector data
+  virtual void init_on_vector(std::vector<Taccess> &vec,CImg<Taccess> &img,std::vector<Taccess> *p_vec)
   {
-    
-  };//init_access
-
-  //! setup index array
-  virtual void init_index(std::vector<Tindex> v_index,CImg<Tindex> &i_index)
-  {
-    
-  };//init_access
+    //shared data
+    img.assign(vec.data(),vec.size(),1,1,1,true);
+    //vector reference
+    p_vec=&vec;
+  };//init_cimg_on_vector
 
   //! setup access array
-  virtual void init_access(std::vector<Taccess> v_access,std::vector<Tindex> v_index, CImgList<Tindex> &access)
+  virtual void init_access(std::vector<Taccess> &v_access,CImg<Taccess> &i_access)
   {
-    init_access(std::vector<Taccess> v_access,CImg<Taccess> &i_access)
-    init_index(std::vector<Tindex> v_index,CImg<Tindex> &i_index)
+    //values
+    std::fill(v_access.begin(),v_access.end(),STATUS_FREE);
+    //shared data
+    init_on_vector(v_access,i_access,vector_access);
   };//init_access
+
+/*
+  //! setup access array
+  virtual void init_access(const std::vector<Taccess> &v_access,const std::vector<Taccess> &v_index, CImgList<Taccess> &access)
+  {
+    //values
+    std::fill(v_access.begin(),v_access.end(),STATUS_FREE);
+    std::fill(v_index.begin(), v_index.end(), STATUS_FREE);
+    //shared data
+    init_on_vector(v_access,i_access, vector_access);
+    init_on_vector(v_index, i_index,  vector_index);
+  };//init_access
+*/
 
   //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
@@ -63,7 +82,7 @@ public:
       if(n==nbuffer-1) n=-1;
     }//vector loop
   }//run
-
+/*
   //! run for loop
   virtual void concurrent_run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
   {
@@ -80,6 +99,7 @@ public:
       this->concurrent_iteration(access,images, n,i);
     }//vector loop
   }//concurrent_run
+*/
 
 };//CDataBuffer
 

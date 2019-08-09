@@ -62,6 +62,7 @@ public:
     }while(a!=status);//waiting for free
   }//wait_for_status
 
+/*
   virtual void search_for_status(std::vector<unsigned char> &what, int &n
     , std::vector<unsigned int> &index, int &d
     , const int status, const int new_status, unsigned int &c)
@@ -91,7 +92,7 @@ public:
       omp_unset_lock(p_access_lock);
     }//lock
   }//search_for_status
-
+*/
 
   virtual void set_status(unsigned char &what, int old_status, int status, /*info:*/ char me, unsigned int i, unsigned int n, unsigned int c)
   {//locked section
