@@ -61,8 +61,8 @@ public:
 
 std::cout<< __FILE__<<"/"<<__func__<<"(...,n="<<n<<",...)"<<std::endl<<std::flush;
 
-std::cout<< __FILE__<<"/"<<__func__<<"vector_access["<<(this->vector_access)->size()<<"]"<<std::endl<<std::flush;
-std::cout<< __FILE__<<"/"<<__func__<<"vector_index[" <<(this->vector_index)->size() <<"]"<<std::endl<<std::flush;
+std::cout<< __FILE__<<"/"<<__func__<<" vector_access["<<(this->vector_access)->size()<<"]"<<std::endl<<std::flush;
+std::cout<< __FILE__<<"/"<<__func__<<" vector_index[" <<(this->vector_index)->size() <<"]"<<std::endl<<std::flush;
 
     //wait lock and setup current (n,i)
     unsigned int c=0,i=0;

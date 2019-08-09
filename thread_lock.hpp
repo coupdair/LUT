@@ -74,6 +74,7 @@ std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<st
     unsigned char a=99;
     bool found=false;
 
+    do{
     //locked section
     {
       omp_set_lock(p_access_lock);
@@ -95,6 +96,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<st
      if(!found) printf("info: %s/%s work not found\n",__FILE__,__func__);fflush(stdout);
       omp_unset_lock(p_access_lock);
     }//lock
+    if(!found) {/*sleep(1);*/std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]=(";for(int j=0;j<what.size();++j) std::cout<<what[j]<<","; std::cout<<")"<<std::endl<<std::flush;}
+    }while(!found);
   }//search_for_status
 
   void set_status(unsigned int &what, unsigned int old_status, unsigned int status, /*info:*/ char me, unsigned int i, unsigned int n, unsigned int c)
