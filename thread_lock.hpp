@@ -66,6 +66,8 @@ public:
     , std::vector<unsigned int> &index, unsigned int &d //output (unshared) current index
     , const int status, const int new_status, unsigned int &c)
   {
+std::cout<< __FILE__<<"/"<<__func__<<"(...,n="<<n<<",...)"<<std::endl<<std::flush;
+
     unsigned char a=99;
     bool found=false;
 
