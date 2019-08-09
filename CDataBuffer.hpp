@@ -69,7 +69,7 @@ public:
     std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
   };//iteration
 
-  virtual void concurrent_iteration(CImgList<Taccess> &access,CImgList<Tdata> &images, int &n)
+  virtual void concurrent_iteration(CImgList<Taccess> &access,CImgList<Tdata> &images, unsigned int &n)
   {
     std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
   };//concurrent_iteration
@@ -95,11 +95,11 @@ public:
       printf("error: code error, this access container should have at least 2 variables, i.e. [status,index].\n");
       exit(99);
     }//error
-    int n=0;
+    unsigned int n=0;
 //! \bug need test to stop an infinite loop (no more for)
     for(int i=0;i<count/2;++i)//loop
     {
-      this->concurrent_iteration(access,images, n);
+      concurrent_iteration(access,images, n);
     }//vector loop
   }//concurrent_run
 

@@ -5,8 +5,8 @@
  usage: ./store -h -I
         ./store -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg
 
- version: v0.1.7e
- compilation date: (Aug  9 2019, 14:50:46)
+ version: v0.1.7f
+ compilation date: (Aug  9 2019, 15:00:04)
 
     [1m-o              [0;0;0m sample.cimg              [0;32;59moutput file name (e.g. "-o data.cimg -d 3" gives data_???.cimg)[0;0;0m
     [1m-d              [0;0;0m 6                        [0;32;59mnumber of digit for file names[0;0;0m
