@@ -83,20 +83,19 @@ std::cout<< __FILE__<<"/"<<__func__<<" index["<<index.size()<<"]"<<std::endl<<st
       {//searching for status
         a=what[i];
         if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
-        ++c;
       }//for loop
       if(!found)
       for(unsigned int i=0;i<n;++i)
       {//searching for status
         a=what[i];
         if(a==status) {what[i]=new_status;found=true;n=i;d=index[i];break;}
-        ++c;
       }//for loop
+      ++c;
      //! \bug [high] should be in a loop until done_status (to add)
      if(!found) printf("info: %s/%s work not found\n",__FILE__,__func__);fflush(stdout);
       omp_unset_lock(p_access_lock);
     }//lock
-    if(!found) {/*sleep(1);*/std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]=(";for(int j=0;j<what.size();++j) std::cout<<what[j]<<","; std::cout<<")"<<std::endl<<std::flush;}
+    if(!found) {usleep(123);std::cout<< __FILE__<<"/"<<__func__<<" what["<<what.size()<<"]=(";for(int j=0;j<what.size();++j) std::cout<<what[j]<<","; std::cout<<")"<<std::endl<<std::flush;}
     }while(!found);
   }//search_for_status
 
