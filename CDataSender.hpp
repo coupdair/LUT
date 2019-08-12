@@ -23,7 +23,7 @@ public:
   udp::socket socket;
   udp::endpoint target;
 
-  CDataSender(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, bool spin) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
+  CDataSender(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
   {
     debug=true;
     class_name="CDataSender";
@@ -32,11 +32,8 @@ public:
       printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());
       exit(99);
     }
-    if (spin)
-    {
-      udp::socket::non_blocking_io nbio(true);
-      socket.io_control(nbio);
-    }
+    udp::socket::non_blocking_io nbio(true);
+    socket.io_control(nbio);
     target.port(port);
   }//constructor
 
@@ -60,8 +57,10 @@ public:
     while ((high_res_clock()-time_hr)<wait) {}
 
     //set free
-    laccess.set_status(access[n],0x5,0x0, class_name[5],i,n,c);
+    laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
+
   }//iteration
 };//CDataSender
 
 #endif
+

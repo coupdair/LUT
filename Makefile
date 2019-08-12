@@ -9,11 +9,9 @@ nogui: main.cpp thread_lock.hpp
 	./store -h 2> store_help.output
 
 run:
-	./store -c 2 -s 4096 -b   6 -n 12
-
-clear:
-	rm sample_??????.cimg
+	#./generate -c 2 -s 12500 -b 12 -n 409600 -w 250000
+	./generate -c 2 -s 1024 -b 12 -n 256 -w 234567890
 
 clean:
-	rm store.X store sample_??????.cimg
+	rm generate.X generate
 

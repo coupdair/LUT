@@ -11,7 +11,7 @@
 
 //thread lock
 #include "CDataGenerator.hpp"
-#include "CDataStore.hpp"
+#include "CDataSender.hpp"
 
 //! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
 
@@ -21,22 +21,41 @@ using namespace cimg_library;
 
 #define S 0 //sample
 
+//Function to copy the data in a CImg in a vector
+std::vector<unsigned char> copy(CImg<unsigned int> img)
+{
+  std::vector<unsigned char> result;
+  for(int i=0; i<img.width(); ++i)
+  {
+    result.push_back(static_cast<unsigned char>(img[i]));
+  }
+  return result;
+}
+
+
 int main(int argc,char **argv)
 {
   ///command arguments, i.e. CLI option
-  cimg_usage(std::string("generate and store data.\n" \
+  cimg_usage(std::string("generate and send data via UDP.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
-  " usage: ./store -h -I\n" \
-  "        ./store -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg\n" \
+  " usage: ./generate -h\n" \
+  "        ./generate -s 1024 -n 123 -X true -p 1234 -i 10.10.15.1 -w 1234657\n" \
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
-  const char* imagefilename = cimg_option("-o","sample.cimg","output file name (e.g. \"-o data.cimg -d 3\" gives data_???.cimg)");
-  const int digit=cimg_option("-d",6,  "number of digit for file names");
-  const int width=cimg_option("-s",1024, "size   of vector");
-  const int count=cimg_option("-n",123,  "number of vector");
+  //const char* imagefilename = cimg_option("-o","sample.cimg","output file name (e.g. \"-o data.cimg -d 3\" gives data_???.cimg)");
+  //const int digit=cimg_option("-d",6,  "number of digit for file names");
+  const int width=cimg_option("-s",1024, "size   of udp buffer");
+  const int count=cimg_option("-n",256,  "number of frames");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
-  const int threadCount=cimg_option("-c",0,"thread count");
+  const int threadCount=cimg_option("-c",2,"thread count");
+  const unsigned short port=cimg_option("-p",1234,"port where the packets are send on the receiving device");
+  const std::string ip=cimg_option("-i", "10.10.15.1", "ip address of the receiver");
+  const int twait=cimg_option("-w", 123456789, "waiting time between udp frames");
+
+  //conversion of twait into a boost::uint64_t
+  const boost::uint64_t wait=static_cast<std::size_t>(twait);
+
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -50,6 +69,10 @@ int main(int argc,char **argv)
   if( cimg_option("--version",show_version,"show version (or -v option)") ) {show_version=true;std::cout<<VERSION<<std::endl;return 0;}//same --version or -v option
   if(show_help) {/*print_help(std::cerr);*/return 0;}
   //}CLI option
+
+  //UDP_buffer initialization
+  std::vector<unsigned char> write_buf(width);
+  //////////TODO : no UDP vector, data directly collected from the circular buffer///////////////
 
   //OpenMP
   if(threadCount>0)
@@ -80,13 +103,15 @@ int main(int argc,char **argv)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataGenerator generate(locks);
-  CDataStore     store(locks,imagefilename,digit);
+  CDataSender    send(locks,ip,port);
+
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
-  else {printf("info: running %d threads\n",tn);fflush(stdout);}
+  else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   }//single
 
+  //for(int n=0,i=0;i<count;++i,++n)
   for(int n=0,i=0;i<count;++i,++n)
   {
     switch(id)
@@ -97,10 +122,12 @@ int main(int argc,char **argv)
         break;
       }//generate
       case 1:
-      {//store
-        store.iteration(access,images, n,i);
+      {//send
+	write_buf=copy(images[n]);
+//      copy(images[n].begin(), images[n].end(), back_inserter(write_buf));		//Ne fait pas ce qui est demandé
+        send.iteration(access,write_buf, n,i, wait);
         break;
-      }//store
+      }//send
     }//switch(id)
     //circular buffer
     if(n==nbuffer-1) n=-1;
