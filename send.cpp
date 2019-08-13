@@ -17,21 +17,9 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.3e"
+#define VERSION "v0.2.3f"
 
 #define S 0 //sample
-
-//! copy the data in a CImg in a vector
-//! \todo [medium] CImg<T> to vector<T>, try also if send with ASIO works
-std::vector<unsigned char> copy(CImg<unsigned int> img)
-{
-  std::vector<unsigned char> result;
-  for(int i=0; i<img.width(); ++i)
-  {
-    result.push_back(static_cast<unsigned char>(img[i]));
-  }
-  return result;
-}//copy
 
 //types
 typedef unsigned char Taccess;
@@ -74,10 +62,6 @@ int main(int argc,char **argv)
   if(show_help) {/*print_help(std::cerr);*/return 0;}
   //}CLI option
 
-  //UDP_buffer initialization
-  std::vector<unsigned char> write_buf(width);
-  //! \todo [low] no UDP vector, data directly collected from the circular buffer///////////////
-
   //OpenMP
   if(threadCount>0)
   {//user number of thread
@@ -107,50 +91,27 @@ int main(int argc,char **argv)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
 
-  CDataSend      send(locks,ip,port);
-
   #pragma omp single
   {
   if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-    switch(id)
-    {
-      case 1:
-      {//send
-
-  for(int n=0,i=0;i<count;++i,++n)
-  {
-	write_buf=copy(images[n]);
-//      copy(images[n].begin(), images[n].end(), back_inserter(write_buf));		//Ne fait pas ce qui est demandé
-        send.iteration(access,write_buf, n,i, wait);
-    //circular buffer
-    if(n==nbuffer-1) n=-1;
-  }//vector loop
-
-        break;
-      }//send
-
-/*
   //run threads
   switch(id)
   {
-*/
     case 0:
     {//generate
       CDataGenerator<Tdata,Taccess> generate(locks);
       generate.run(access,images, count);
       break;
     }//generate
-/*
     case 1:
     {//send
-      CDataSend<Tdata,Taccess> send(locks,...);
+      CDataSend<Tdata,Taccess> send(locks,ip,port,wait);
       send.run(access,images, count);
       break;
     }//send
-*/
   }//switch(id)
   }//parallel section
 

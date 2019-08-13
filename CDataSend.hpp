@@ -15,6 +15,7 @@ using boost::posix_time::microsec_clock;
 
 #include "CDataAccess.hpp"
 
+template<typename Tdata, typename Taccess=unsigned char>
 class CDataSend : CDataAccess
 {
 public:
@@ -22,8 +23,13 @@ public:
   boost::asio::io_service io_service;
   udp::socket socket;
   udp::endpoint target;
+  boost::uint64_t wait;
+  std::vector<unsigned char> write_buf;
 
-  CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
+  CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, boost::uint64_t wait) : CDataAccess(lock)
+    , socket(io_service, udp::endpoint(udp::v4(), 0))
+    , target(boost::asio::ip::address::from_string(ip), port)
+    , wait(wait)
   {
     debug=true;
     class_name="CDataSender";
@@ -37,7 +43,17 @@ public:
     target.port(port);
   }//constructor
 
-  virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> write_buf, int n, int i, boost::uint64_t wait)
+  //! copy the data in a CImg in a vector
+  //! \todo [medium] CImg<T> to vector<T>, try also if send with ASIO works
+  void copy2vector(CImg<unsigned int> img)
+  {
+    for(int i=0; i<img.width(); ++i)
+    {
+      write_buf.push_back(static_cast<unsigned char>(img[i]));
+    }
+  }//copy2vector
+
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
     if(debug)
     {
@@ -60,6 +76,21 @@ public:
     laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
 
   }//iteration
+
+  //! run for loop
+  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
+  {
+    unsigned int nbuffer=images.size();
+    for(unsigned int n=0,i=0;i<count;++i,++n)
+    {
+      //! \todo [high] move copy2vector to iteration, consequently suppress run that should inherit from CDataBuffer
+      copy2vector(images[n]);
+      this->iteration(access,images, n,i);
+      //circular buffer
+       if(n==nbuffer-1) n=-1;
+    }//vector loop
+  }//run
+
 };//CDataSend
 
 #endif //_DATA_SEND_
