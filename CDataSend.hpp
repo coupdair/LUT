@@ -1,5 +1,5 @@
-#ifndef _DATA_SENDER_
-#define _DATA_SENDER_
+#ifndef _DATA_SEND_
+#define _DATA_SEND_
 
 #include <boost/asio/ip/udp.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -15,7 +15,7 @@ using boost::posix_time::microsec_clock;
 
 #include "CDataAccess.hpp"
 
-class CDataSender : CDataAccess
+class CDataSend : CDataAccess
 {
 public:
 
@@ -23,7 +23,7 @@ public:
   udp::socket socket;
   udp::endpoint target;
 
-  CDataSender(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
+  CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port) : CDataAccess(lock), socket(io_service, udp::endpoint(udp::v4(), 0)), target(boost::asio::ip::address::from_string(ip), port)
   {
     debug=true;
     class_name="CDataSender";
@@ -60,7 +60,7 @@ public:
     laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
 
   }//iteration
-};//CDataSender
+};//CDataSend
 
-#endif
+#endif //_DATA_SEND_
 

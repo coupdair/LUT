@@ -11,13 +11,13 @@
 
 //thread lock
 #include "CDataGenerator.hpp"
-#include "CDataSender.hpp"
+#include "CDataSend.hpp"
 
 //! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.2d"
+#define VERSION "v0.2.2"
 
 #define S 0 //sample
 
@@ -38,8 +38,8 @@ int main(int argc,char **argv)
   ///command arguments, i.e. CLI option
   cimg_usage(std::string("generate and send data via UDP.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
-  " usage: ./generate -h\n" \
-  "        ./generate -s 1024 -n 123 -X true -p 1234 -i 10.10.15.1 -w 1234657\n" \
+  " usage: ./send -h\n" \
+  "        ./send -s 1024 -n 123 -X true -p 1234 -i 10.10.15.1 -w 1234657\n" \
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
@@ -103,7 +103,7 @@ int main(int argc,char **argv)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataGenerator generate(locks);
-  CDataSender    send(locks,ip,port);
+  CDataSend      send(locks,ip,port);
 
   #pragma omp single
   {
