@@ -27,9 +27,9 @@ using namespace cimg_library;
 namespace compute = boost::compute;
 using boost::asio::ip::udp;
 
-#define VERSION "v0.2.1"
+#define VERSION "v0.2.2d"
 
-#include "CDataReceiver.hpp"
+#include "CDataReceive.hpp"
 #include "CDataStore.hpp"
 #include "CDataProcessor.hpp"
 
@@ -102,7 +102,7 @@ int main(int argc,char **argv)
 
   //! receive data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
-  CDataReceiver  receive(locks, port, width, &io_service);  //CDataReceiver must be shared because 2 CDataReceiver can't communicate on the same port
+  CDataReceive  receive(locks, port, width, &io_service);  //CDataReceiver must be shared because 2 CDataReceiver can't communicate on the same port
 
   std::vector<unsigned char> rec_buf;//width);
 

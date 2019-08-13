@@ -1,5 +1,5 @@
-#ifndef _DATA_RECEIVER_
-#define _DATA_RECEIVER_
+#ifndef _DATA_RECEIVE_
+#define _DATA_RECEIVE_
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
@@ -46,7 +46,7 @@ void timer_handler(const boost::system::error_code& error)
 
 #include "CDataAccess.hpp"
 
-class CDataReceiver : CDataAccess
+class CDataReceive : CDataAccess
 {
 public:
 
@@ -56,7 +56,7 @@ public:
 
 #define TIMER_DELAY 543
 
-  CDataReceiver(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service) : CDataAccess(lock), s(new udp_server(*io_service, port, buf_size))
+  CDataReceive(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service) : CDataAccess(lock), s(new udp_server(*io_service, port, buf_size))
   {
     debug=true;
     class_name="CDataReceiver";
@@ -102,6 +102,7 @@ public:
     laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
 
   }//iteration
-};//CDataReceiver
+};//CDataReceive
 
-#endif
+#endif //_DATA_RECEIVE_
+
