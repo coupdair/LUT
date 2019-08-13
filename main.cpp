@@ -27,7 +27,7 @@ using namespace cimg_library;
 namespace compute = boost::compute;
 using boost::asio::ip::udp;
 
-#define VERSION "v0.0.2"
+#define VERSION "v0.2.1"
 
 #include "CDataReceiver.hpp"
 #include "CDataStore.hpp"
