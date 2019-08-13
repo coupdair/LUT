@@ -1,0 +1,19 @@
+
+ [0;31;59mreceive[0;0;0m: generate and store data.
+ It uses different GNU libraries (see --info option)
+
+ usage: ./store -h -I
+        ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234
+
+ version: v0.2.2d
+ compilation date: (Aug 13 2019, 08:55:20)
+
+    [1m-o              [0;0;0m samples/sample.png       [0;32;59moutput file name (e.g. "-o data.png -d 3" gives data_???.png)[0;0;0m
+    [1m-d              [0;0;0m 6                        [0;32;59mnumber of digit for file names[0;0;0m
+    [1m-s              [0;0;0m 1024                     [0;32;59msize   of udp buffer[0;0;0m
+    [1m-b              [0;0;0m 12                       [0;32;59msize   of vector buffer (total size is b*s*4 Bytes)[0;0;0m
+    [1m-c              [0;0;0m 0                        [0;32;59mthread count[0;0;0m
+    [1m-p              [0;0;0m 1234                     [0;32;59mport where the packets are sent on the receiving device[0;0;0m
+    [1m--help          [0;0;0m true                     [0;32;59mhelp (or -h option)[0;0;0m
+    [1m--info          [0;0;0m false                    [0;32;59mshow compilation options (or -I option)[0;0;0m
+    [1m--version       [0;0;0m false                    [0;32;59mshow version (or -v option)[0;0;0m
