@@ -17,11 +17,12 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.2"
+#define VERSION "v0.2.3d"
 
 #define S 0 //sample
 
-//Function to copy the data in a CImg in a vector
+//! copy the data in a CImg in a vector
+//! \todo [medium] CImg<T> to vector<T>, try also if send with ASIO works
 std::vector<unsigned char> copy(CImg<unsigned int> img)
 {
   std::vector<unsigned char> result;
@@ -30,8 +31,11 @@ std::vector<unsigned char> copy(CImg<unsigned int> img)
     result.push_back(static_cast<unsigned char>(img[i]));
   }
   return result;
-}
+}//copy
 
+//types
+typedef unsigned char Taccess;
+typedef unsigned int  Tdata;
 
 int main(int argc,char **argv)
 {
@@ -72,7 +76,7 @@ int main(int argc,char **argv)
 
   //UDP_buffer initialization
   std::vector<unsigned char> write_buf(width);
-  //////////TODO : no UDP vector, data directly collected from the circular buffer///////////////
+  //! \todo [low] no UDP vector, data directly collected from the circular buffer///////////////
 
   //OpenMP
   if(threadCount>0)
@@ -85,24 +89,25 @@ int main(int argc,char **argv)
   omp_lock_t print_lock;omp_init_lock(&print_lock);
 
   //! circular buffer
-  CImgList<unsigned int> images(nbuffer,width,1,1,1);
+  CImgList<Tdata> images(nbuffer,width,1,1,1);
   images[0].fill(0);
   images[0].print("image",false);
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
 
   //! access and status of buffer
-  CImg<unsigned char> access(nbuffer,1,1,1);
+  CImg<Taccess> access(nbuffer,1,1,1);
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
-  //! generate data
+  //! thread locks
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
   #pragma omp parallel shared(print_lock, access,images)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataGenerator generate(locks);
+
+  CDataGenerator<Tdata,Taccess> generate(locks);
   CDataSend      send(locks,ip,port);
 
   #pragma omp single
@@ -111,7 +116,6 @@ int main(int argc,char **argv)
   else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-  //for(int n=0,i=0;i<count;++i,++n)
   for(int n=0,i=0;i<count;++i,++n)
   {
     switch(id)
@@ -132,6 +136,25 @@ int main(int argc,char **argv)
     //circular buffer
     if(n==nbuffer-1) n=-1;
   }//vector loop
+
+/*
+  //run threads
+  switch(id)
+  {
+    case 0:
+    {//generate
+      CDataGenerator<Tdata,Taccess> generate(locks);
+      generate.run(access,images, count);
+      break;
+    }//generate
+    case 1:
+    {//store
+      CDataSend<Tdata,Taccess> send(locks,...);
+      send.run(access,images, count);
+      break;
+    }//store
+  }//switch(id)
+*/
   }//parallel section
 
   access.print("access (free state)",false);fflush(stderr);

@@ -6,38 +6,48 @@
 using namespace cimg_library;
 
 //thread lock
-#include "CDataAccess.hpp"
+#include "CDataBuffer.hpp"
 
-class CDataGenerator: public CDataAccess
+//! generate data into a shared circular buffer
+/**
+ * this generation data class implements \c iteration function on the data.
+ * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
+**/
+template<typename Tdata, typename Taccess=unsigned char>
+class CDataGenerator: public CDataBuffer<Tdata, Taccess>
 {
+
 public:
 
   CDataGenerator(std::vector<omp_lock_t*> &lock)
-  : CDataAccess(lock)
+  : CDataBuffer<Tdata, Taccess>(lock)
   {
-    debug=true;
-    class_name="CDataGenerator";
-    check_locks(lock);
+    this->debug=true;
+    this->class_name="CDataGenerator";
+    this->check_locks(lock);
   }//constructor
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+
+  //! one iteration for any loop
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
-    if(debug)
+    if(this->debug)
     {
-      lprint.print("",false);
+      this->lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
+      this->lprint.unset_lock();
     }
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FREE,STATE_FILLING, c);//free,filling
+    this->laccess.wait_for_status(access[n],this->STATUS_FREE,this->STATE_FILLING, c);//free,filling
 
     //fill image
     images[n].fill(i);
 
     //set filled
-    laccess.set_status(access[n],STATE_FILLING,STATUS_FILLED, class_name[5],i,n,c);//filling,filled
+    this->laccess.set_status(access[n],this->STATE_FILLING,this->STATUS_FILLED, this->class_name[5],i,n,c);//filling,filled
   }//iteration
+
 };//CDataGenerator
 
 #endif //_DATA_GENERATOR_

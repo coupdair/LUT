@@ -6,36 +6,46 @@
 using namespace cimg_library;
 
 //thread lock
-#include "CDataAccess.hpp"
+#include "CDataBuffer.hpp"
 
-class CDataStore: public CDataAccess
+//! store data from a shared circular buffer to files
+/**
+ * this storage data class implements \c iteration function on the data.
+ * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
+ * \todo [low] \c wait_for_status might be a locking process to ensure fastest unlocking for these storage classes.
+**/
+template<typename Tdata, typename Taccess=unsigned char>
+class CDataStore: public CDataBuffer<Tdata, Taccess>
 {
 public:
   std::string file_name;
   unsigned int file_name_digit;
 
   CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, unsigned int digit)
-  : CDataAccess(lock)
+  : CDataBuffer<Tdata, Taccess>(lock)
   {
-    debug=true;
-    class_name="CDataStore";
+    this->debug=true;
+    this->class_name="CDataStore";
     file_name=imagefilename;
     file_name_digit=digit;
-    check_locks(lock);
+    this->check_locks(lock);
   }//constructor
-  virtual void iteration(CImg<unsigned char> &access,CImgList<unsigned int> &images, int n, int i)
+
+  //! one iteration for any loop
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
-    if(debug)
+    if(this->debug)
     {
-      lprint.print("",false);
+      this->lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
+      this->lprint.unset_lock();
     }
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_PROCESSED,STATE_STORING, c);//processed,storing
+//    this->laccess.wait_for_status(access[n],this->STATUS_PROCESSED,this->STATE_STORING, c);//processed,storing
+    this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
 
     //save image
     CImg<char> nfilename(1024);
@@ -44,8 +54,9 @@ public:
     images[n].save_png(nfilename);
 
     //set filled
-    laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//stored, now free
+    this->laccess.set_status(access[n],this->STATE_STORING,this->STATUS_FREE, this->class_name[5],i,n,c);//storing,free
   }//iteration
+
 };//CDataStore
 
 
