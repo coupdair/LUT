@@ -5,12 +5,12 @@ gui: main.cpp
 	./generate.X -h 2> generateX_help.output
 
 nogui: main.cpp thread_lock.hpp CDataAccess.hpp CDataGenerator.hpp CDataStore.hpp
-	g++ -O0 -o store   main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system -Dcimg_display=0 && ./store -h -I && ./store -v > VERSION
+	g++ -O0 -o store   main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system -Dcimg_display=0 -lMali -L/usr/lib/aarch64-linux-gnu/ -DBOOST_COMPUTE_MAX_CL_VERSION=102 && ./store -h -I && ./store -v > VERSION
 	./store -h 2> store_help.output
 
 run:
-	mkdir samples/ addition/
-	rm samples/*
+	mkdir -p samples/ addition/
+	rm -f samples/*
 	./store -c 3 -s 1024 -b   15 -n 256 -p 1234
 
 clear:
