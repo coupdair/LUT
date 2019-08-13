@@ -12,9 +12,9 @@ class CDataStore: public CDataAccess
 {
 public:
   std::string file_name;
-  int file_name_digit;
+  unsigned int file_name_digit;
 
-  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, int digit)
+  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, unsigned int digit)
   : CDataAccess(lock)
   {
     debug=true;
@@ -35,15 +35,16 @@ public:
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FILLED,STATE_STORING, c);//filled,storing
+    laccess.wait_for_status(access[n],STATUS_PROCESSED,STATE_STORING, c);//processed,storing
 
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
-    images[n].save_cimg(nfilename);
+//    images[n].save_cimg(nfilename);
+    images[n].save_png(nfilename);
 
     //set filled
-    laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//storing,free
+    laccess.set_status(access[n],STATE_STORING,STATUS_FREE, class_name[5],i,n,c);//stored, now free
   }//iteration
 };//CDataStore
 

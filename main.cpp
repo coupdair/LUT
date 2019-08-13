@@ -4,22 +4,44 @@
 //C++ base
 #include <iostream>
 #include <string>
+#include <vector>
 
 //OpenMP
 #include <omp.h>
+
+//UDP
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
+#include "UDP/allocator.hpp"
 
-//thread lock
-#include "CDataGenerator.hpp"
-#include "CDataStore.hpp"
-
-//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
+//OpenCL
+#include <boost/compute.hpp>
 
 using namespace cimg_library;
+namespace compute = boost::compute;
+using boost::asio::ip::udp;
 
-#define VERSION "v0.1.2"
+#define VERSION "v0.0.2"
 
-#define S 0 //sample
+#include "CDataReceiver.hpp"
+#include "CDataStore.hpp"
+#include "CDataProcessor.hpp"
+
+CImg<unsigned int> copy(std::vector<unsigned char> *vec)
+{
+  CImg<unsigned int> result(vec->size(), 1, 1 , 1);
+  for(unsigned int i=0; i < vec->size(); ++i)
+  {
+    result[i]=static_cast<unsigned int>((*vec)[i]);
+  }
+  return result;
+}
 
 int main(int argc,char **argv)
 {
@@ -27,16 +49,21 @@ int main(int argc,char **argv)
   cimg_usage(std::string("generate and store data.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./store -h -I\n" \
-  "        ./store -s 1024 -n 123 -X true -o sample.cimg && ls sample_000???.cimg\n" \
+  "        ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234\n" \
   "\n version: "+std::string(VERSION)+"\n compilation date:" \
   ).c_str());//cimg_usage
 
-  const char* imagefilename = cimg_option("-o","sample.cimg","output file name (e.g. \"-o data.cimg -d 3\" gives data_???.cimg)");
-  const int digit=cimg_option("-d",6,  "number of digit for file names");
-  const int width=cimg_option("-s",1024, "size   of vector");
-  const int count=cimg_option("-n",123,  "number of vector");
+  const char* imagefilename = cimg_option("-o","samples/sample.png","output file name (e.g. \"-o data.png -d 3\" gives data_???.png)");
+  const unsigned int digit=cimg_option("-d",6,  "number of digit for file names");
+  const int width=cimg_option("-s",1024, "size   of udp buffer");
+  //const int count=cimg_option("-n",123,  "number of vector");  //No count of the vectors because of the infinite loop
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
   const int threadCount=cimg_option("-c",0,"thread count");
+  const unsigned short port=cimg_option("-p", 1234, "port where the packets are sent on the receiving device");
+  //const bool spin=cimg_option("-sp", 1, "type of udp sending, possible values : {0 (block)|1 (spin)}");
+
+  //définition en spin par défaut, block is not adequate for parallel threads
+
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
@@ -73,30 +100,46 @@ int main(int argc,char **argv)
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
-  //! generate data
+  //! receive data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
+  CDataReceiver  receive(locks, port, width, &io_service);  //CDataReceiver must be shared because 2 CDataReceiver can't communicate on the same port
 
-  #pragma omp parallel shared(print_lock, access,images)
+  std::vector<unsigned char> rec_buf;//width);
+
+  //Choosing the target for OpenCL computing
+  compute::device gpu = compute::system::default_device();
+
+  #pragma omp parallel shared(print_lock, access,images, receive, gpu)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataGenerator generate(locks);
   CDataStore     store(locks,imagefilename,digit);
+  CDataProcessor process(locks, gpu, width, "addition/Asample.png", digit);
+
   #pragma omp single
   {
-  if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
+  if(tn<3) {printf("error: run error, this process need at least 3 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-  for(int n=0,i=0;i<count;++i,++n)
+  for(int n=0, i=0;;++i,++n)
   {
     switch(id)
     {
       case 0:
-      {//generate
-        generate.iteration(access,images, n,i);
+      {//receive
+        receive.iteration(access,rec_buf, n,i, &io_service);
+        images[n]=copy(&rec_buf);
         break;
-      }//generate
+      }//receive
       case 1:
+      {//process
+        if(n>0)
+          process.iteration(access,n,i, images[n-1], images[n]);
+        else
+          process.iteration(access,n,i, images[nbuffer-1], images[n]);
+        break;
+      }//process
+      case 2:
       {//store
         store.iteration(access,images, n,i);
         break;
@@ -107,8 +150,6 @@ int main(int argc,char **argv)
   }//vector loop
   }//parallel section
 
-  access.print("access (free state)",false);fflush(stderr);
-  images.print("CImgList",false);
   return 0;
 }//main
 
