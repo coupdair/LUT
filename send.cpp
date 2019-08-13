@@ -17,7 +17,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.3d"
+#define VERSION "v0.2.3e"
 
 #define S 0 //sample
 
@@ -107,7 +107,6 @@ int main(int argc,char **argv)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
 
-  CDataGenerator<Tdata,Taccess> generate(locks);
   CDataSend      send(locks,ip,port);
 
   #pragma omp single
@@ -116,45 +115,43 @@ int main(int argc,char **argv)
   else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-  for(int n=0,i=0;i<count;++i,++n)
-  {
     switch(id)
     {
-      case 0:
-      {//generate
-        generate.iteration(access,images, n,i);
-        break;
-      }//generate
       case 1:
       {//send
+
+  for(int n=0,i=0;i<count;++i,++n)
+  {
 	write_buf=copy(images[n]);
 //      copy(images[n].begin(), images[n].end(), back_inserter(write_buf));		//Ne fait pas ce qui est demandé
         send.iteration(access,write_buf, n,i, wait);
-        break;
-      }//send
-    }//switch(id)
     //circular buffer
     if(n==nbuffer-1) n=-1;
   }//vector loop
+
+        break;
+      }//send
 
 /*
   //run threads
   switch(id)
   {
+*/
     case 0:
     {//generate
       CDataGenerator<Tdata,Taccess> generate(locks);
       generate.run(access,images, count);
       break;
     }//generate
+/*
     case 1:
-    {//store
+    {//send
       CDataSend<Tdata,Taccess> send(locks,...);
       send.run(access,images, count);
       break;
-    }//store
-  }//switch(id)
+    }//send
 */
+  }//switch(id)
   }//parallel section
 
   access.print("access (free state)",false);fflush(stderr);
