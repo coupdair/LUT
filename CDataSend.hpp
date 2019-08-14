@@ -45,7 +45,7 @@ public:
 
   //! copy the data in a CImg in a vector
   //! \todo [medium] CImg<T> to vector<T>, try also if send with ASIO works
-  void copy2vector(CImg<unsigned int> img)
+  void copy2vector(CImg<Tdata> img)
   {
     write_buf.clear();
     for(int i=0; i<img.width(); ++i)
@@ -67,6 +67,9 @@ public:
     unsigned int c=0;
     laccess.wait_for_status(access[n],STATUS_FILLED,STATE_SENDING, c);//filled, sending
 
+    //! \todo [high] . move copy2vector to iteration, consequently suppress run that should inherit from CDataBuffer
+    copy2vector(images[n]);
+
     //send data by udp
     boost::system::error_code ec;
     socket.send_to(boost::asio::buffer(write_buf), target, 0, ec);
@@ -84,8 +87,6 @@ public:
     unsigned int nbuffer=images.size();
     for(unsigned int n=0,i=0;i<count;++i,++n)
     {
-      //! \todo [high] move copy2vector to iteration, consequently suppress run that should inherit from CDataBuffer
-      copy2vector(images[n]);
       this->iteration(access,images, n,i);
       //circular buffer
        if(n==nbuffer-1) n=-1;
