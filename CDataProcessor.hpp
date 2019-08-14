@@ -47,7 +47,9 @@ public:
     this->check_locks(lock);
   }//constructor
 
-  virtual void iteration(CImg<Taccess> &access, int n, int i, CImg<Tdata> image, CImg<Tdata> image2)
+  //! one iteration for any loop
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
+//  virtual void iteration(CImg<Taccess> &access, int n, int i, CImg<Tdata> image, CImg<Tdata> image2)
   {
     if(this->debug)
     {
@@ -61,33 +63,44 @@ public:
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->STATUS_RECEIVED,this->STATE_PROCESSING, c);//received, processing
 
+    //copy CPU to GPU
+    unsigned int n1,n2;
+    if(n>0)
+      n1=n-1;
+    else
+      n1=images.size()-1;
+    n2=n;
+
     compute::copy(
-      image.begin(), image.end(), device_vector1.begin(), queue
+      images[n1].begin(), images[n1].end(), device_vector1.begin(), queue
     );
 
     compute::copy(
-      image2.begin(), image2.end(), device_vector2.begin(), queue
+      images[n2].begin(), images[n2].end(), device_vector2.begin(), queue
     );
 
+    //compute
     using compute::lambda::_1;
     using compute::lambda::_2;
-
     compute::transform(device_vector1.begin(), device_vector1.end(), device_vector2.begin(), device_vector3.begin(),
       _1+_2 , queue);
 
+    //copy GPU to CPU
     compute::copy(
       device_vector3.begin(), device_vector3.end(), host_vector3.begin(), queue
     );
 
+    /*
     int err = 0;
-    /*for(unsigned int j=0; j<host_vector3.size(); ++j)
+    for(unsigned int j=0; j<host_vector3.size(); ++j)
     {
       if(host_vector3[j]!=image[j]+image2[j])
       {
         ++err;
       }
-    }*/
-    //std::cout << "Errors : " << err << "/" << host_vector3.size() << std::endl;
+    }
+    std::cout << "Errors : " << err << "/" << host_vector3.size() << std::endl;
+    */
 
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);

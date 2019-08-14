@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3g"
+#define VERSION "v0.2.3h"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -128,10 +128,7 @@ int main(int argc,char **argv)
       }//receive
       case 1:
       {//process
-        if(n>0)
-          process.iteration(access,n,i, images[n-1], images[n]);
-        else
-          process.iteration(access,n,i, images[nbuffer-1], images[n]);
+        process.iteration(access,images, n,i);
         break;
       }//process
       case 2:
