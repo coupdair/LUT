@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3m"
+#define VERSION "v0.2.3"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -41,7 +41,7 @@ int main(int argc,char **argv)
   const char* resultfilename =cimg_option("-r","results/sample.png","result file name (e.g. \"-o proc.png -d 3\" gives proc_???.png)");
   const unsigned int digit=cimg_option("-d",6,  "number of digit for file names");
   const int width=cimg_option("-s",1024, "size   of udp buffer");
-  //const int count=cimg_option("-n",123,  "number of vector");  //No count of the vectors because of the infinite loop
+  const int count=cimg_option("-n",123,  "number of vector");  //! \todo [high] should be NO count of the vectors with an infinite loop (to implement)
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
   const int threadCount=cimg_option("-c",0,"thread count");
   const unsigned short port=cimg_option("-p", 1234, "port where the packets are sent on the receiving device");
@@ -91,7 +91,6 @@ int main(int argc,char **argv)
   //Choosing the target for OpenCL computing
   compute::device gpu = compute::system::default_device();
 
-  CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
 
   #pragma omp parallel shared(print_lock, access,images, gpu)
   {
@@ -103,17 +102,12 @@ int main(int argc,char **argv)
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-unsigned int count=999999999999;
     switch(id)
     {
       case 0:
       {//receive
-  for(unsigned int n=0, i=0;i<count;++i,++n)
-  {
-        receive.iteration(access,images, n,i);
-    //circular buffer
-    if(n==nbuffer-1) n=-1;
-  }//vector loop
+        CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
+        receive.run(access,images, count);
         break;
       }//receive
       case 1:

@@ -17,7 +17,11 @@ using boost::asio::ip::udp;
 
 #include "UDP/yield.hpp"
 
-boost::asio::io_service io_service(1);  ///!\ io_service is noncopyable, that means you should only refer to it via its addre$
+//! global variable of ASIO service
+/**
+ * \c io_service is noncopyable, that means you should only refer to it via its address
+**/
+boost::asio::io_service io_service(1);
 
 #define TIMER_DELAY 543
 
@@ -47,7 +51,7 @@ void timer_handler(const boost::system::error_code& error)
 #include "CDataBuffer.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataReceive : CDataBuffer<Tdata, Taccess>
+class CDataReceive : public CDataBuffer<Tdata, Taccess>
 {
 public:
 
@@ -114,6 +118,7 @@ public:
 
     this->laccess.set_status(access[n],this->STATE_RECEIVING,this->STATUS_RECEIVED, this->class_name[5],i,n,c);//receiving, received
   }//iteration
+
 };//CDataReceive
 
 #endif //_DATA_RECEIVE_

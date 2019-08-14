@@ -20,7 +20,7 @@ using compute::lambda::_2;
 #include "CDataBuffer.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataProcessor : CDataBuffer<Tdata, Taccess>
+class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
   compute::context ctx;
@@ -70,14 +70,8 @@ public:
     else
       n1=images.size()-1;
     n2=n;
-
-    compute::copy(
-      images[n1].begin(), images[n1].end(), device_vector1.begin(), queue
-    );
-
-    compute::copy(
-      images[n2].begin(), images[n2].end(), device_vector2.begin(), queue
-    );
+    compute::copy(images[n1].begin(), images[n1].end(), device_vector1.begin(), queue);
+    compute::copy(images[n2].begin(), images[n2].end(), device_vector2.begin(), queue);
 
     //compute
     using compute::lambda::_1;
@@ -110,19 +104,6 @@ public:
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed -> storage
 
   }//iteration
-
-  //! run for loop
-//! \todo [highest] should be inherited from \c CDataBuffer but "is not an accessible base of " at compilation time
-  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
-  {
-    unsigned int nbuffer=images.size();
-    for(unsigned int n=0,i=0;i<count;++i,++n)
-    {
-      this->iteration(access,images, n,i);
-      //circular buffer
-       if(n==nbuffer-1) n=-1;
-     }//vector loop
-  }//run
 
 };//CDataProcessor
 
