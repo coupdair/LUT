@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3i"
+#define VERSION "v0.2.3j"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -48,6 +48,7 @@ int main(int argc,char **argv)
   ).c_str());//cimg_usage
 
   const char* imagefilename = cimg_option("-o","samples/sample.png","output file name (e.g. \"-o data.png -d 3\" gives data_???.png)");
+  const char* resultfilename =cimg_option("-r","results/sample.png","result file name (e.g. \"-o proc.png -d 3\" gives proc_???.png)");
   const unsigned int digit=cimg_option("-d",6,  "number of digit for file names");
   const int width=cimg_option("-s",1024, "size   of udp buffer");
   //const int count=cimg_option("-n",123,  "number of vector");  //No count of the vectors because of the infinite loop
@@ -130,7 +131,7 @@ unsigned int count=999999999999;
       }//receive
       case 1:
       {//process
-        CDataProcessor<Tdata, Taccess> process(locks, gpu, width, "addition/Asample.png", digit);
+        CDataProcessor<Tdata, Taccess> process(locks, gpu, width, resultfilename, digit);
         process.run(access,images, count);
         break;
       }//process

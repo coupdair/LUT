@@ -17,18 +17,18 @@ send_run:
 	./send -c 2 -s 1024 -b 12 -n 256 -w 234567890
 
 receive_run:
-	mkdir -p samples/ addition/
-	rm -f samples/*
+	mkdir -p samples/  results/
+	rm -f    samples/* results/*
 	./receive -c 3 -s 1024 -b   15 -n 256 -p 1234
 
 clear:
-	rm -f samples/* addition/*
+	rm -f samples/* results/*
 
 clean:
-	rm -f receive.X receive samples/* addition/*
+	rm -f receive.X receive samples/* results/*
 	rm -f send.X send
 
 display:
-	convert -append samples/sample*.png result.png && display result.png &
-	convert -append addition/Asample*.png result_add.png && display result_add.png
+	convert -append samples/sample*.png samples.png && display samples.png &
+	convert -append results/sample*.png results.png && display results.png
 
