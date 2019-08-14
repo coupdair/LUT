@@ -12,8 +12,9 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3d"
+#define VERSION "v0.2.3e"
 
+#define __STORE_PROCESSING__
 #include "CDataStore.hpp"
 #include "CDataProcessor.hpp"
 #include "CDataReceive.hpp"

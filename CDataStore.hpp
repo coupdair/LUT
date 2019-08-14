@@ -44,9 +44,12 @@ public:
 
     //wait lock
     unsigned int c=0;
-//    this->laccess.wait_for_status(access[n],this->STATUS_PROCESSED,this->STATE_STORING, c);//processed,storing
+    //! \todo [high] setup status bits (and state) to remove __STORE_PROCESSING__ (make // storings)
+#ifdef __STORE_PROCESSING__
+    this->laccess.wait_for_status(access[n],this->STATUS_PROCESSED,this->STATE_STORING, c);//processed,storing
+#else
     this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
-
+#endif
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
