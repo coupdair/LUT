@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3h"
+#define VERSION "v0.2.3i"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -107,8 +107,6 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(print_lock, access,images, gpu)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
-  CDataProcessor<Tdata, Taccess> process(locks, gpu, width, "addition/Asample.png", digit);
 
   #pragma omp single
   {
@@ -116,30 +114,33 @@ int main(int argc,char **argv)
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-  for(int n=0, i=0;;++i,++n)
-  {
+unsigned int count=999999999999;
     switch(id)
     {
       case 0:
       {//receive
+  for(unsigned int n=0, i=0;i<count;++i,++n)
+  {
         receive.iteration(access,rec_buf, n,i, &io_service);
         images[n]=copy(&rec_buf);
+    //circular buffer
+    if(n==nbuffer-1) n=-1;
+  }//vector loop
         break;
       }//receive
       case 1:
       {//process
-        process.iteration(access,images, n,i);
+        CDataProcessor<Tdata, Taccess> process(locks, gpu, width, "addition/Asample.png", digit);
+        process.run(access,images, count);
         break;
       }//process
       case 2:
       {//store
-        store.iteration(access,images, n,i);
+        CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
+        store.run(access,images, count);
         break;
       }//store
     }//switch(id)
-    //circular buffer
-    if(n==nbuffer-1) n=-1;
-  }//vector loop
   }//parallel section
 
   return 0;

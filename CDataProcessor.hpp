@@ -91,6 +91,7 @@ public:
     );
 
     /*
+    //compution check
     int err = 0;
     for(unsigned int j=0; j<host_vector3.size(); ++j)
     {
@@ -109,6 +110,20 @@ public:
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed -> storage
 
   }//iteration
-};
+
+  //! run for loop
+//! \todo [highest] should be inherited from \c CDataBuffer but "is not an accessible base of " at compilation time
+  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
+  {
+    unsigned int nbuffer=images.size();
+    for(unsigned int n=0,i=0;i<count;++i,++n)
+    {
+      this->iteration(access,images, n,i);
+      //circular buffer
+       if(n==nbuffer-1) n=-1;
+     }//vector loop
+  }//run
+
+};//CDataProcessor
 
 #endif
