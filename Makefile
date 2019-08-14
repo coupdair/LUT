@@ -1,10 +1,14 @@
 #run
 DATA=./
 DATA=/media/temp/
+DIN=samples/
+DOUT=results/
+FIN=sample.png
+FOUT=$(FIN)
 UDP_SIZE=4096
 
 
-all: send
+all: send receive
 
 gui: main.cpp
 	g++ -O0 -o generate.X main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system -I/usr/X11R6/include -L/usr/X11R6/lib -lX11 && ./generate.X -h -I && ./generate.X -v > VERSION
@@ -23,9 +27,9 @@ send_run:
 	./send    -c 2 -s $(UDP_SIZE) -b  8 -n 256 -w 234567890
 
 receive_run:
-	mkdir -p $(DATA)/samples/  $(DATA)/results/
-	rm -f    $(DATA)/samples/* $(DATA)/results/*
-	./receive -c 3 -s $(UDP_SIZE) -b 16 -n 255 -p 1234
+	mkdir -p $(DATA)$(DIN)  $(DATA)$(DOUT)
+	rm -f    $(DATA)$(DIN)* $(DATA)$(DOUT)*
+	./receive -c 3 -s $(UDP_SIZE) -b 16 -n 255 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*
