@@ -5,12 +5,14 @@
  usage: ./store -h -I
         ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234
 
- version: v0.2.3e
- compilation date: (Aug 14 2019, 09:26:55)
+ version: v0.2.3
+ compilation date: (Aug 14 2019, 14:56:15)
 
     [1m-o              [0;0;0m samples/sample.png       [0;32;59moutput file name (e.g. "-o data.png -d 3" gives data_???.png)[0;0;0m
+    [1m-r              [0;0;0m results/sample.png       [0;32;59mresult file name (e.g. "-o proc.png -d 3" gives proc_???.png)[0;0;0m
     [1m-d              [0;0;0m 6                        [0;32;59mnumber of digit for file names[0;0;0m
     [1m-s              [0;0;0m 1024                     [0;32;59msize   of udp buffer[0;0;0m
+    [1m-n              [0;0;0m 123                      [0;32;59mnumber of vector[0;0;0m
     [1m-b              [0;0;0m 12                       [0;32;59msize   of vector buffer (total size is b*s*4 Bytes)[0;0;0m
     [1m-c              [0;0;0m 0                        [0;32;59mthread count[0;0;0m
     [1m-p              [0;0;0m 1234                     [0;32;59mport where the packets are sent on the receiving device[0;0;0m
