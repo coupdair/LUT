@@ -46,6 +46,7 @@ void timer_handler(const boost::system::error_code& error)
 
 #include "CDataAccess.hpp"
 
+template<typename Tdata, typename Taccess=unsigned char>
 class CDataReceive : CDataAccess
 {
 public:
@@ -53,6 +54,7 @@ public:
   std::vector<boost::shared_ptr<udp_server> > servers;
   boost::shared_ptr<udp_server> s;
   std::vector<unsigned char>compare_vector;
+  std::vector<unsigned char> rec_buf;
 
 #define TIMER_DELAY 543
 
@@ -68,7 +70,16 @@ public:
     servers.push_back(s);
   }
 
-  virtual void iteration(CImg<unsigned char> &access, std::vector<unsigned char> &rec_buf, int n, int i, boost::asio::io_service *io_service)
+  //! copy the data in a vector in a CImg
+  void copy2cimg(std::vector<unsigned char> *vec,CImg<Tdata>&image)
+  {
+    for(unsigned int i=0; i < vec->size(); ++i)
+    {
+      image[i]=static_cast<Tdata>((*vec)[i]);
+    }
+  }//copy2cimg
+
+  virtual void iteration(CImg<unsigned char> &access,CImgList<Tdata> &images, int n, int i, boost::asio::io_service *io_service)
   {
     if(debug)
     {
@@ -82,25 +93,22 @@ public:
     unsigned int c=0;
     laccess.wait_for_status(access[n],STATUS_FREE,STATE_RECEIVING, c);//free, receiving
 
+    //spin
     rec_buf.clear();
-
-
-    //if(spin)
-    //définition en spin par défaut, block n'est pas adapté pour la programmation de processus parallèles
     while(rec_buf.size()==0)
     {
       //Getting the info in the buffer
       (*s)(boost::system::error_code(), &rec_buf);
       io_service->poll();
       if(compare_vector==rec_buf)
-      {
-	rec_buf.clear();
-      }
+        rec_buf.clear();
       else
         compare_vector=rec_buf;
-    }
-    laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
+    }//while
 
+    copy2cimg(&rec_buf,images[n]);
+
+    laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
   }//iteration
 };//CDataReceive
 

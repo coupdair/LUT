@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3j"
+#define VERSION "v0.2.3k"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -26,16 +26,6 @@ using boost::asio::ip::udp;
 //types
 typedef unsigned char Taccess;
 typedef unsigned int  Tdata;
-
-CImg<Tdata> copy(std::vector<unsigned char> *vec)
-{
-  CImg<Tdata> result(vec->size(), 1, 1 , 1);
-  for(unsigned int i=0; i < vec->size(); ++i)
-  {
-    result[i]=static_cast<Tdata>((*vec)[i]);
-  }
-  return result;
-}
 
 int main(int argc,char **argv)
 {
@@ -98,12 +88,10 @@ int main(int argc,char **argv)
   //! receive data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
-  std::vector<unsigned char> rec_buf;
-
   //Choosing the target for OpenCL computing
   compute::device gpu = compute::system::default_device();
 
-  CDataReceive  receive(locks, port, width, &io_service);
+  CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
 
   #pragma omp parallel shared(print_lock, access,images, gpu)
   {
@@ -122,8 +110,7 @@ unsigned int count=999999999999;
       {//receive
   for(unsigned int n=0, i=0;i<count;++i,++n)
   {
-        receive.iteration(access,rec_buf, n,i, &io_service);
-        images[n]=copy(&rec_buf);
+        receive.iteration(access,images, n,i, &io_service);
     //circular buffer
     if(n==nbuffer-1) n=-1;
   }//vector loop
