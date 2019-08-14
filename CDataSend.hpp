@@ -47,6 +47,7 @@ public:
   //! \todo [medium] CImg<T> to vector<T>, try also if send with ASIO works
   void copy2vector(CImg<unsigned int> img)
   {
+    write_buf.clear();
     for(int i=0; i<img.width(); ++i)
     {
       write_buf.push_back(static_cast<unsigned char>(img[i]));
