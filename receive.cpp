@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3e"
+#define VERSION "v0.2.3f"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -83,30 +83,31 @@ int main(int argc,char **argv)
   omp_lock_t print_lock;omp_init_lock(&print_lock);
 
   //! circular buffer
-  CImgList<unsigned int> images(nbuffer,width,1,1,1);
+  CImgList<Tdata> images(nbuffer,width,1,1,1);
   images[0].fill(0);
   images[0].print("image",false);
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
 
   //! access and status of buffer
-  CImg<unsigned char> access(nbuffer,1,1,1);
+  CImg<Taccess> access(nbuffer,1,1,1);
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
   //! receive data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
-  CDataReceive  receive(locks, port, width, &io_service);  //CDataReceiver must be shared because 2 CDataReceiver can't communicate on the same port
 
-  std::vector<unsigned char> rec_buf;//width);
+  std::vector<unsigned char> rec_buf;
 
   //Choosing the target for OpenCL computing
   compute::device gpu = compute::system::default_device();
 
-  #pragma omp parallel shared(print_lock, access,images, receive, gpu)
+  CDataReceive  receive(locks, port, width, &io_service);
+
+  #pragma omp parallel shared(print_lock, access,images, gpu)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataStore <Tdata, Taccess> store(locks,imagefilename,digit);
+  CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
   CDataProcessor process(locks, gpu, width, "addition/Asample.png", digit);
 
   #pragma omp single
