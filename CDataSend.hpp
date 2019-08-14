@@ -16,7 +16,7 @@ using boost::posix_time::microsec_clock;
 #include "CDataAccess.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataSend : CDataAccess
+class CDataSend : public CDataBuffer<Tdata, Taccess>
 {
 public:
 
@@ -24,27 +24,28 @@ public:
   udp::socket socket;
   udp::endpoint target;
   boost::uint64_t wait;
+  //! \todo [medium] \c vector<T> \c T should be \c Tdata, try also if send with ASIO works
   std::vector<unsigned char> write_buf;
 
-  CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, boost::uint64_t wait) : CDataAccess(lock)
+  CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, boost::uint64_t wait) : CDataBuffer<Tdata, Taccess>(lock)
     , socket(io_service, udp::endpoint(udp::v4(), 0))
     , target(boost::asio::ip::address::from_string(ip), port)
     , wait(wait)
   {
-    debug=true;
-    class_name="CDataSender";
+    this->debug=true;
+    this->class_name="CDataSender";
     if(lock.size()<2)
     {
-      printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());
+      printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
       exit(99);
     }
     udp::socket::non_blocking_io nbio(true);
     socket.io_control(nbio);
     target.port(port);
+    this->check_locks(lock);
   }//constructor
 
   //! copy the data in a CImg in a vector
-  //! \todo [medium] CImg<T> to vector<T>, try also if send with ASIO works
   void copy2vector(CImg<Tdata> img)
   {
     write_buf.clear();
@@ -56,16 +57,16 @@ public:
 
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
-    if(debug)
+    if(this->debug)
     {
-      lprint.print("",false);
+      this->lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
+      this->lprint.unset_lock();
     }
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FILLED,STATE_SENDING, c);//filled, sending
+    this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_SENDING, c);//filled, sending
 
     //! \todo [high] . move copy2vector to iteration, consequently suppress run that should inherit from CDataBuffer
     copy2vector(images[n]);
@@ -77,21 +78,9 @@ public:
     while ((high_res_clock()-time_hr)<wait) {}
 
     //set free
-    laccess.set_status(access[n],STATE_SENDING,STATUS_FREE, class_name[5],i,n,c);//sent, now free
+    this->laccess.set_status(access[n],this->STATE_SENDING,this->STATUS_FREE, this->class_name[5],i,n,c);//sent, now free
 
   }//iteration
-
-  //! run for loop
-  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images, unsigned int count)
-  {
-    unsigned int nbuffer=images.size();
-    for(unsigned int n=0,i=0;i<count;++i,++n)
-    {
-      this->iteration(access,images, n,i);
-      //circular buffer
-       if(n==nbuffer-1) n=-1;
-    }//vector loop
-  }//run
 
 };//CDataSend
 
