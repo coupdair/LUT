@@ -102,27 +102,27 @@ int main(int argc,char **argv)
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
-    switch(id)
-    {
-      case 0:
-      {//receive
-        CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
-        receive.run(access,images, count);
-        break;
-      }//receive
-      case 1:
-      {//process
-        CDataProcessor<Tdata, Taccess> process(locks, gpu, width, resultfilename, digit);
-        process.run(access,images, count);
-        break;
-      }//process
-      case 2:
-      {//store
-        CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
-        store.run(access,images, count);
-        break;
-      }//store
-    }//switch(id)
+  switch(id)
+  {
+    case 0:
+    {//receive
+      CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
+      receive.run(access,images, count);
+      break;
+    }//receive
+    case 1:
+    {//process
+      CDataProcessor<Tdata, Taccess> process(locks, gpu, width, resultfilename, digit);
+      process.run(access,images, count);
+      break;
+    }//process
+    case 2:
+    {//store
+      CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
+      store.run(access,images, count);
+      break;
+    }//store
+  }//switch(id)
   }//parallel section
 
   return 0;
