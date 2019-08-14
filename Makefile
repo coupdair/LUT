@@ -1,5 +1,8 @@
+#run
 DATA=./
 DATA=/media/temp/
+UDP_SIZE=4096
+
 
 all: send
 
@@ -17,12 +20,12 @@ receive: receive.cpp thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp CDataStore.
 
 send_run:
 	#./send -c 2 -s 12500 -b 12 -n 409600 -w 250000
-	./send -c 2 -s 1024 -b 12 -n 256 -w 234567890
+	./send    -c 2 -s $(UDP_SIZE) -b  8 -n 256 -w 234567890
 
 receive_run:
 	mkdir -p $(DATA)/samples/  $(DATA)/results/
 	rm -f    $(DATA)/samples/* $(DATA)/results/*
-	./receive -c 3 -s 1024 -b   15 -n 256 -p 1234
+	./receive -c 3 -s $(UDP_SIZE) -b 16 -n 255 -p 1234
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*
