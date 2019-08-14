@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3k"
+#define VERSION "v0.2.3l"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -110,7 +110,7 @@ unsigned int count=999999999999;
       {//receive
   for(unsigned int n=0, i=0;i<count;++i,++n)
   {
-        receive.iteration(access,images, n,i, &io_service);
+        receive.iteration(access,images, n,i);
     //circular buffer
     if(n==nbuffer-1) n=-1;
   }//vector loop

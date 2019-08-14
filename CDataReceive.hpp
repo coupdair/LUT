@@ -53,12 +53,15 @@ public:
 
   std::vector<boost::shared_ptr<udp_server> > servers;
   boost::shared_ptr<udp_server> s;
+  boost::asio::io_service *io_service;
   std::vector<unsigned char>compare_vector;
   std::vector<unsigned char> rec_buf;
 
 #define TIMER_DELAY 543
 
-  CDataReceive(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service) : CDataAccess(lock), s(new udp_server(*io_service, port, buf_size))
+  CDataReceive(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service) : CDataAccess(lock)
+   , s(new udp_server(*io_service, port, buf_size))
+   , io_service(io_service)
   {
     debug=true;
     class_name="CDataReceiver";
@@ -79,7 +82,7 @@ public:
     }
   }//copy2cimg
 
-  virtual void iteration(CImg<unsigned char> &access,CImgList<Tdata> &images, int n, int i, boost::asio::io_service *io_service)
+  virtual void iteration(CImg<unsigned char> &access,CImgList<Tdata> &images, int n, int i)
   {
     if(debug)
     {
