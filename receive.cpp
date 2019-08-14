@@ -9,36 +9,29 @@
 //OpenMP
 #include <omp.h>
 
-//UDP
-#include <boost/asio/deadline_timer.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/shared_ptr.hpp>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
-#include "UDP/allocator.hpp"
-
 //OpenCL
 #include <boost/compute.hpp>
+
+#define VERSION "v0.2.3d"
+
+#include "CDataStore.hpp"
+#include "CDataProcessor.hpp"
+#include "CDataReceive.hpp"
 
 using namespace cimg_library;
 namespace compute = boost::compute;
 using boost::asio::ip::udp;
 
-#define VERSION "v0.2.2"
+//types
+typedef unsigned char Taccess;
+typedef unsigned int  Tdata;
 
-#include "CDataReceive.hpp"
-#include "CDataStore.hpp"
-#include "CDataProcessor.hpp"
-
-CImg<unsigned int> copy(std::vector<unsigned char> *vec)
+CImg<Tdata> copy(std::vector<unsigned char> *vec)
 {
-  CImg<unsigned int> result(vec->size(), 1, 1 , 1);
+  CImg<Tdata> result(vec->size(), 1, 1 , 1);
   for(unsigned int i=0; i < vec->size(); ++i)
   {
-    result[i]=static_cast<unsigned int>((*vec)[i]);
+    result[i]=static_cast<Tdata>((*vec)[i]);
   }
   return result;
 }
@@ -112,7 +105,7 @@ int main(int argc,char **argv)
   #pragma omp parallel shared(print_lock, access,images, receive, gpu)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  CDataStore     store(locks,imagefilename,digit);
+  CDataStore <Tdata, Taccess> store(locks,imagefilename,digit);
   CDataProcessor process(locks, gpu, width, "addition/Asample.png", digit);
 
   #pragma omp single
