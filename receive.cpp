@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3l"
+#define VERSION "v0.2.3m"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"

@@ -44,10 +44,10 @@ void timer_handler(const boost::system::error_code& error)
 
 #include "UDP/unyield.hpp"
 
-#include "CDataAccess.hpp"
+#include "CDataBuffer.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataReceive : CDataAccess
+class CDataReceive : CDataBuffer<Tdata, Taccess>
 {
 public:
 
@@ -59,15 +59,15 @@ public:
 
 #define TIMER_DELAY 543
 
-  CDataReceive(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service) : CDataAccess(lock)
+  CDataReceive(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service) : CDataBuffer<Tdata, Taccess>(lock)
    , s(new udp_server(*io_service, port, buf_size))
    , io_service(io_service)
   {
-    debug=true;
-    class_name="CDataReceiver";
+    this->debug=true;
+    this->class_name="CDataReceiver";
     if(lock.size()<2)
     {
-      printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());
+      printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
       exit(99);
     }
     servers.push_back(s);
@@ -84,17 +84,17 @@ public:
 
   virtual void iteration(CImg<unsigned char> &access,CImgList<Tdata> &images, int n, int i)
   {
-    if(debug)
+    if(this->debug)
     {
-      lprint.print("",false);
+      this->lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
+      this->lprint.unset_lock();
     }
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_FREE,STATE_RECEIVING, c);//free, receiving
+    this->laccess.wait_for_status(access[n],this->STATUS_FREE,this->STATE_RECEIVING, c);//free, receiving
 
     //spin
     rec_buf.clear();
@@ -109,9 +109,10 @@ public:
         compare_vector=rec_buf;
     }//while
 
+    //copy buffer to circular buffer
     copy2cimg(&rec_buf,images[n]);
 
-    laccess.set_status(access[n],STATE_RECEIVING,STATUS_RECEIVED, class_name[5],i,n,c);//receiving, received
+    this->laccess.set_status(access[n],this->STATE_RECEIVING,this->STATUS_RECEIVED, this->class_name[5],i,n,c);//receiving, received
   }//iteration
 };//CDataReceive
 
