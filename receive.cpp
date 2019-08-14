@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3f"
+#define VERSION "v0.2.3g"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
@@ -108,7 +108,7 @@ int main(int argc,char **argv)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
   CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
-  CDataProcessor process(locks, gpu, width, "addition/Asample.png", digit);
+  CDataProcessor<Tdata, Taccess> process(locks, gpu, width, "addition/Asample.png", digit);
 
   #pragma omp single
   {

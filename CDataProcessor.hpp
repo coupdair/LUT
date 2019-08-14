@@ -17,9 +17,10 @@ using namespace cimg_library;
 using compute::lambda::_1;
 using compute::lambda::_2;
 
-#include "CDataAccess.hpp"
+#include "CDataBuffer.hpp"
 
-class CDataProcessor : CDataAccess
+template<typename Tdata, typename Taccess=unsigned char>
+class CDataProcessor : CDataBuffer<Tdata, Taccess>
 {
 public:
   compute::context ctx;
@@ -32,36 +33,33 @@ public:
   compute::vector<char> device_vector2;
   compute::vector<char> device_vector3;
 
-  CDataProcessor(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataAccess(lock), ctx(device), queue(ctx, device), host_vector3(VECTOR_SIZE), device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
+  CDataProcessor(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock), ctx(device), queue(ctx, device), host_vector3(VECTOR_SIZE), device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
-    debug=true;
-    class_name="CDataProcessor";
+    this->debug=true;
+    this->class_name="CDataProcessor";
     if(lock.size()<2)
     {
-      printf("code error: locks should have at least 2 locks for %s class.",class_name.c_str());
+      printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
       exit(99);
     }
-
     file_name=imagefilename;
     file_name_digit=digit;
-    check_locks(lock);
-
-
+    this->check_locks(lock);
   }//constructor
 
-  virtual void iteration(CImg<unsigned char> &access, int n, int i, CImg<unsigned char> image, CImg<unsigned char> image2)
+  virtual void iteration(CImg<Taccess> &access, int n, int i, CImg<Tdata> image, CImg<Tdata> image2)
   {
-    if(debug)
+    if(this->debug)
     {
-      lprint.print("",false);
+      this->lprint.print("",false);
       printf("4 B%02d #%04d: ",n,i);fflush(stdout);
       access.print("access",false);fflush(stderr);
-      lprint.unset_lock();
+      this->lprint.unset_lock();
     }
 
     //wait lock
     unsigned int c=0;
-    laccess.wait_for_status(access[n],STATUS_RECEIVED,STATE_PROCESSING, c);//received, processing
+    this->laccess.wait_for_status(access[n],this->STATUS_RECEIVED,this->STATE_PROCESSING, c);//received, processing
 
     compute::copy(
       image.begin(), image.end(), device_vector1.begin(), queue
@@ -95,9 +93,9 @@ public:
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
     host_vector3.save_png(nfilename);
 
-    laccess.set_status(access[n],STATE_PROCESSING,STATUS_PROCESSED, class_name[5],i,n,c);//processing, processed -> storage
+    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed -> storage
 
-  }
+  }//iteration
 };
 
 #endif
