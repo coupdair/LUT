@@ -8,28 +8,29 @@ FOUT=$(FIN)
 UDP_SIZE=4096
 
 #compiler options
-#TODO
-#XWINDOWS
-#CIMG
-#BOOST_ASIO
-#BOOST_COMPUTE
+LIB_XWINDOWS=-I/usr/X11R6/include -L/usr/X11R6/lib -lX11
+LIB_CIMG=-I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp
+LIB_BOOST_ASIO=-lboost_system
+LIB_BOOST_COMPUTE=-lMali -L/usr/lib/aarch64-linux-gnu/ -DBOOST_COMPUTE_MAX_CL_VERSION=102
 
+#source package
+#TODO
 all: process
 
 gui: main.cpp
-	g++ -O0 -o generate.X main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system -I/usr/X11R6/include -L/usr/X11R6/lib -lX11 && ./generate.X -h -I && ./generate.X -v > VERSION
+	g++ -O0 -o generate.X main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system $(LIB_XWINDOWS) && ./generate.X -h -I && ./generate.X -v > VERSION
 	./generate.X -h 2> generateX_help.output
 
 process: process.cpp thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp CDataGenerator.hpp CDataStore.hpp
-	g++ -O0 -o process   process.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -Dcimg_display=0 && ./process -h -I && ./process -v > VERSION
+	g++ -O0 -o process   process.cpp $(LIB_CIMG) -Dcimg_display=0 && ./process -h -I && ./process -v > VERSION
 	./process -h 2> process_help.output
 
 send: send.cpp thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp CDataGenerator.hpp CDataSend.hpp
-	g++ -O0 -o send   send.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system -Dcimg_display=0 && ./send -h -I && ./send -v > VERSION
+	g++ -O0 -o send   send.cpp  $(LIB_CIMG) $(LIB_BOOST_ASIO) -Dcimg_display=0 && ./send -h -I && ./send -v > VERSION
 	./send -h 2> send_help.output
 
 receive: receive.cpp thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp CDataStore.hpp CDataReceive.hpp CDataProcessor.hpp CDataProcessorGPU.hpp
-	g++ -O0 -o receive receive.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system -Dcimg_display=0 -lMali -L/usr/lib/aarch64-linux-gnu/ -DBOOST_COMPUTE_MAX_CL_VERSION=102 && ./receive -h -I && ./receive -v > VERSION
+	g++ -O0 -o receive receive.cpp  $(LIB_CIMG) $(LIB_BOOST_ASIO) -Dcimg_display=0 $(LIB_BOOST_COMPUTE) && ./receive -h -I && ./receive -v > VERSION
 	./receive -h 2> receive_help.output
 
 send_run:
