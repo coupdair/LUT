@@ -18,9 +18,12 @@ template<typename Tdata, typename Taccess=unsigned char>
 class CDataBuffer: public CDataAccess
 {
 public:
+  ACCESS_STATUS_OR_STATE wait_flag;
+  ACCESS_STATUS_OR_STATE  set_flag;
 
-  CDataBuffer(std::vector<omp_lock_t*> &lock)
+  CDataBuffer(std::vector<omp_lock_t*> &lock, ACCESS_STATUS_OR_STATE wait_flag=STATUS_FREE, ACCESS_STATUS_OR_STATE  set_flag=STATUS_FILLED)
   : CDataAccess(lock)
+  , wait_flag(wait_flag), set_flag(set_flag)
   {
     debug=true;
     class_name="CDataBuffer";
