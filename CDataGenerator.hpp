@@ -19,12 +19,17 @@ class CDataGenerator: public CDataBuffer<Tdata, Taccess>
 
 public:
 
-  CDataGenerator(std::vector<omp_lock_t*> &lock)
+  CDataGenerator(std::vector<omp_lock_t*> &lock
+  , CDataAccess::ACCESS_STATUS_OR_STATE waitStatus=CDataAccess::STATUS_FREE
+  , CDataAccess::ACCESS_STATUS_OR_STATE  setStatus=CDataAccess::STATUS_FILLED
+  )
   : CDataBuffer<Tdata, Taccess>(lock)
   {
     this->debug=true;
     this->class_name="CDataGenerator";
     this->check_locks(lock);
+    this->wait_status=waitStatus;
+    this->set_status=setStatus;
   }//constructor
 
   //! one iteration for any loop
@@ -39,13 +44,13 @@ public:
     }
     //wait lock
     unsigned int c=0;
-    this->laccess.wait_for_status(access[n],this->STATUS_FREE,this->STATE_FILLING, c);//free,filling
+    this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_FILLING, c);//free,filling
 
     //fill image
     images[n].fill(i);
 
     //set filled
-    this->laccess.set_status(access[n],this->STATE_FILLING,this->STATUS_FILLED, this->class_name[5],i,n,c);//filling,filled
+    this->laccess.set_status(access[n],this->STATE_FILLING,this->set_status, this->class_name[5],i,n,c);//filling,filled
   }//iteration
 
 };//CDataGenerator

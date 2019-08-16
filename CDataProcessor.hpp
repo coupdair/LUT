@@ -17,7 +17,12 @@ public:
   std::string file_name;
   unsigned int file_name_digit;
 
-  CDataProcessor(std::vector<omp_lock_t*> &lock, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock)
+  CDataProcessor(std::vector<omp_lock_t*> &lock
+  ,  std::string imagefilename, unsigned int digit
+  , CDataAccess::ACCESS_STATUS_OR_STATE waitStatus=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE  setStatus=CDataAccess::STATUS_PROCESSED
+  )
+  : CDataBuffer<Tdata, Taccess>(lock)
   {
     this->debug=true;
     this->class_name="CDataProcessor";
@@ -28,6 +33,8 @@ public:
     }
     file_name=imagefilename;
     file_name_digit=digit;
+    this->wait_status=waitStatus;
+    this->set_status=setStatus;
     this->check_locks(lock);
   }//constructor
 
@@ -44,12 +51,7 @@ public:
 
     //wait lock
     unsigned int c=0;
-
-#ifdef __PROCESS_FILLED__
-    this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_PROCESSING, c);//filled, processing
-#else
-    this->laccess.wait_for_status(access[n],this->STATUS_RECEIVED,this->STATE_PROCESSING, c);//received, processing
-#endif
+    this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
 
     //compution
     unsigned int n1,n2;
@@ -65,11 +67,7 @@ public:
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
     host_vector3.save_png(nfilename);
 
-#ifdef __FREE__
-    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_FREE, this->class_name[5],i,n,c);//processing, free
-#else
-    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed
-#endif
+    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
   }//iteration
 
