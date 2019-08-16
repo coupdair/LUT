@@ -11,12 +11,12 @@
 
 //thread lock
 #include "CDataGenerator.hpp"
-#include "CDataProcessor.hpp"
+#include "CDataProcessor_morphomath.hpp"
 #include "CDataStore.hpp"
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.5d"
+#define VERSION "v0.2.5e"
 
 #define S 0 //sample
 
@@ -119,7 +119,11 @@ int main(int argc,char **argv)
     }//generate
     case 1:
     {//process
+/*
       CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      process.run(access,images, accessR,results, count);
+*/
+      CDataProcessor_dilate<Tdata,Taccess> process(locks, 12, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
       process.run(access,images, accessR,results, count);
       break;
     }//process
