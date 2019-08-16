@@ -1,5 +1,5 @@
-#ifndef _DATA_PROCESSOR_
-#define _DATA_PROCESSOR_
+#ifndef _DATA_PROCESSOR_GPU_
+#define _DATA_PROCESSOR_GPU_
 
 
 //Packages Boost
@@ -20,7 +20,7 @@ using compute::lambda::_2;
 #include "CDataBuffer.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataProcessor : public CDataBuffer<Tdata, Taccess>
+class CDataProcessorGPU : public CDataBuffer<Tdata, Taccess>
 {
 public:
   compute::context ctx;
@@ -33,7 +33,7 @@ public:
   compute::vector<char> device_vector2;
   compute::vector<char> device_vector3;
 
-  CDataProcessor(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock), ctx(device), queue(ctx, device), host_vector3(VECTOR_SIZE), device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
+  CDataProcessorGPU(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock), ctx(device), queue(ctx, device), host_vector3(VECTOR_SIZE), device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
     this->debug=true;
     this->class_name="CDataProcessor";
@@ -105,7 +105,7 @@ public:
 
   }//iteration
 
-};//CDataProcessor
+};//CDataProcessorGPU
 
-#endif //_DATA_PROCESSOR_
+#endif //_DATA_PROCESSOR_GPU_
 
