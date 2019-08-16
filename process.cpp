@@ -96,6 +96,7 @@ int main(int argc,char **argv)
 
   //! thread locks
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);locks.push_back(&lckR);
+  std::vector<omp_lock_t*> locksR;locks.push_back(&print_lock);locks.push_back(&lckR);
 
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
   {
@@ -124,7 +125,7 @@ int main(int argc,char **argv)
     }//process
     case 2:
     {//store
-      CDataStore<Tdata,Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
+      CDataStore<Tdata,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
       store.run(accessR,results, count);
       break;
     }//store

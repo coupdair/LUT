@@ -14,6 +14,7 @@ class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
   CImg<unsigned char> image;
+  //! result access
   CAccessOMPLock laccessR;
   CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR;
   CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR;
@@ -21,23 +22,22 @@ public:
   CDataProcessor(std::vector<omp_lock_t*> &lock
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
-  , CDataAccess::ACCESS_STATUS_OR_STATE waitStatusR=CDataAccess::STATUS_FREE
-  , CDataAccess::ACCESS_STATUS_OR_STATE  setStatusR=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
   )
   : CDataBuffer<Tdata, Taccess>(lock,wait_status,set_status)
-//  , wait_statusR(wait_statusR), set_statusR(set_statusR)
+  , laccessR(lock[2])
+  , wait_statusR(wait_statusR), set_statusR(set_statusR)
   {
     this->debug=true;
     this->class_name="CDataProcessor";
-    if(lock.size()<2)
+
+    //this->check_locks(lock);
+    if(lock.size()<3)
     {
-      printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
+      printf("code error: locks should have at least 3 locks for %s class.",this->class_name.c_str());
       exit(99);
     }
-    this->check_locks(lock);
-
-    this->wait_statusR=waitStatusR;
-    this->set_statusR= setStatusR;
   }//constructor
 
   //! one iteration for any loop

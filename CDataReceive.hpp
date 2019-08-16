@@ -69,12 +69,8 @@ public:
   {
     this->debug=true;
     this->class_name="CDataReceiver";
-    if(lock.size()<2)
-    {
-      printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
-      exit(99);
-    }
     servers.push_back(s);
+    this->check_locks(lock);
   }
 
   //! copy the data in a vector in a CImg

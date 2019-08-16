@@ -34,12 +34,12 @@ public:
   //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
   {
-    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<", iter="<<i<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
+    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", n="<<n<<", iter="<<i<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
   };//iteration
   //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
-    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<n<<", iter="<<i<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
+    std::cout<< __FILE__<<"/"<<__func__<<"(buffer="<<access.width()<<", buffer="<<images.size()<<", buffer="<<accessR.width()<<", buffer="<<results.size()<<", n="<<n<<", iter="<<i<<") empty, should be implemented in inherited class."<<std::endl<<std::flush;
   };//iteration
 
   //! run for loop

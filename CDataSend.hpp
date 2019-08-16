@@ -34,11 +34,6 @@ public:
   {
     this->debug=true;
     this->class_name="CDataSender";
-    if(lock.size()<2)
-    {
-      printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
-      exit(99);
-    }
     udp::socket::non_blocking_io nbio(true);
     socket.io_control(nbio);
     target.port(port);
