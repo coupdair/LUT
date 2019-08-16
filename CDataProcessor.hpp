@@ -14,12 +14,18 @@ class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
   CImg<unsigned char> image;
+  CAccessOMPLock laccessR;
+  CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR;
+  CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR;
 
   CDataProcessor(std::vector<omp_lock_t*> &lock
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
+  , CDataAccess::ACCESS_STATUS_OR_STATE waitStatusR=CDataAccess::STATUS_FREE
+  , CDataAccess::ACCESS_STATUS_OR_STATE  setStatusR=CDataAccess::STATUS_FILLED
   )
   : CDataBuffer<Tdata, Taccess>(lock,wait_status,set_status)
+//  , wait_statusR(wait_statusR), set_statusR(set_statusR)
   {
     this->debug=true;
     this->class_name="CDataProcessor";
@@ -29,10 +35,13 @@ public:
       exit(99);
     }
     this->check_locks(lock);
+
+    this->wait_statusR=waitStatusR;
+    this->set_statusR= setStatusR;
   }//constructor
 
   //! one iteration for any loop
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     if(this->debug)
     {
@@ -55,11 +64,16 @@ public:
     n2=n;
     image=images[n1]+images[n2];
 
-    //copy
-//! \todo [high] need result buffer
-    images[n]=image;
-
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
+
+    //wait lock
+    this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
+
+    //copy
+    results[n]=image;
+
+    //set filled
+    this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
   }//iteration
 

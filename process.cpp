@@ -119,13 +119,13 @@ int main(int argc,char **argv)
     case 1:
     {//process
       CDataProcessor<Tdata,Taccess> process(locks);
-      process.run(access,images,results, count);
+      process.run(access,images, accessR,results, count);
       break;
     }//process
     case 2:
     {//store
       CDataStore<Tdata,Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
-      store.run(access,results, count);
+      store.run(accessR,results, count);
       break;
     }//store
   }//switch(id)
