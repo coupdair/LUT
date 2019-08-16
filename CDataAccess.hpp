@@ -25,7 +25,7 @@ public:
   CDataAccess(std::vector<omp_lock_t*> &lock)
   : lprint(lock[0]), laccess(lock[1])
   {
-    debug=true;
+    debug=false;
     class_name="CDataAccess";
   }//constructor
   virtual void check_locks(std::vector<omp_lock_t*> &lock)

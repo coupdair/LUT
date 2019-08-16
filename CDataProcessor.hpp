@@ -29,7 +29,7 @@ public:
   , laccessR(lock[2])
   , wait_statusR(wait_statusR), set_statusR(set_statusR)
   {
-    this->debug=true;
+//    this->debug=true;
     this->class_name="CDataProcessor";
 
     //this->check_locks(lock);
@@ -69,12 +69,13 @@ public:
     if(this->debug)
     {
       this->lprint.print("",false);
-      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      printf("4 C%02d #%04d: ",n,i);fflush(stdout);
       accessR.print("accessR",false);fflush(stderr);
       this->lprint.unset_lock();
     }
 
     //wait lock
+    c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
     //copy local to buffer
     results[n]=image;

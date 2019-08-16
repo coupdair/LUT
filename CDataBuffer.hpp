@@ -26,7 +26,7 @@ public:
   : CDataAccess(lock)
   , wait_status(wait_status), set_status(set_status)
   {
-    debug=true;
+//    debug=true;
     class_name="CDataBuffer";
     check_locks(lock);
   }//constructor

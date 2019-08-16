@@ -25,7 +25,7 @@ public:
   : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
   , s(s)
   {
-    this->debug=true;
+//    this->debug=true;
     this->class_name="CDataProcDilate";
   }//constructor
 
