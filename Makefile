@@ -43,10 +43,11 @@ receive_run:
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*
+	rm -f sample_??????.cimg
 
-clean:
-	rm -f receive.X receive $(DATA)/samples/* $(DATA)/results/*
+clean: clear
 	rm -f send.X    send
+	rm -f receive.X receive
 	rm -f process.X process
 
 display:

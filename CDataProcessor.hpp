@@ -19,10 +19,10 @@ public:
 
   CDataProcessor(std::vector<omp_lock_t*> &lock
   ,  std::string imagefilename, unsigned int digit
-  , CDataAccess::ACCESS_STATUS_OR_STATE waitStatus=CDataAccess::STATUS_FILLED
-  , CDataAccess::ACCESS_STATUS_OR_STATE  setStatus=CDataAccess::STATUS_PROCESSED
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   )
-  : CDataBuffer<Tdata, Taccess>(lock)
+  : CDataBuffer<Tdata, Taccess>(lock,wait_status,set_status)
   {
     this->debug=true;
     this->class_name="CDataProcessor";
@@ -33,8 +33,6 @@ public:
     }
     file_name=imagefilename;
     file_name_digit=digit;
-    this->wait_status=waitStatus;
-    this->set_status=setStatus;
     this->check_locks(lock);
   }//constructor
 
