@@ -66,6 +66,14 @@ public:
 
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
+    if(this->debug)
+    {
+      this->lprint.print("",false);
+      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
+      accessR.print("accessR",false);fflush(stderr);
+      this->lprint.unset_lock();
+    }
+
     //wait lock
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
 

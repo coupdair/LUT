@@ -81,7 +81,7 @@ int main(int argc,char **argv)
   CImgList<Tdata> results(nbuffer,width,1,1,1);
   results[0].fill(0);
   results[0].print("result",false);
-  //access locking
+  //accessR locking
   omp_lock_t lckR;omp_init_lock(&lckR);
 
   //! access and status of buffer
@@ -89,7 +89,7 @@ int main(int argc,char **argv)
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
-  //! access and status of result buffer
+  //! access and status of Result buffer
   CImg<Taccess> accessR(nbuffer,1,1,1);
   accessR.fill(0);//free
   accessR.print("accessR (free state)",false);fflush(stderr);
@@ -125,8 +125,8 @@ int main(int argc,char **argv)
     }//process
     case 2:
     {//store
-      CDataStore<Tdata,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
-      store.run(accessR,results, count);
+//      CDataStore<Tdata,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
+//      store.run(accessR,results, count);
       break;
     }//store
   }//switch(id)
