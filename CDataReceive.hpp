@@ -96,6 +96,7 @@ public:
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->STATUS_FREE,this->STATE_RECEIVING, c);//free, receiving
 
+//! \todo [low] receive buffer could be before lock
     //spin
     rec_buf.clear();
     while(rec_buf.size()==0)
