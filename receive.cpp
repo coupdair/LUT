@@ -12,9 +12,8 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.4d"
+#define VERSION "v0.2.4e"
 
-#define __STORE_PROCESSING__
 #include "CDataStore.hpp"
 #include "CDataProcessorGPU.hpp"
 #include "CDataReceive.hpp"
@@ -112,13 +111,13 @@ int main(int argc,char **argv)
     }//receive
     case 1:
     {//process
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu, width, resultfilename, digit);
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, resultfilename, digit);
       process.run(access,images, count);
       break;
     }//process
     case 2:
     {//store
-      CDataStore<Tdata, Taccess> store(locks,imagefilename,digit);
+      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
       store.run(access,images, count);
       break;
     }//store

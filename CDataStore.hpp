@@ -21,8 +21,12 @@ public:
   std::string file_name;
   unsigned int file_name_digit;
 
-  CDataStore(std::vector<omp_lock_t*> &lock,std::string imagefilename, unsigned int digit)
-  : CDataBuffer<Tdata, Taccess>(lock)
+  CDataStore(std::vector<omp_lock_t*> &lock
+  , std::string imagefilename, unsigned int digit
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_FREE
+  )
+  : CDataBuffer<Tdata, Taccess>(lock,wait_status,set_status)
   {
     this->debug=true;
     this->class_name="CDataStore";
@@ -44,12 +48,7 @@ public:
 
     //wait lock
     unsigned int c=0;
-    //! \todo [high] setup status bits (and state) to remove __STORE_PROCESSING__ (make // storings)
-#ifdef __STORE_PROCESSING__
-    this->laccess.wait_for_status(access[n],this->STATUS_PROCESSED,this->STATE_STORING, c);//processed,storing
-#else
-    this->laccess.wait_for_status(access[n],this->STATUS_FILLED,this->STATE_STORING, c);//filled,storing
-#endif
+    this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_STORING, c);//processed,storing
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
@@ -57,7 +56,7 @@ public:
     images[n].save_png(nfilename);
 
     //set filled
-    this->laccess.set_status(access[n],this->STATE_STORING,this->STATUS_FREE, this->class_name[5],i,n,c);//storing,free
+    this->laccess.set_status(access[n],this->STATE_STORING,this->set_status, this->class_name[5],i,n,c);//storing,free
   }//iteration
 
 };//CDataStore

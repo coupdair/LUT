@@ -13,7 +13,7 @@ template<typename Tdata, typename Taccess=unsigned char>
 class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
-  CImg<unsigned char> host_vector3;
+  CImg<unsigned char> image;
   std::string file_name;
   unsigned int file_name_digit;
 
@@ -58,12 +58,12 @@ public:
     else
       n1=images.size()-1;
     n2=n;
-    host_vector3=images[n1]+images[n2];
+    image=images[n1]+images[n2];
 
     //store
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
-    host_vector3.save_png(nfilename);
+    image.save_png(nfilename);
 
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
