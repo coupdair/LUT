@@ -16,7 +16,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.4h"
+#define VERSION "v0.2.4i"
 
 #define S 0 //sample
 
@@ -77,15 +77,27 @@ int main(int argc,char **argv)
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
 
+  //! result circular buffer
+  CImgList<Tdata> results(nbuffer,width,1,1,1);
+  results[0].fill(0);
+  results[0].print("result",false);
+  //access locking
+  omp_lock_t lckR;omp_init_lock(&lckR);
+
   //! access and status of buffer
   CImg<Taccess> access(nbuffer,1,1,1);
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
 
-  //! thread locks
-  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
+  //! access and status of result buffer
+  CImg<Taccess> accessR(nbuffer,1,1,1);
+  accessR.fill(0);//free
+  accessR.print("accessR (free state)",false);fflush(stderr);
 
-  #pragma omp parallel shared(print_lock, access,images)
+  //! thread locks
+  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);locks.push_back(&lckR);
+
+  #pragma omp parallel shared(print_lock, access,images, accessR,results)
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
 
@@ -107,13 +119,13 @@ int main(int argc,char **argv)
     case 1:
     {//process
       CDataProcessor<Tdata,Taccess> process(locks);
-      process.run(access,images, count);
+      process.run(access,images,results, count);
       break;
     }//process
     case 2:
     {//store
       CDataStore<Tdata,Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
-      store.run(access,images, count);
+      store.run(access,results, count);
       break;
     }//store
   }//switch(id)
