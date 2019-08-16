@@ -13,7 +13,7 @@ template<typename Tdata, typename Taccess=unsigned char>
 class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
-  CImg<unsigned char> image;
+  CImg<Tdata> image;
   //! result access
   CAccessOMPLock laccessR;
   CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR;
@@ -40,6 +40,13 @@ public:
     }
   }//constructor
 
+  //! compution kernel for an iteration
+  virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out)
+  {
+    std::cout<< __FILE__<<"/"<<__func__<<"(images: in="<<in.width()<<", out="<<out.size()<<") copy kernel, other kernels should be implemented in inherited class."<<std::endl<<std::flush;
+    out=in;
+  };//iteration
+
   //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
@@ -54,16 +61,9 @@ public:
     //wait lock
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
-
-    //compution
-    unsigned int n1,n2;
-    if(n>0)
-      n1=n-1;
-    else
-      n1=images.size()-1;
-    n2=n;
-    image=images[n1]+images[n2];
-
+    //computionin local
+    kernel(images[n],image);
+    //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
     if(this->debug)
@@ -76,11 +76,9 @@ public:
 
     //wait lock
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
-
-    //copy
+    //copy local to buffer
     results[n]=image;
-
-    //set filled
+    //unlock
     this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
   }//iteration
