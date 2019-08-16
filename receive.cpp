@@ -12,11 +12,11 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.3"
+#define VERSION "v0.2.4d"
 
 #define __STORE_PROCESSING__
 #include "CDataStore.hpp"
-#include "CDataProcessor.hpp"
+#include "CDataProcessorGPU.hpp"
 #include "CDataReceive.hpp"
 
 using namespace cimg_library;
@@ -112,7 +112,7 @@ int main(int argc,char **argv)
     }//receive
     case 1:
     {//process
-      CDataProcessor<Tdata, Taccess> process(locks, gpu, width, resultfilename, digit);
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu, width, resultfilename, digit);
       process.run(access,images, count);
       break;
     }//process
