@@ -52,9 +52,8 @@ public:
     //save image
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
-//    images[n].save_cimg(nfilename);
-    images[n].save_png(nfilename);
-
+    images[n].save(nfilename);
+ 
     //set filled
     this->laccess.set_status(access[n],this->STATE_STORING,this->set_status, this->class_name[5],i,n,c);//storing,free
   }//iteration

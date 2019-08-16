@@ -1,11 +1,12 @@
 #run
+FRAME_SIZE=4096
+
 DATA=./
 DATA=/media/temp/
 DIN=samples/
 DOUT=results/
 FIN=sample.png
 FOUT=$(FIN)
-UDP_SIZE=4096
 
 #compiler options
 LIB_XWINDOWS=-I/usr/X11R6/include -L/usr/X11R6/lib -lX11
@@ -34,14 +35,17 @@ receive: receive.cpp $(SRC_DATA_BUFFER)  CDataStore.hpp CDataReceive.hpp CDataPr
 	g++ -O0 -o receive receive.cpp  $(LIB_CIMG) $(LIB_BOOST_ASIO) -Dcimg_display=0 $(LIB_BOOST_COMPUTE) && ./receive -h -I && ./receive -v > VERSION
 	./receive -h 2> receive_help.output
 
+process_run:
+	./process -c 3 -s $(FRAME_SIZE)
+
 send_run:
 	#./send -c 2 -s 12500 -b 12 -n 409600 -w 250000
-	./send    -c 2 -s $(UDP_SIZE) -b  8 -n 256 -w 234567890
+	./send    -c 2 -s $(FRAME_SIZE) -b  8 -n 256 -w 234567890
 
 receive_run:
 	mkdir -p $(DATA)$(DIN)  $(DATA)$(DOUT)
 	rm -f    $(DATA)$(DIN)* $(DATA)$(DOUT)*
-	./receive -c 3 -s $(UDP_SIZE) -b 16 -n 255 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
+	./receive -c 3 -s $(FRAME_SIZE) -b 16 -n 255 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*

@@ -16,7 +16,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.4g"
+#define VERSION "v0.2.4h"
 
 #define S 0 //sample
 
@@ -91,7 +91,7 @@ int main(int argc,char **argv)
 
   #pragma omp single
   {
-  if(tn<2) {printf("error: run error, this process need at least 2 threads (presently only %d available)\n",tn);exit(2);}
+  if(tn<3) {printf("error: run error, this process need at least 3 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   }//single
 
@@ -106,10 +106,16 @@ int main(int argc,char **argv)
     }//generate
     case 1:
     {//process
-      CDataProcessor<Tdata,Taccess> process(locks, imagefilename,digit, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      CDataProcessor<Tdata,Taccess> process(locks);
       process.run(access,images, count);
       break;
     }//process
+    case 2:
+    {//store
+      CDataStore<Tdata,Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
+      store.run(access,images, count);
+      break;
+    }//store
   }//switch(id)
   }//parallel section
 

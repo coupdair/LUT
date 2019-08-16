@@ -14,11 +14,8 @@ class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
   CImg<unsigned char> image;
-  std::string file_name;
-  unsigned int file_name_digit;
 
   CDataProcessor(std::vector<omp_lock_t*> &lock
-  ,  std::string imagefilename, unsigned int digit
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   )
@@ -31,8 +28,6 @@ public:
       printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
       exit(99);
     }
-    file_name=imagefilename;
-    file_name_digit=digit;
     this->check_locks(lock);
   }//constructor
 
@@ -60,10 +55,9 @@ public:
     n2=n;
     image=images[n1]+images[n2];
 
-    //store
-    CImg<char> nfilename(1024);
-    cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
-    image.save_png(nfilename);
+    //copy
+//! \todo [high] need result buffer
+    images[n]=image;
 
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
