@@ -33,10 +33,13 @@ public:
   compute::vector<char> device_vector2;
   compute::vector<char> device_vector3;
 
-  CDataProcessorGPU(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock), ctx(device), queue(ctx, device), host_vector3(VECTOR_SIZE), device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
+  CDataProcessorGPU(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock)
+   , ctx(device), queue(ctx, device)
+   , host_vector3(VECTOR_SIZE)
+   , device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
     this->debug=true;
-    this->class_name="CDataProcessor";
+    this->class_name="CDataProcessorGPU";
     if(lock.size()<2)
     {
       printf("code error: locks should have at least 2 locks for %s class.",this->class_name.c_str());
@@ -49,7 +52,6 @@ public:
 
   //! one iteration for any loop
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
-//  virtual void iteration(CImg<Taccess> &access, int n, int i, CImg<Tdata> image, CImg<Tdata> image2)
   {
     if(this->debug)
     {
@@ -97,6 +99,7 @@ public:
     std::cout << "Errors : " << err << "/" << host_vector3.size() << std::endl;
     */
 
+    //store
     CImg<char> nfilename(1024);
     cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
     host_vector3.save_png(nfilename);
