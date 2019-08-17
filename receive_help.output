@@ -5,8 +5,8 @@
  usage: ./store -h -I
         ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234
 
- version: v0.3.0d
- compilation date: (Aug 21 2019, 10:06:11)
+ version: v0.3.0i
+ compilation date: (Aug 17 2019, 21:52:42)
 
     [1m-o              [0;0;0m samples/sample.png       [0;32;59moutput file name (e.g. "-o data.png -d 3" gives data_???.png)[0;0;0m
     [1m-r              [0;0;0m results/sample.png       [0;32;59mresult file name (e.g. "-o proc.png -d 3" gives proc_???.png)[0;0;0m
@@ -16,6 +16,7 @@
     [1m-b              [0;0;0m 12                       [0;32;59msize   of vector buffer (total size is b*s*4 Bytes)[0;0;0m
     [1m-c              [0;0;0m 0                        [0;32;59mthread count[0;0;0m
     [1m-p              [0;0;0m 1234                     [0;32;59mport where the packets are sent on the receiving device[0;0;0m
+    [1m--use-GPU       [0;0;0m false                    [0;32;59mshow GUI (or -G option)[0;0;0m
     [1m--help          [0;0;0m true                     [0;32;59mhelp (or -h option)[0;0;0m
     [1m--info          [0;0;0m false                    [0;32;59mshow compilation options (or -I option)[0;0;0m
     [1m--version       [0;0;0m false                    [0;32;59mshow version (or -v option)[0;0;0m

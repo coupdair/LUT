@@ -47,7 +47,7 @@ send_run:
 receive_run:
 	mkdir -p $(DATA)$(DIN)  $(DATA)$(DOUT)
 	rm -f    $(DATA)$(DIN)* $(DATA)$(DOUT)*
-	./receive -c 4 -s $(FRAME_SIZE) -b 16 -n 254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
+	./receive -c 4 -s $(FRAME_SIZE) -b 16 -n 254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT) --use-GPU
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*

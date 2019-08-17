@@ -1,28 +1,32 @@
 #help
-cat generate_help.output
+cat process_help.output
 cat receive_help.output
+cat send_help.output
 
 #compile
-make generate
+##receiving
+make process
 make receive
+##sending
+make send_run
 
 #run
-##receive
+##receiving
 ssh rock64@193.48.111.156
 make receive_run
 sudo iftop -i enp1s0
-##send
+##sending
 make send_run
 
+
+exit
+
 #show wait
-##Generate
-./generate     -s 4096 -b  16 -n 123 2>/dev/null | grep 'G'
+##Process
+./process      -s 4096 -b  16 -n 123 2>/dev/null | grep 'G'
 
 ##Receive
 ./receive      -s 4096 -b  16 -n 123 2>/dev/null | grep 'R'
-
-##Store
-./store        -s 4096 -b  16 -n 123 2>/dev/null | grep 'S'
 
 #show buffer status
 ./generate      -s 4096 -b  16 -n 123 >/dev/null
