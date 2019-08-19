@@ -12,7 +12,7 @@
 //OpenCL
 #include <boost/compute.hpp>
 
-#define VERSION "v0.2.4e"
+#define VERSION "v0.2.4"
 
 #include "CDataStore.hpp"
 #include "CDataProcessorGPU.hpp"
