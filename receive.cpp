@@ -9,17 +9,22 @@
 //OpenMP
 #include <omp.h>
 
-//OpenCL
-#include <boost/compute.hpp>
-
-#define VERSION "v0.2.4"
+#define VERSION "v0.2.6d"
 
 #include "CDataStore.hpp"
+#ifdef DO_GPU
+//OpenCL
+#include <boost/compute.hpp>
 #include "CDataProcessorGPU.hpp"
+#else
+#include "CDataProcessor.hpp"
+#endif //!DO_GPU
 #include "CDataReceive.hpp"
 
 using namespace cimg_library;
+#ifdef DO_GPU
 namespace compute = boost::compute;
+#endif //DO_GPU
 using boost::asio::ip::udp;
 
 //types
@@ -78,20 +83,32 @@ int main(int argc,char **argv)
   images[0].print("image",false);
   //access locking
   omp_lock_t lck;omp_init_lock(&lck);
+  //! result circular buffer
+  CImgList<Tdata> results(nbuffer,width,1,1,1);
+  results[0].fill(0);
+  results[0].print("result",false);
+  //accessR locking
+  omp_lock_t lckR;omp_init_lock(&lckR);
 
   //! access and status of buffer
   CImg<Taccess> access(nbuffer,1,1,1);
   access.fill(0);//free
   access.print("access (free state)",false);fflush(stderr);
+  //! access and status of Result buffer
+  CImg<Taccess> accessR(nbuffer,1,1,1);
+  accessR.fill(0);//free
+  accessR.print("accessR (free state)",false);fflush(stderr);
 
   //! receive data
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
 
+#ifdef DO_GPU
   //Choosing the target for OpenCL computing
   compute::device gpu = compute::system::default_device();
-
-
   #pragma omp parallel shared(print_lock, access,images, gpu)
+#else
+  #pragma omp parallel shared(print_lock, access,images)
+#endif //!DO_GPU
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
 
@@ -111,8 +128,13 @@ int main(int argc,char **argv)
     }//receive
     case 1:
     {//process
+#ifdef DO_GPU
       CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, resultfilename, digit);
       process.run(access,images, count);
+#else
+      CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      process.run(access,images, accessR,results, count);
+#endif //!DO_GPU
       break;
     }//process
     case 2:
