@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.6d"
+#define VERSION "v0.2.6e"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU
@@ -22,9 +22,6 @@
 #include "CDataReceive.hpp"
 
 using namespace cimg_library;
-#ifdef DO_GPU
-namespace compute = boost::compute;
-#endif //DO_GPU
 using boost::asio::ip::udp;
 
 //types
@@ -104,7 +101,7 @@ int main(int argc,char **argv)
 
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
-  compute::device gpu = compute::system::default_device();
+  boost::compute::device gpu = boost::compute::system::default_device();
   #pragma omp parallel shared(print_lock, access,images, gpu)
 #else
   #pragma omp parallel shared(print_lock, access,images)

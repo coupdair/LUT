@@ -123,7 +123,7 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
-
+//! \todo add GPU call
 #else
 /*
       CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
