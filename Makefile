@@ -15,7 +15,7 @@ LIB_BOOST_ASIO=-lboost_system
 LIB_BOOST_COMPUTE=-lMali -L/usr/lib/aarch64-linux-gnu/ -DBOOST_COMPUTE_MAX_CL_VERSION=102
 
 DO_GPU=-DDO_GPU $(LIB_BOOST_COMPUTE)
-DO_GPU=
+#DO_GPU=
 
 #source package
 SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
@@ -47,7 +47,7 @@ send_run:
 receive_run:
 	mkdir -p $(DATA)$(DIN)  $(DATA)$(DOUT)
 	rm -f    $(DATA)$(DIN)* $(DATA)$(DOUT)*
-	./receive -c 3 -s $(FRAME_SIZE) -b 16 -n 254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
+	./receive -c 4 -s $(FRAME_SIZE) -b 16 -n 254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*

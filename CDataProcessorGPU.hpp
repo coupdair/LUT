@@ -17,26 +17,37 @@ using namespace cimg_library;
 using compute::lambda::_1;
 using compute::lambda::_2;
 
-#include "CDataBuffer.hpp"
+#include "CDataProcessor.hpp"
 
 template<typename Tdata, typename Taccess=unsigned char>
-class CDataProcessorGPU : public CDataBuffer<Tdata, Taccess>
+class CDataProcessorGPU : public CDataProcessor<Tdata, Taccess>
 {
 public:
   compute::context ctx;
   compute::command_queue queue;
+
+//! \todo 3 flowing lines to remove (inheritance or other thread !)
   CImg<unsigned char> host_vector3;
   std::string file_name;
   unsigned int file_name_digit;
+
   // create vectors on the device
   compute::vector<char> device_vector1;
   compute::vector<char> device_vector2;
   compute::vector<char> device_vector3;
 
-  CDataProcessorGPU(std::vector<omp_lock_t*> &lock, compute::device device, int VECTOR_SIZE, std::string imagefilename, unsigned int digit) : CDataBuffer<Tdata, Taccess>(lock)
-   , ctx(device), queue(ctx, device)
-   , host_vector3(VECTOR_SIZE)
-   , device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
+  CDataProcessorGPU(std::vector<omp_lock_t*> &lock
+  , compute::device device, int VECTOR_SIZE
+  , std::string imagefilename, unsigned int digit
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
+  )
+  : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
+  , ctx(device), queue(ctx, device)
+  , host_vector3(VECTOR_SIZE)
+  , device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
     this->debug=true;
     this->class_name="CDataProcessorGPU";

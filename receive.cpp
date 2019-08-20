@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.6e"
+#define VERSION "v0.2.6f"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU
@@ -97,7 +97,8 @@ int main(int argc,char **argv)
   accessR.print("accessR (free state)",false);fflush(stderr);
 
   //! receive data
-  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);
+  std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);locks.push_back(&lckR);
+  std::vector<omp_lock_t*> locksR;locksR.push_back(&print_lock);locksR.push_back(&lckR);
 
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
@@ -111,7 +112,7 @@ int main(int argc,char **argv)
 
   #pragma omp single
   {
-  if(tn<3) {printf("error: run error, this process need at least 3 threads (presently only %d available)\n",tn);exit(2);}
+  if(tn<4) {printf("error: run error, this process need at least 4 threads (presently only %d available)\n",tn);exit(2);}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
@@ -126,8 +127,8 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, resultfilename, digit);
-      process.run(access,images, count);
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, resultfilename, digit, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      process.run(access,images, accessR,results, count);
 #else
       CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
       process.run(access,images, accessR,results, count);
@@ -136,8 +137,14 @@ int main(int argc,char **argv)
     }//process
     case 2:
     {//store
-      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);
+      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_FILLED);
       store.run(access,images, count);
+      break;
+    }//store
+    case 3:
+    {//store
+      CDataStore<Tdata, Taccess> store(locksR, resultfilename,digit, CDataAccess::STATUS_PROCESSED);
+      store.run(accessR,results, count);
       break;
     }//store
   }//switch(id)
