@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.6"
+#define VERSION "v0.2.7d"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU

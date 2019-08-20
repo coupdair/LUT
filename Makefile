@@ -34,7 +34,7 @@ send: send.cpp $(SRC_DATA_BUFFER) CDataGenerator.hpp CDataSend.hpp
 	g++ -O0 -o send   send.cpp  $(LIB_CIMG) $(LIB_BOOST_ASIO) -Dcimg_display=0 && ./send -h -I && ./send -v > VERSION
 	./send -h 2> send_help.output
 
-receive: receive.cpp $(SRC_DATA_BUFFER)  CDataStore.hpp CDataReceive.hpp CDataProcessor.hpp CDataProcessorGPU.hpp
+receive: receive.cpp $(SRC_DATA_BUFFER) CDataReceive.hpp CDataProcessor.hpp CDataProcessorGPU.hpp CDataStore.hpp
 	g++ -O0 -o receive receive.cpp  $(LIB_CIMG) $(LIB_BOOST_ASIO) -Dcimg_display=0 $(DO_GPU) && ./receive -h -I && ./receive -v > VERSION
 	./receive -h 2> receive_help.output
 

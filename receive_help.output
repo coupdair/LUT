@@ -5,8 +5,8 @@
  usage: ./store -h -I
         ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234
 
- version: v0.2.6e
- compilation date: (Aug 15 2019, 03:30:35)
+ version: v0.2.6
+ compilation date: (Aug 20 2019, 16:32:42)
 
     [1m-o              [0;0;0m samples/sample.png       [0;32;59moutput file name (e.g. "-o data.png -d 3" gives data_???.png)[0;0;0m
     [1m-r              [0;0;0m results/sample.png       [0;32;59mresult file name (e.g. "-o proc.png -d 3" gives proc_???.png)[0;0;0m

@@ -48,7 +48,7 @@ public:
     this->check_locks(lock);
   }//constructor
 
-  //! one iteration for any loop
+  //! one iteration for any loop: copy kernel (as average of same image)
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     if(this->debug)
@@ -61,18 +61,11 @@ public:
     //! 1. compute from buffer
     //wait lock
     unsigned int c=0;
-//  this->laccess.wait_for_status(access[n],this->STATUS_RECEIVED,this->STATE_PROCESSING, c);//received, processing
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
 
     //copy CPU to GPU
-    unsigned int n1,n2;
-    if(n>0)
-      n1=n-1;
-    else
-      n1=images.size()-1;
-    n2=n;
-    compute::copy(images[n1].begin(), images[n1].end(), device_vector1.begin(), queue);
-    compute::copy(images[n2].begin(), images[n2].end(), device_vector2.begin(), queue);
+    compute::copy(images[n].begin(), images[n].end(), device_vector1.begin(), queue);
+    compute::copy(images[n].begin(), images[n].end(), device_vector2.begin(), queue);
 
     //compute
     using compute::lambda::_1;
@@ -86,7 +79,6 @@ public:
     );
 
     //unlock
-//  this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed -> storage
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
     //! 2. copy to buffer
