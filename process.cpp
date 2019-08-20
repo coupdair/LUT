@@ -123,16 +123,15 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, resultfilename, digit, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
-      process.run(access,images, accessR,results, count);
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
 #else
-      CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      CDataProcessor<Tdata,Taccess> process(locks
+//      CDataProcessor_dilate<Tdata,Taccess> process(locks
+#endif //!DO_GPU
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      );
       process.run(access,images, accessR,results, count);
-/*
-      CDataProcessor_dilate<Tdata,Taccess> process(locks, 12, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
-      process.run(access,images, accessR,results, count);
-*/
-#endif
       break;
     }//process
     case 2:

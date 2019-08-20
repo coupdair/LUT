@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.6g"
+#define VERSION "v0.2.6h"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU
@@ -127,23 +127,25 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_FREE);
-      process.run(access,images, accessR,results, count);
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
 #else
-      CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_FREE);
-      process.run(access,images, accessR,results, count);
+      CDataProcessor<Tdata,Taccess> process(locks
 #endif //!DO_GPU
+      , CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_PROCESSED //images
+      , CDataAccess::STATUS_FREE,    CDataAccess::STATUS_FILLED    //results
+      );
+      process.run(access,images, accessR,results, count);
       break;
     }//process
     case 2:
     {//store
-      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_RECEIVED);
+      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);//images
       store.run(access,images, count);
       break;
     }//store
     case 3:
     {//store
-      CDataStore<Tdata, Taccess> store(locksR, resultfilename,digit, CDataAccess::STATUS_PROCESSED);
+      CDataStore<Tdata, Taccess> store(locksR, resultfilename,digit, CDataAccess::STATUS_FILLED);//results
       store.run(accessR,results, count);
       break;
     }//store
