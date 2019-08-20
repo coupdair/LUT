@@ -19,7 +19,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.6e"
+#define VERSION "v0.2.6"
 
 #define S 0 //sample
 
@@ -101,7 +101,13 @@ int main(int argc,char **argv)
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);locks.push_back(&lckR);
   std::vector<omp_lock_t*> locksR;locksR.push_back(&print_lock);locksR.push_back(&lckR);
 
+#ifdef DO_GPU
+  //Choosing the target for OpenCL computing
+  boost::compute::device gpu = boost::compute::system::default_device();
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu)
+#else
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
+#endif //!DO_GPU
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
 
