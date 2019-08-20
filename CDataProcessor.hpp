@@ -9,11 +9,11 @@ using namespace cimg_library;
 
 #include "CDataBuffer.hpp"
 
-template<typename Tdata, typename Taccess=unsigned char>
+template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
 class CDataProcessor : public CDataBuffer<Tdata, Taccess>
 {
 public:
-  CImg<Tdata> image;
+  CImg<Tdout> image;
   //! result access
   CAccessOMPLock laccessR;
   CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR;
@@ -41,15 +41,16 @@ public:
   }//constructor
 
   //! compution kernel for an iteration
-  virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out)
+  virtual void kernel(CImg<Tdata> &in,CImg<Tdout> &out)
   {
     std::cout<< __FILE__<<"/"<<__func__<<"(images: in="<<in.width()<<", out="<<out.size()<<") copy kernel, other kernels should be implemented in inherited class."<<std::endl<<std::flush;
     out=in;
   };//kernel
 
   //! one iteration for any loop
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdout> &results, int n, int i)
   {
+    //! 1. compute from buffer
     if(this->debug)
     {
       this->lprint.print("",false);
@@ -57,8 +58,6 @@ public:
       access.print("access",false);fflush(stderr);
       this->lprint.unset_lock();
     }
-
-    //! 1. compute from buffer
     //wait lock
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing

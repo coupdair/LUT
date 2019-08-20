@@ -9,8 +9,8 @@ using namespace cimg_library;
 
 #include "CDataProcessor.hpp"
 
-template<typename Tdata, typename Taccess=unsigned char>
-class CDataProcessor_dilate : public CDataProcessor<Tdata, Taccess>
+template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
+class CDataProcessor_dilate : public CDataProcessor<Tdata,Tdout, Taccess>
 {
 public:
   //! width of the structuring element
@@ -22,7 +22,7 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
   )
-  : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
+  : CDataProcessor<Tdata,Tdout, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
   , s(s)
   {
 //    this->debug=true;
@@ -30,7 +30,7 @@ public:
   }//constructor
 
   //! compution kernel for an iteration
-  virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out)
+  virtual void kernel(CImg<Tdata> &in,CImg<Tdout> &out)
   {
     out=in.get_dilate(s);
   };//kernel

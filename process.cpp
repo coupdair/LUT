@@ -19,13 +19,17 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.7d"
+#define VERSION "v0.2.7e"
 
 #define S 0 //sample
 
 //types
+//! thread access
 typedef unsigned char Taccess;
+//! data in
 typedef unsigned int  Tdata;
+//! data out
+typedef unsigned int  Tdout;
 
 int main(int argc,char **argv)
 {
@@ -129,10 +133,10 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
+      CDataProcessorGPU<Tdata,Tdout, Taccess> process(locks, gpu,width
 #else
-      CDataProcessor<Tdata,Taccess> process(locks
-//      CDataProcessor_dilate<Tdata,Taccess> process(locks
+      CDataProcessor<Tdata,Tdout,Taccess> process(locks
+//      CDataProcessor_dilate<Tdata,Tdout,Taccess> process(locks
 #endif //!DO_GPU
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results

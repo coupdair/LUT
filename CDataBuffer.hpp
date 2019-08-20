@@ -53,8 +53,10 @@ public:
       if(n==nbuffer-1) n=-1;
      }//vector loop
   }//run
+
   //! run for loop
-  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images,  CImg<Taccess> &accessR,CImgList<Tdata> &results, unsigned int count)
+  template<typename Tdout>
+  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images,  CImg<Taccess> &accessR,CImgList<Tdout> &results, unsigned int count)
   {
     unsigned int nbuffer=images.size();
     for(unsigned int n=0,i=0;i<count;++i,++n)

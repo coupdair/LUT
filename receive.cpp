@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.7d"
+#define VERSION "v0.2.7e"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU
@@ -25,8 +25,12 @@ using namespace cimg_library;
 using boost::asio::ip::udp;
 
 //types
+//! thread access
 typedef unsigned char Taccess;
+//! data in
 typedef unsigned int  Tdata;
+//! data out
+typedef unsigned int  Tdout;
 
 int main(int argc,char **argv)
 {

@@ -19,17 +19,17 @@ using compute::lambda::_2;
 
 #include "CDataProcessor.hpp"
 
-template<typename Tdata, typename Taccess=unsigned char>
-class CDataProcessorGPU : public CDataProcessor<Tdata, Taccess>
+template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
+class CDataProcessorGPU : public CDataProcessor<Tdata,Tdout, Taccess>
 {
 public:
   compute::context ctx;
   compute::command_queue queue;
 
   // create vectors on the device
-  compute::vector<char> device_vector1;
-  compute::vector<char> device_vector2;
-  compute::vector<char> device_vector3;
+  compute::vector<Tdata> device_vector1;
+  compute::vector<Tdata> device_vector2;
+  compute::vector<Tdout> device_vector3;
 
   CDataProcessorGPU(std::vector<omp_lock_t*> &lock
   , compute::device device, int VECTOR_SIZE
@@ -38,7 +38,7 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
   )
-  : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
+  : CDataProcessor<Tdata,Tdout, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
   , ctx(device), queue(ctx, device)
   , device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
@@ -49,8 +49,9 @@ public:
   }//constructor
 
   //! one iteration for any loop: copy kernel (as average of same image)
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdout> &results, int n, int i)
   {
+    //! 1. compute from buffer
     if(this->debug)
     {
       this->lprint.print("",false);
@@ -58,7 +59,6 @@ public:
       access.print("access",false);fflush(stderr);
       this->lprint.unset_lock();
     }
-    //! 1. compute from buffer
     //wait lock
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
