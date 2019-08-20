@@ -26,11 +26,6 @@ public:
   compute::context ctx;
   compute::command_queue queue;
 
-//! \todo 3 flowing lines to remove (inheritance or other thread !)
-  CImg<unsigned char> host_vector3;
-  std::string file_name;
-  unsigned int file_name_digit;
-
   // create vectors on the device
   compute::vector<char> device_vector1;
   compute::vector<char> device_vector2;
@@ -38,7 +33,6 @@ public:
 
   CDataProcessorGPU(std::vector<omp_lock_t*> &lock
   , compute::device device, int VECTOR_SIZE
-  , std::string imagefilename, unsigned int digit
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
@@ -46,18 +40,16 @@ public:
   )
   : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
   , ctx(device), queue(ctx, device)
-  , host_vector3(VECTOR_SIZE)
   , device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
     this->debug=true;
     this->class_name="CDataProcessorGPU";
-    file_name=imagefilename;
-    file_name_digit=digit;
+    this->image.assign(VECTOR_SIZE);
     this->check_locks(lock);
   }//constructor
 
   //! one iteration for any loop
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     if(this->debug)
     {
@@ -66,10 +58,11 @@ public:
       access.print("access",false);fflush(stderr);
       this->lprint.unset_lock();
     }
-
+    //! 1. compute from buffer
     //wait lock
     unsigned int c=0;
-    this->laccess.wait_for_status(access[n],this->STATUS_RECEIVED,this->STATE_PROCESSING, c);//received, processing
+//  this->laccess.wait_for_status(access[n],this->STATUS_RECEIVED,this->STATE_PROCESSING, c);//received, processing
+    this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
 
     //copy CPU to GPU
     unsigned int n1,n2;
@@ -89,28 +82,28 @@ public:
 
     //copy GPU to CPU
     compute::copy(
-      device_vector3.begin(), device_vector3.end(), host_vector3.begin(), queue
+      device_vector3.begin(), device_vector3.end(), this->image.begin(), queue
     );
 
-    /*
-    //compution check
-    int err = 0;
-    for(unsigned int j=0; j<host_vector3.size(); ++j)
+    //unlock
+//  this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed -> storage
+    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
+
+    //! 2. copy to buffer
+    if(this->debug)
     {
-      if(host_vector3[j]!=image[j]+image2[j])
-      {
-        ++err;
-      }
+      this->lprint.print("",false);
+      printf("4 C%02d #%04d: ",n,i);fflush(stdout);
+      accessR.print("accessR",false);fflush(stderr);
+      this->lprint.unset_lock();
     }
-    std::cout << "Errors : " << err << "/" << host_vector3.size() << std::endl;
-    */
-
-    //store
-    CImg<char> nfilename(1024);
-    cimg::number_filename(file_name.c_str(),i,file_name_digit,nfilename);
-    host_vector3.save_png(nfilename);
-
-    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->STATUS_PROCESSED, this->class_name[5],i,n,c);//processing, processed -> storage
+    //wait lock
+    c=0;
+    this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
+    //copy local to buffer
+    results[n]=this->image;
+    //unlock
+    this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
   }//iteration
 

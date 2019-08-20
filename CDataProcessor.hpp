@@ -58,14 +58,16 @@ public:
       this->lprint.unset_lock();
     }
 
+    //! 1. compute from buffer
     //wait lock
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
-    //computionin local
+    //compution in local
     kernel(images[n],image);
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
+    //! 2. copy to buffer
     if(this->debug)
     {
       this->lprint.print("",false);
@@ -73,7 +75,6 @@ public:
       accessR.print("accessR",false);fflush(stderr);
       this->lprint.unset_lock();
     }
-
     //wait lock
     c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing

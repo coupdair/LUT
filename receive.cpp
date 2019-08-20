@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.6f"
+#define VERSION "v0.2.6g"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU
@@ -127,17 +127,17 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, resultfilename, digit, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width, CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_FREE);
       process.run(access,images, accessR,results, count);
 #else
-      CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_FILLED,CDataAccess::STATUS_FREE);
+      CDataProcessor<Tdata,Taccess> process(locks, CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_FREE);
       process.run(access,images, accessR,results, count);
 #endif //!DO_GPU
       break;
     }//process
     case 2:
     {//store
-      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_FILLED);
+      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_RECEIVED);
       store.run(access,images, count);
       break;
     }//store

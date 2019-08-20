@@ -42,7 +42,7 @@ process_run:
 	./process -c 3 -s $(FRAME_SIZE)
 
 send_run:
-	./send    -c 2 -s $(FRAME_SIZE) -b  8 -n 256 -w 87654321
+	./send    -c 2 -s $(FRAME_SIZE) -b  8 -n 256 -w 76543210
 
 receive_run:
 	mkdir -p $(DATA)$(DIN)  $(DATA)$(DOUT)
