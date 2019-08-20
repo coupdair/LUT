@@ -10,7 +10,7 @@ using namespace cimg_library;
 #include "CDataBuffer.hpp"
 
 template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
-class CDataProcessor : public CDataBuffer<Tdata, Taccess>
+class CDataProcessor : public CDataBuffer<Tdata,Tdout, Taccess>
 {
 public:
   CImg<Tdout> image;

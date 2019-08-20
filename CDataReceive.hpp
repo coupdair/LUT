@@ -50,8 +50,8 @@ void timer_handler(const boost::system::error_code& error)
 
 #include "CDataBuffer.hpp"
 
-template<typename Tdata, typename Taccess=unsigned char>
-class CDataReceive : public CDataBuffer<Tdata, Taccess>
+template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
+class CDataReceive : public CDataBuffer<Tdata,Tdout, Taccess>
 {
 public:
 

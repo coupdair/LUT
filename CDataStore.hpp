@@ -14,8 +14,8 @@ using namespace cimg_library;
  * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
  * \todo [low] \c wait_for_status might be a locking process to ensure fastest unlocking for these storage classes.
 **/
-template<typename Tdata, typename Taccess=unsigned char>
-class CDataStore: public CDataBuffer<Tdata, Taccess>
+template<typename Tdata,typename Tdout=Tdata, typename Taccess=unsigned char>
+class CDataStore: public CDataBuffer<Tdata,Tdout, Taccess>
 {
 public:
   std::string file_name;
@@ -26,7 +26,7 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_FREE
   )
-  : CDataBuffer<Tdata, Taccess>(lock,wait_status,set_status)
+  : CDataBuffer<Tdata,Tdout, Taccess>(lock,wait_status,set_status)
   {
 //    this->debug=true;
     this->class_name="CDataStore";

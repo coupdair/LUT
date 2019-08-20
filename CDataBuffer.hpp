@@ -14,7 +14,7 @@ using namespace cimg_library;
  * It is implementing \c run functions, i.e. loop on circular buffer, so \c iteration should be defined in sub-classes.
  * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
 **/
-template<typename Tdata, typename Taccess=unsigned char>
+template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
 class CDataBuffer: public CDataAccess
 {
 public:
@@ -55,7 +55,6 @@ public:
   }//run
 
   //! run for loop
-  template<typename Tdout>
   virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images,  CImg<Taccess> &accessR,CImgList<Tdout> &results, unsigned int count)
   {
     unsigned int nbuffer=images.size();

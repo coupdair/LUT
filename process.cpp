@@ -19,7 +19,7 @@
 
 using namespace cimg_library;
 
-#define VERSION "v0.2.7e"
+#define VERSION "v0.2.7f"
 
 #define S 0 //sample
 
@@ -126,14 +126,14 @@ int main(int argc,char **argv)
   {
     case 0:
     {//generate
-      CDataGenerator<Tdata,Taccess> generate(locks);
+      CDataGenerator<Tdata,Tdout,Taccess> generate(locks);
       generate.run(access,images, count);
       break;
     }//generate
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata,Tdout, Taccess> process(locks, gpu,width
+      CDataProcessorGPU<Tdata,Tdout,Taccess> process(locks, gpu,width
 #else
       CDataProcessor<Tdata,Tdout,Taccess> process(locks
 //      CDataProcessor_dilate<Tdata,Tdout,Taccess> process(locks
@@ -146,7 +146,7 @@ int main(int argc,char **argv)
     }//process
     case 2:
     {//store
-      CDataStore<Tdata,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_FILLED);
+      CDataStore<Tdata,Tdout,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_FILLED);
       store.run(accessR,results, count);
       break;
     }//store

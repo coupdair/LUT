@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.7e"
+#define VERSION "v0.2.7f"
 
 #include "CDataStore.hpp"
 #ifdef DO_GPU
@@ -124,16 +124,16 @@ int main(int argc,char **argv)
   {
     case 0:
     {//receive
-      CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
+      CDataReceive<Tdata> receive(locks, port, width, &io_service);
       receive.run(access,images, count);
       break;
     }//receive
     case 1:
     {//process
 #ifdef DO_GPU
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
+      CDataProcessorGPU<Tdata,Tdout> process(locks, gpu,width
 #else
-      CDataProcessor<Tdata,Taccess> process(locks
+      CDataProcessor<Tdata,Tdout> process(locks
 #endif //!DO_GPU
       , CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_PROCESSED //images
       , CDataAccess::STATUS_FREE,    CDataAccess::STATUS_FILLED    //results
@@ -143,13 +143,13 @@ int main(int argc,char **argv)
     }//process
     case 2:
     {//store
-      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);//images
+      CDataStore<Tdata> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);//images
       store.run(access,images, count);
       break;
     }//store
     case 3:
     {//store
-      CDataStore<Tdata, Taccess> store(locksR, resultfilename,digit, CDataAccess::STATUS_FILLED);//results
+      CDataStore<Tdata> store(locksR, resultfilename,digit, CDataAccess::STATUS_FILLED);//results
       store.run(accessR,results, count);
       break;
     }//store

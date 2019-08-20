@@ -13,8 +13,8 @@ using namespace cimg_library;
  * this generation data class implements \c iteration function on the data.
  * Data is shared, so both circular access and lock to it should be provided (see parameters: \c images, \c access, \c lock).
 **/
-template<typename Tdata, typename Taccess=unsigned char>
-class CDataGenerator: public CDataBuffer<Tdata, Taccess>
+template<typename Tdata,typename Tdout, typename Taccess=unsigned char>
+class CDataGenerator: public CDataBuffer<Tdata,Tdout, Taccess>
 {
 
 public:
@@ -23,7 +23,7 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_FILLED
   )
-  : CDataBuffer<Tdata, Taccess>(lock,wait_status,set_status)
+  : CDataBuffer<Tdata,Tdout, Taccess>(lock,wait_status,set_status)
   {
 //    this->debug=true;
     this->class_name="CDataGenerator";

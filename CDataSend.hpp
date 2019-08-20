@@ -15,8 +15,8 @@ using boost::posix_time::microsec_clock;
 
 #include "CDataAccess.hpp"
 
-template<typename Tdata, typename Taccess=unsigned char>
-class CDataSend : public CDataBuffer<Tdata, Taccess>
+template<typename Tdata,typename Tdout=Tdata, typename Taccess=unsigned char>
+class CDataSend : public CDataBuffer<Tdata,Tdout, Taccess>
 {
 public:
 
