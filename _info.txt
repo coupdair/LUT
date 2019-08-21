@@ -7,9 +7,12 @@ make generate
 make receive
 
 #run
-make send_run
+##receive
+ssh rock64@193.48.111.156
 make receive_run
 sudo iftop -i enp1s0
+##send
+make send_run
 
 #show wait
 ##Generate

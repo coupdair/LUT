@@ -15,7 +15,6 @@ namespace compute = boost::compute;
 using namespace cimg_library;
 
 using compute::lambda::_1;
-using compute::lambda::_2;
 
 #include "CDataProcessor.hpp"
 
@@ -69,9 +68,8 @@ public:
 
     //compute
     using compute::lambda::_1;
-    using compute::lambda::_2;
-    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector2.begin(), device_vector3.begin(),
-      _1+_2 , queue);
+    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
+      _1 , queue);
 
     //copy GPU to CPU
     compute::copy(
