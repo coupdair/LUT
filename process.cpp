@@ -4,10 +4,12 @@
 //C++ base
 #include <iostream>
 #include <string>
+#include <vector>
 
 //OpenMP
 #include <omp.h>
-#include <vector>
+
+#define VERSION "v0.3.0d"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -18,8 +20,6 @@
 #include "CDataStore.hpp"
 
 using namespace cimg_library;
-
-#define VERSION "v0.2.7d"
 
 #define S 0 //sample
 

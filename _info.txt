@@ -9,6 +9,7 @@ make receive
 #run
 make send_run
 make receive_run
+sudo iftop -i enp1s0
 
 #show wait
 ##Generate

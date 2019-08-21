@@ -5,7 +5,7 @@ DATA=./
 DATA=/media/temp/
 DIN=samples/
 DOUT=results/
-FIN=sample.png
+FIN=sample.cimg
 FOUT=$(FIN)
 
 #compiler options
@@ -15,12 +15,12 @@ LIB_BOOST_ASIO=-lboost_system
 LIB_BOOST_COMPUTE=-lMali -L/usr/lib/aarch64-linux-gnu/ -DBOOST_COMPUTE_MAX_CL_VERSION=102
 
 DO_GPU=-DDO_GPU $(LIB_BOOST_COMPUTE)
-#DO_GPU=
+DO_GPU=
 
 #source package
 SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
 
-all: process
+all: process send receive
 
 gui: main.cpp
 	g++ -O0 -o generate.X main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system $(LIB_XWINDOWS) && ./generate.X -h -I && ./generate.X -v > VERSION

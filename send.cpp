@@ -4,10 +4,12 @@
 //C++ base
 #include <iostream>
 #include <string>
+#include <vector>
 
 //OpenMP
 #include <omp.h>
-#include <vector>
+
+#define VERSION "v0.3.0d"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -16,8 +18,6 @@
 //! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
 
 using namespace cimg_library;
-
-#define VERSION "v0.2.4"
 
 #define S 0 //sample
 

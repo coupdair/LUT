@@ -9,12 +9,11 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.2.7d"
+#define VERSION "v0.3.0d"
 
+//thread lock
 #include "CDataStore.hpp"
 #ifdef DO_GPU
-//OpenCL
-#include <boost/compute.hpp>
 #include "CDataProcessorGPU.hpp"
 #else
 #include "CDataProcessor.hpp"
