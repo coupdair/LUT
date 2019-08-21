@@ -47,6 +47,21 @@ public:
     this->check_locks(lock);
   }//constructor
 
+  //! compution kernel for an iteration
+  virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out)
+  {
+    //copy CPU to GPU
+    compute::copy(in.begin(), in.end(), device_vector1.begin(), queue);
+
+    //compute
+    using compute::lambda::_1;
+    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
+      _1 , queue);
+
+    //copy GPU to CPU
+    compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), queue);
+  };//kernel
+
   //! one iteration for any loop: copy kernel (as average of same image)
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
@@ -61,21 +76,8 @@ public:
     //wait lock
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
-
-    //copy CPU to GPU
-    compute::copy(images[n].begin(), images[n].end(), device_vector1.begin(), queue);
-    compute::copy(images[n].begin(), images[n].end(), device_vector2.begin(), queue);
-
-    //compute
-    using compute::lambda::_1;
-    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
-      _1 , queue);
-
-    //copy GPU to CPU
-    compute::copy(
-      device_vector3.begin(), device_vector3.end(), this->image.begin(), queue
-    );
-
+    //compution in local
+    kernel(images[n],this->image);
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
