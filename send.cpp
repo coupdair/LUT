@@ -15,8 +15,6 @@
 #include "CDataGenerator.hpp"
 #include "CDataSend.hpp"
 
-//! \todo [high] class: v baseOMPLock, v +print, v +access _ +progress, _ +buffer, v +run: acc, gen,store
-
 using namespace cimg_library;
 
 #define S 0 //sample

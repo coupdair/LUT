@@ -47,17 +47,22 @@ public:
     this->check_locks(lock);
   }//constructor
 
+  //! compution kernel for an iteration (compution=copy, here)
+  virtual void kernelGPU(compute::vector<char> &in,compute::vector<char> &out)
+  {
+    //compute with lambda
+    using compute::lambda::_1;
+    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
+      _1 , queue);
+  };//kernelGPU
+
   //! compution kernel for an iteration
   virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out)
   {
     //copy CPU to GPU
     compute::copy(in.begin(), in.end(), device_vector1.begin(), queue);
-
     //compute
-    using compute::lambda::_1;
-    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
-      _1 , queue);
-
+    kernelGPU(device_vector1,device_vector3);
     //copy GPU to CPU
     compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), queue);
   };//kernel
