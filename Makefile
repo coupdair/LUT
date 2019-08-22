@@ -42,12 +42,12 @@ process_run:
 	./process -c 3 -s $(FRAME_SIZE)
 
 send_run:
-	./send    -c 2 -s $(FRAME_SIZE) -b  8 -n 1256 -w 65432109
+	./send    -c 2 -s $(FRAME_SIZE) -b  8 -n 256 -w 65432109
 
 receive_run:
 	mkdir -p $(DATA)$(DIN)  $(DATA)$(DOUT)
 	rm -f    $(DATA)$(DIN)* $(DATA)$(DOUT)*
-	./receive -c 4 -s $(FRAME_SIZE) -b 16 -n 1254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
+	./receive -c 4 -s $(FRAME_SIZE) -b 16 -n 254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
 
 clear:
 	rm -f $(DATA)/samples/* $(DATA)/results/*
