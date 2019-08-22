@@ -67,43 +67,6 @@ public:
     compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), queue);
   };//kernel
 
-  //! one iteration for any loop: copy kernel (as average of same image)
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
-  {
-    if(this->debug)
-    {
-      this->lprint.print("",false);
-      printf("4 B%02d #%04d: ",n,i);fflush(stdout);
-      access.print("access",false);fflush(stderr);
-      this->lprint.unset_lock();
-    }
-    //! 1. compute from buffer
-    //wait lock
-    unsigned int c=0;
-    this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_PROCESSING, c);//filled, processing
-    //compution in local
-    kernel(images[n],this->image);
-    //unlock
-    this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
-
-    //! 2. copy to buffer
-    if(this->debug)
-    {
-      this->lprint.print("",false);
-      printf("4 C%02d #%04d: ",n,i);fflush(stdout);
-      accessR.print("accessR",false);fflush(stderr);
-      this->lprint.unset_lock();
-    }
-    //wait lock
-    c=0;
-    this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
-    //copy local to buffer
-    results[n]=this->image;
-    //unlock
-    this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
-
-  }//iteration
-
 };//CDataProcessorGPU
 
 #endif //_DATA_PROCESSOR_GPU_
