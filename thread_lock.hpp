@@ -46,20 +46,22 @@ public:
   omp_lock_t *p_access_lock;
   CAccessOMPLock(omp_lock_t* lock):CBaseOMPLock(lock){debug=true;class_name="CAccessOMPLock"; p_access_lock=lock;}
   virtual void unset_lock(){omp_unset_lock(p_access_lock);}
-  virtual void wait_for_status(unsigned char &what, const int status, const int new_status, unsigned int &c)
+  virtual void wait_for_status(unsigned char &what, const int status, const int new_status, unsigned int &c, unsigned int sleep=123)
   {
     unsigned char a=99;
+    bool do_sleep=true;
     do
     {//waiting for status
       //locked section
       {
         omp_set_lock(p_access_lock);
         a=what;
-        if(a==status) what=new_status;
+        if(a==status) {what=new_status;do_sleep=false;}
         omp_unset_lock(p_access_lock);
       }//lock
       ++c;
-    }while(a!=status);//waiting for free
+      if(do_sleep) usleep(sleep);
+    }while(a!=status);//waiting for status
   }//wait_for_status
 
 
