@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.0h"
+#define VERSION "v0.3.0i"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -42,12 +42,11 @@ int main(int argc,char **argv)
   const int width=cimg_option("-s",1024, "size   of udp buffer");
   const int count=cimg_option("-n",256,  "number of frames");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
-  const int threadCount=cimg_option("-c",2,"thread count");
-//  const unsigned short port=cimg_option("-p",1234,"port where the packets are send on the receiving device");
-//  const std::string ip=cimg_option("-i", "10.10.15.1", "ip address of the receiver");
-//  const int twait=cimg_option("-w", 123456789, "waiting time between udp frames");
-  //conversion of twait into a boost::uint64_t
-//  const boost::uint64_t wait=static_cast<std::size_t>(twait);
+  const int threadCount=cimg_option("-c",3,"thread count");
+#ifdef DO_GPU
+  const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
+        bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"show GUI (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
+#endif //DO_GPU
 
   ///standard options
   #if cimg_display!=0
@@ -129,15 +128,25 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
+      if(use_GPU)
+      {//GPU
+      std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
       CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
-#else
-      CDataProcessor<Tdata,Taccess> process(locks
-//      CDataProcessor_dilate<Tdata,Taccess> process(locks
-#endif //!DO_GPU
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
       process.run(access,images, accessR,results, count);
+      }//GPU
+      else
+#endif
+      {//CPU
+      std::cout<<"information: use CPU for processing."<<std::endl<<std::flush;
+      CDataProcessor<Tdata,Taccess> process(locks
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      );
+      process.run(access,images, accessR,results, count);
+      }//CPU
       break;
     }//process
     case 2:

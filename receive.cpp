@@ -9,15 +9,14 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.0h"
+#define VERSION "v0.3.0i"
 
 //thread lock
 #include "CDataStore.hpp"
 #ifdef DO_GPU
 #include "CDataProcessorGPU.hpp"
-#else
+#endif //DO_GPU
 #include "CDataProcessor.hpp"
-#endif //!DO_GPU
 #include "CDataReceive.hpp"
 
 using namespace cimg_library;
@@ -45,14 +44,15 @@ int main(int argc,char **argv)
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
   const int threadCount=cimg_option("-c",0,"thread count");
   const unsigned short port=cimg_option("-p", 1234, "port where the packets are sent on the receiving device");
-  //const bool spin=cimg_option("-sp", 1, "type of udp sending, possible values : {0 (block)|1 (spin)}");
-
-  //définition en spin par défaut, block is not adequate for parallel threads
+#ifdef DO_GPU
+  const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
+        bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"show GUI (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
+#endif //DO_GPU
 
   ///standard options
   #if cimg_display!=0
   const bool show_X=cimg_option("-X",true,NULL);//-X hidden option
-  bool show=cimg_option("--show",show_X,"show GUI (or -X option)");show=show_X|show;//same --show or -X option
+        bool show=cimg_option("--show",show_X,"show GUI (or -X option)");show=show_X|show;//same --show or -X option
   #endif
   const bool show_h   =cimg_option("-h",    false,NULL);//-h hidden option
         bool show_help=cimg_option("--help",show_h,"help (or -h option)");show_help=show_h|show_help; //same --help or -h option
@@ -126,14 +126,25 @@ int main(int argc,char **argv)
     case 1:
     {//process
 #ifdef DO_GPU
+      if(use_GPU)
+      {//GPU
+      std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
       CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
-#else
-      CDataProcessor<Tdata,Taccess> process(locks
-#endif //!DO_GPU
       , CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_PROCESSED //images
       , CDataAccess::STATUS_FREE,    CDataAccess::STATUS_FILLED    //results
       );
       process.run(access,images, accessR,results, count);
+      }//GPU
+      else
+#endif
+      {//CPU
+      std::cout<<"information: use CPU for processing."<<std::endl<<std::flush;
+      CDataProcessor<Tdata,Taccess> process(locks
+      , CDataAccess::STATUS_RECEIVED,CDataAccess::STATUS_PROCESSED //images
+      , CDataAccess::STATUS_FREE,    CDataAccess::STATUS_FILLED    //results
+      );
+      process.run(access,images, accessR,results, count);
+      }//CPU
       break;
     }//process
     case 2:
