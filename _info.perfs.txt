@@ -1,0 +1,8 @@
+#rockpro64
+
+##process_sequential
+./process_sequential -s 4096 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg  -n  123456
+###file (iotop)
+make clear; ./process_sequential ... &>/dev/null #120MB/s
+./process_sequential ... &>/dev/null             # 85MB/s
+
