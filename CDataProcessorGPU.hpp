@@ -18,6 +18,13 @@ using compute::lambda::_1;
 
 #include "CDataProcessor.hpp"
 
+//! base for GPU process 
+/**
+ * kernel do a simple copy of the data
+ * \note presently, this class launch GPU compution on a single data vector and wait for result (this is very slow !)
+ * , please use queueing and dequeuing classes to have great performances.
+ * This class might be used for debug or test only.
+**/
 template<typename Tdata, typename Taccess=unsigned char>
 class CDataProcessorGPU : public CDataProcessor<Tdata, Taccess>
 {

@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.1e"
+#define VERSION "v0.3.1f"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -44,8 +44,10 @@ int main(int argc,char **argv)
   const int nbuffer=1;
 #ifdef DO_GPU
   const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
-        bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"show GUI (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
+        bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"use GPU for compution (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
 #endif //DO_GPU
+  const bool do_check_C=cimg_option("-C",false,NULL);//-G hidden option
+        bool do_check=cimg_option("--do-check",do_check_C,"do data check, e.g. test pass (or -C option)");do_check=do_check_C|do_check;//same --do_check or -C option
 
   ///standard options
   #if cimg_display!=0
@@ -98,19 +100,24 @@ int main(int argc,char **argv)
   std::vector<omp_lock_t*> locks;locks.push_back(&print_lock);locks.push_back(&lck);locks.push_back(&lckR);
   std::vector<omp_lock_t*> locksR;locksR.push_back(&print_lock);locksR.push_back(&lckR);
 
+  //do check
+  unsigned int check_error=0;
+
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
   boost::compute::device gpu = boost::compute::system::default_device();
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu)
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, check_error, gpu)
 #else
-  #pragma omp parallel shared(print_lock, access,images, accessR,results)
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, check_error)
 #endif //!DO_GPU
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
 
   #pragma omp single
   {
-  printf("\ninfo: running single thread over %d.\n",tn);fflush(stdout);
+  printf("\ninfo: running single thread over %d.\n",tn);
+  if(do_check) std::cout<<"information: checking data, i.e. test, activated (slow process !)\n";
+  fflush(stdout);
   }//single
 
   //run threads
@@ -153,6 +160,12 @@ int main(int argc,char **argv)
         generate.iteration(access,images,0,i);
         process->iteration(access,images, accessR,results, 0,i);
         store.iteration(accessR,results, 0,i);
+        //check
+        if(do_check)
+        {
+          if(images[0] ==i) NULL; else {++check_error;std::cout<<"compution error: bad generate class for this test."<<std::endl<<std::flush;}
+          if(results[0]==i) NULL; else {++check_error;std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<"."<<std::endl<<std::flush;}
+        }
       }//vector loop
       break;
     }//sequential
@@ -164,6 +177,12 @@ int main(int argc,char **argv)
 
   access.print("accessR (free state)",false);fflush(stderr);
   images.print("CImgListR",false);
+
+  if(do_check)
+  {
+    if(check_error>0) std::cout<<"test: fail ("<<check_error<<" errors over "<<count<<" iterations)."<<std::endl;
+    else std::cout<<"test: pass."<<std::endl;
+  }//if
   return 0;
 }//main
 
