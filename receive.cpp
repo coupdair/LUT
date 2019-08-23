@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.0"
+#define VERSION "v0.3.1d"
 
 //thread lock
 #include "CDataStore.hpp"
@@ -29,7 +29,7 @@ typedef unsigned int  Tdata;
 int main(int argc,char **argv)
 {
   ///command arguments, i.e. CLI option
-  cimg_usage(std::string("generate and store data.\n" \
+  cimg_usage(std::string("receive (,  process) and store data.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./store -h -I\n" \
   "        ./store -s 1024 -n 123 -X true -o samples/sample.png -p 1234\n" \
@@ -42,7 +42,7 @@ int main(int argc,char **argv)
   const int width=cimg_option("-s",1024, "size   of udp buffer");
   const int count=cimg_option("-n",123,  "number of vector");  //! \todo [high] should be NO count of the vectors with an infinite loop (to implement)
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
-  const int threadCount=cimg_option("-c",0,"thread count");
+  const int threadCount=cimg_option("-c",0,"thread count (2 for receiving only and 4 for processing)");
   const unsigned short port=cimg_option("-p", 1234, "port where the packets are sent on the receiving device");
 #ifdef DO_GPU
   const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
@@ -111,7 +111,7 @@ int main(int argc,char **argv)
 
   #pragma omp single
   {
-  if(tn<4) {printf("error: run error, this process need at least 4 threads (presently only %d available)\n",tn);exit(2);}
+  if(tn<4) {if(tn!=2) {printf("error: run error, this process need at least 2 (or 4) threads (presently only %d available)\n",tn);exit(2);}}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
   }//single
 
@@ -124,6 +124,14 @@ int main(int argc,char **argv)
       break;
     }//receive
     case 1:
+    {//store
+      //! store either if processing or not (i.e. 2 or 4 threads)
+      if(tn==2) std::cout<<"information: no processing as thread number need to be at least up to 4."<<std::endl<<std::flush;
+      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, (tn==2)?CDataAccess::STATUS_FILLED:CDataAccess::STATUS_PROCESSED);//images
+      store.run(access,images, count);
+      break;
+    }//store
+    case 2:
     {//process
 #ifdef DO_GPU
       if(use_GPU)
@@ -147,12 +155,6 @@ int main(int argc,char **argv)
       }//CPU
       break;
     }//process
-    case 2:
-    {//store
-      CDataStore<Tdata, Taccess> store(locks, imagefilename,digit, CDataAccess::STATUS_PROCESSED);//images
-      store.run(access,images, count);
-      break;
-    }//store
     case 3:
     {//store
       CDataStore<Tdata, Taccess> store(locksR, resultfilename,digit, CDataAccess::STATUS_FILLED);//results
