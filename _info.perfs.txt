@@ -3,6 +3,14 @@
 ##process_sequential
 ./process_sequential -s 4096 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg  -n  123456
 ###file (iotop)
-make clear; ./process_sequential ... &>/dev/null #120MB/s
+make clear; ./process_sequential ... &>/dev/null #120MB/s (2.4GB/20s)
 ./process_sequential ... &>/dev/null             # 85MB/s
+
+##process
+./process -s 4096 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg  -n  123456
+###file (iotop)
+make clear; ./process ... &>/dev/null           #105MB/s (2.4GB/23s)
+./process ... &>/dev/null                       # 90MB/s
+make clear; ./process -s  8192 ... &>/dev/null  #180MB/s (4.3GB/25s)
+make clear; ./process -s 16384 ... &>/dev/null  #230MB/s (8.1GB/35s)
 
