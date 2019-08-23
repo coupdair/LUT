@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.1d"
+#define VERSION "v0.3.1e"
 
 //thread lock
 #include "CDataStore.hpp"
@@ -48,6 +48,8 @@ int main(int argc,char **argv)
   const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
         bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"show GUI (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
 #endif //DO_GPU
+  const bool do_check_C=cimg_option("-C",false,NULL);//-G hidden option
+        bool do_check=cimg_option("--do-check",do_check_C,"do data check, e.g. test pass (or -C option)");do_check=do_check_C|do_check;//same --do_check or -C option
 
   ///standard options
   #if cimg_display!=0
@@ -119,8 +121,9 @@ int main(int argc,char **argv)
   {
     case 0:
     {//receive
-      CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service);
+      CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service, do_check);
       receive.run(access,images, count);
+      receive.show_checking();
       break;
     }//receive
     case 1:
