@@ -58,7 +58,8 @@ receive_run:
 	./receive -c 4 -s $(FRAME_SIZE) -b 16 -n 254 -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT) --use-GPU
 
 clear:
-	rm -f $(DATA)/samples/* $(DATA)/results/*
+	rm -fr $(DATA)/samples/ $(DATA)/results/
+	mkdir  $(DATA)/samples/ $(DATA)/results/
 	rm -f sample_??????.cimg
 
 clean: clear
