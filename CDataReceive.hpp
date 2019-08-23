@@ -50,15 +50,13 @@ void timer_handler(const boost::system::error_code& error)
 
 #include "CDataBuffer.hpp"
 
-//!\todo [high] . need to have more than 255 levels (unsigned char -> Tdata)
-
 template<typename Tdata, typename Taccess=unsigned char>
 class CDataReceive : public CDataBuffer<Tdata, Taccess>
 {
 public:
 
-  std::vector<boost::shared_ptr<udp_server> > servers;
-  boost::shared_ptr<udp_server> s;
+  std::vector<boost::shared_ptr<udp_server<Tdata> > > servers;
+  boost::shared_ptr<udp_server<Tdata> > s;
   boost::asio::io_service *io_service;
   std::vector<Tdata>compare_vector;
   std::vector<Tdata> rec_buf;
@@ -68,7 +66,7 @@ public:
 #define TIMER_DELAY 543
 
   CDataReceive(std::vector<omp_lock_t*> &lock, unsigned short port, int buf_size, boost::asio::io_service *io_service, bool do_check=false, bool do_check_exit=false) : CDataBuffer<Tdata, Taccess>(lock)
-   , s(new udp_server(*io_service, port, buf_size))
+   , s(new udp_server<Tdata>(*io_service, port, buf_size))
    , io_service(io_service)
    , do_check(do_check), do_check_exit(do_check_exit)
   {

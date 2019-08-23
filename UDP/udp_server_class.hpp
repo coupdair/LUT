@@ -17,6 +17,7 @@
 
 using boost::asio::ip::udp;
 
+template<typename Tdata>
 class udp_server : coroutine
 {
 public:
@@ -30,7 +31,7 @@ public:
 
   }
 
-  void operator()(boost::system::error_code ec, std::vector<unsigned char> *rec_buf, std::size_t n = 0)
+  void operator()(boost::system::error_code ec, std::vector<Tdata> *rec_buf, std::size_t n = 0)
   {
     //infinite loop for receive (and send back)
     reenter (this) for (;;)
@@ -90,8 +91,8 @@ public:
 
     void operator()(boost::system::error_code ec, std::size_t n = 0)
     {
-      std::vector<unsigned char> *rec_buf(0);
-      std::vector<unsigned char> rec_vec;
+      std::vector<Tdata> *rec_buf(0);
+      std::vector<Tdata> rec_vec;
       rec_buf= &rec_vec;
       (*p_)(ec, rec_buf, n);
     }
@@ -111,7 +112,7 @@ public:
 
 private:
   udp::socket socket_;
-  std::vector<unsigned char> buffer_;
+  std::vector<Tdata> buffer_;
   udp::endpoint sender_;
   allocator allocator_;
   //! count received

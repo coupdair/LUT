@@ -27,6 +27,8 @@ using namespace cimg_library;
 typedef unsigned char Taccess;
 typedef unsigned int  Tdata;
 
+//! \todo [high] add data test
+
 int main(int argc,char **argv)
 {
   ///command arguments, i.e. CLI option

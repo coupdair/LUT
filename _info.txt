@@ -29,5 +29,5 @@ exit
 ./receive      -s 4096 -b  16 -n 123 2>/dev/null | grep 'R'
 
 #show buffer status
-./generate      -s 4096 -b  16 -n 123 >/dev/null
+./generate     -s 4096 -b  16 -n 123 >/dev/null
 

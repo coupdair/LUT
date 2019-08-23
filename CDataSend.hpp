@@ -24,7 +24,6 @@ public:
   udp::socket socket;
   udp::endpoint target;
   boost::uint64_t wait;
-  //! \todo . \c vector<T> \c T should be \c Tdata, try also if send with ASIO works
   std::vector<Tdata> write_buf;
 
   CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, boost::uint64_t wait) : CDataBuffer<Tdata, Taccess>(lock)
