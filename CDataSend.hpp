@@ -24,8 +24,8 @@ public:
   udp::socket socket;
   udp::endpoint target;
   boost::uint64_t wait;
-  //! \todo [medium] \c vector<T> \c T should be \c Tdata, try also if send with ASIO works
-  std::vector<unsigned char> write_buf;
+  //! \todo . \c vector<T> \c T should be \c Tdata, try also if send with ASIO works
+  std::vector<Tdata> write_buf;
 
   CDataSend(std::vector<omp_lock_t*> &lock, std::string ip, unsigned short port, boost::uint64_t wait) : CDataBuffer<Tdata, Taccess>(lock)
     , socket(io_service, udp::endpoint(udp::v4(), 0))
@@ -46,7 +46,7 @@ public:
     write_buf.clear();
     for(int i=0; i<img.width(); ++i)
     {
-      write_buf.push_back(static_cast<unsigned char>(img[i]));
+      write_buf.push_back(static_cast<Tdata>(img[i]));
     }
   }//copy2vector
 

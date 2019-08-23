@@ -50,6 +50,8 @@ void timer_handler(const boost::system::error_code& error)
 
 #include "CDataBuffer.hpp"
 
+//!\todo [high] . need to have more than 255 levels (unsigned char -> Tdata)
+
 template<typename Tdata, typename Taccess=unsigned char>
 class CDataReceive : public CDataBuffer<Tdata, Taccess>
 {
@@ -58,8 +60,8 @@ public:
   std::vector<boost::shared_ptr<udp_server> > servers;
   boost::shared_ptr<udp_server> s;
   boost::asio::io_service *io_service;
-  std::vector<unsigned char>compare_vector;
-  std::vector<unsigned char> rec_buf;
+  std::vector<Tdata>compare_vector;
+  std::vector<Tdata> rec_buf;
 
   bool do_check;unsigned int check_error;bool do_check_exit;
 
@@ -78,7 +80,7 @@ public:
   }
 
   //! copy the data in a vector in a CImg
-  void copy2cimg(std::vector<unsigned char> *vec,CImg<Tdata>&image)
+  void copy2cimg(std::vector<Tdata> *vec,CImg<Tdata>&image)
   {
     for(unsigned int i=0; i < vec->size(); ++i)
     {
