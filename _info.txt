@@ -18,6 +18,13 @@ sudo iftop -i enp1s0
 ##sending
 make send_run
 
+#test
+##receiving
+ssh rock64@193.48.111.156
+./receive -c 2 -s 4096 -b 16 -n 1254 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg -C -E
+##sending
+./send -c 2 -s 4096 -b 8 -n 1256 -w 65432109
+##700kB/s
 
 exit
 
