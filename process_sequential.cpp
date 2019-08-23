@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.1d"
+#define VERSION "v0.3.1e"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -121,27 +121,25 @@ int main(int argc,char **argv)
      //generate
       CDataGenerator<Tdata,Taccess> generate(locks);
      //process
-/*
+      CDataProcessor<Tdata,Taccess> *process;
 #ifdef DO_GPU
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
+      process=new CDataProcessorGPU<Tdata, Taccess>(locks, gpu,width
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
-      process.run(access,images, accessR,results, count);
       }//GPU
       else
 #endif
       {//CPU
-*/
       std::cout<<"information: use CPU for processing."<<std::endl<<std::flush;
-      CDataProcessor<Tdata,Taccess> process(locks
+      process=new CDataProcessor<Tdata, Taccess>(locks
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
-//      }//CPU
+      }//CPU
      //store
       CDataStore<Tdata,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_FILLED);
       //run
@@ -153,7 +151,7 @@ int main(int argc,char **argv)
       for(unsigned int i=0;i<count;++i)
       {
         generate.iteration(access,images,0,i);
-        process.iteration(access,images, accessR,results, 0,i);
+        process->iteration(access,images, accessR,results, 0,i);
         store.iteration(accessR,results, 0,i);
       }//vector loop
       break;
