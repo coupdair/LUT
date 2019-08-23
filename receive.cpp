@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.1f"
+#define VERSION "v0.3.1g"
 
 //thread lock
 #include "CDataStore.hpp"
@@ -50,6 +50,8 @@ int main(int argc,char **argv)
 #endif //DO_GPU
   const bool do_check_C=cimg_option("-C",false,NULL);//-G hidden option
         bool do_check=cimg_option("--do-check",do_check_C,"do data check, e.g. test pass (or -C option)");do_check=do_check_C|do_check;//same --do_check or -C option
+  const bool do_check_CE=cimg_option("-E",false,NULL);//-E hidden option
+        bool do_check_exit=cimg_option("--do-check-exit",do_check_CE,"do data check exit on first error (or -E option)");do_check_exit=do_check_CE|do_check_exit;//same --do_check_exit or -E option
 
   ///standard options
   #if cimg_display!=0
@@ -121,7 +123,7 @@ int main(int argc,char **argv)
   {
     case 0:
     {//receive
-      CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service, do_check);
+      CDataReceive<Tdata, Taccess> receive(locks, port, width, &io_service, do_check,do_check_exit);
       receive.run(access,images, count);
       receive.show_checking();
       break;
