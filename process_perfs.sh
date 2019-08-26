@@ -17,5 +17,7 @@ do
   t=`echo $s | cut -d' ' -f4 | sed 's/m/min+/;s/\./s/' | head -c -5`
   g=`echo $s | cut -d' ' -f5`'B'
   r=`units "$g/($t)" MB/s -t | cut -d'.' -f1`
-  echo $f $t $g $r'MB/s'
+  ts=`units "$t" s -t | cut -d'.' -f1`
+  echo $f'B' $t $ts's' $g $r'MB/s'
 done > process_perfs.dat
+

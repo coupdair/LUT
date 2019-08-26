@@ -6,4 +6,10 @@ set output "process_perfs.ps"
 
 set xlabel 'frame size (B)'
 set ylabel 'data rate (MB/s)'
-plot 'process_perfs.dat' u 1:4  w lp title 'data storing rate'
+plot 'process_perfs.dat' u 1:5  w lp title 'data storing rate'
+
+
+set xlabel 'frame size (B)'
+set ylabel 'elapsed time (s)'
+plot 'process_perfs.dat' u 1:3  w lp title 'elapsed time'
+
