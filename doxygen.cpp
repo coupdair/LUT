@@ -7,9 +7,8 @@
 * table of content:
 * \li \ref sectionCodeHistory
 * \li \ref sectionCommandLine
-* \li \ref sectionServerCommand
-* \li \ref sectionDriverCommand
-* \li \ref sectionSCserverDocumentation
+* \li \ref sectionRunCommand
+* \li \ref sectionDocumentation
 * \li \ref sectionDoxygenSyntax
 *
 * \section sectionCodeHistory Modifications
@@ -20,7 +19,7 @@
 
 * \section sectionCommandLine command line options
 *
-* - all process that have processing class might have \c --use-GPU CLI option if \c DO_GPU is set in \c Makefile
+* \note all process that have processing class might have \c --use-GPU CLI option if \c DO_GPU is set in \c Makefile
 *
 * - process
 * \verbinclude "process_help.output"
@@ -37,24 +36,56 @@
 * - store (old process)
 * \verbinclude "store_help.output"
 *
-* \section sectionSCserverDocumentation documentation outline
+* \section sectionCompile compiling processes
+*
+* - many current processes\n
+*   \c make \c all
+*
+* - single one, e.g. process\n
+*   \c make \c process
+*   \see \c Makefile and \c _info.txt
+*
+* - clear images\n
+*   \c make \c clear
+*
+* - clean all\n
+*   \c make \c clean
+*
+* \section sectionRunCommand running processes
+*
+* - process* on their own\n
+*   \c make \c process_run
+*   \see \c Makefile and \c _info.txt
+*
+* - send and receive\n
+*   \c make \c receive_run
+*   \c make \c send_run
+*   \see \c Makefile and \c _info.txt
+*
+* \section sectionDocumentation documentation outline
 * This is the reference documentation of 
-* <a href="http://wiki.ganil.fr/gap/">NUMEXO2 register server</a>, 
+* <a href="http://wiki.ganil.fr/gap/">RockAMali</a> software suite, 
 * from the <a href="http://www.ganil-spiral2.eu">GANIL</a>.\n\n
-* The main function is in <a href="SC__server__numexo_8cc.html">SC_server_numexo.cc</a> source file.\n\n
+* The main functions are in several files (one source file for each process)
+* - <a href="process_8cpp.html">process</a>
+* - <a href="process__sequential_8cpp.html">process sequential</a>
+* - <a href="receive_8cpp.html">receive</a>
+* - <a href="send_8cpp.html">send</a>
+* \n
 * This documentation has been automatically generated from the sources,
+* (and especially <a href="doxygen_8cpp.html">doxygen.cpp</a> for this main page -no C++ code-)
 * using the tool <a href="http://www.doxygen.org">doxygen</a>. It should be readed as HTML, LaTex and man page.\n
 * It contains both
 * \li a detailed description of all classes and functions
-* \li TODO: a user guide (cf. \ref pages.html "related pages")
+* \li TODO: a user guide (cf. \ref pages.html "related pages") \see \c _info.txt
 *
 * that as been documented within the sources.
 *
 * \par Additional needed libraries:
 *
-* \li \c gc_ref:   see \c gc_liste_string.h.
-* \li \c FDT:      see \c fdt.h
-* \li \c Drivers:  see \c Device.hxx
+* \li \c CImg
+* \li \c BOOST::ASIO
+* \li \c BOOST::compute
 *
 * \section sectionDoxygenSyntax make documentation using Doxygen syntax
 * Each function in the source code should be commented using \b doxygen \b syntax in the same file.
@@ -96,101 +127,22 @@
 **/
 
 /**
-\page pageServerCommand NUMEXO2 register server commands
+\page pagePerfs Performances for RockAMali
 * table of content:
-* \li \ref sectionCmdB3
-* \li \ref sectionCmdC2SA
-* \li \ref sectionCmdFADC
-* \li \ref sectionCmdGTS
-* \li \ref sectionCmdV5
-* \li \ref sectionCmdV6
-* \li \ref sectionCmdV6_S3
+* \li \ref sectionStore
+* \li \ref sectionNetwork
 *
-* \section sectionCmdB3 B3
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.B3.output"
+* \section sectionStore storing performances
 *
-* \section sectionCmdC2SA C2SA
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.C2SA.output"
+* \note clean image files before running, as if files are overrited, it hield to smaller performances, e.g. 120MB/s to 80MB/s, so please remove image files !
 *
-* \section sectionCmdFADC FADC
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.FADC.output"
+* \verbinclude "process_perfs.dat"
+* 
+* \image html store_plot.png "data rate vs frame size"
 *
-* \section sectionCmdGTS GTS
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.GTS.output"
+* \section sectionNetwork ethernet performances
 *
-* \section sectionCmdV5 V5
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.V5.output"
+* \image html network_3Dplot.png "data rate vs wait time and frame size"
 *
-* \section sectionCmdV6 V6
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.V6.output"
-*
-* \section sectionCmdV6_S3 V6 S3
-* \verbinclude "/home/coudert/SC_Embedded/trunk/NUMEXO2/SCserver.service.V6_S3.output"
-*
-**/
-
-/**
-\page pageGit Git repository for NUMEXO2 register server
-* table of content:
-* \li \ref sectionGitLayout
-*
-* \section sectionGitLayout Git repository layout (and history)
-*
-* Git repository
-*
-* \image html git_graph.png "git layout"
-*
-* \li branches in blue  color
-* \li projects in green color
-*
-**/
-
-/**
-\page pageConnection server connections
-* device and client relations with SC server:
-* \dot
-* digraph connection {
-* node[shape=record];
-**
-* //nodes
-* ///device nodes
-* sensor[ label="temperature registers\nmax6627 as sensorV5nV6" URL="\ref module_numexo2.hxx"];
-* v6[ label="Virtex6 registers" URL="\ref device_spi_v6_numexo.cc"];
-* b3[ label="B3 registers" URL="\ref device_spi_b3_numexo.cc"];
-* v5[ label="Virtex5/PLL registers" URL="\ref device_v5_numexo.cc"];
-* gts[ label="GTS registers" URL="\ref device_numexo2_gts.cc"];
-* adc[ label="ADC registers" URL="\ref device_adc_interface_numexo.cc"];
-* frame[ label="frame readout" URL="\ref device_numexo2_readout.cc"];
-* ///driver nodes
-* frame_driver[  label="Virtex5 frame readout\n/dev/my_fifo driver\n(custom)" shape=ellipse];
-* memory_driver[ label="register by memory map\n/dev/memory driver\n(custom)" shape=ellipse URL="\ref device_memory"];
-* spi_driver[    label="register by SPI\n/dev/spidev* driver\n(standard)"     shape=ellipse URL="\ref spi"];
-* //[ label="" URL="\ref "];
-* server[ label="Virtex5/PPC\nthis SC server" URL="\ref SC_server_numexo.cc" color=green];
-*
-* //links
-* spi_driver->sensor[style="dashed"];sensor->server[label="SPI"];
-* spi_driver->v6[style="dashed"];v6->server[label="SPI"];
-* spi_driver->b3[style="dashed"];b3->server[label="SPI"];
-* spi_driver->v5[style="dashed"];
-* memory_driver->v5[style="dashed"];v5->server[label="mmap or SPI"];
-* memory_driver->gts[style="dashed"];gts->server[label="mmap"];
-* memory_driver->adc[style="dashed"];adc->server[label="mmap"];
-* frame_driver->frame[style="dashed"];frame->server[label="readout"];
-**
-* //client nodes
-* SC_client[label="SC client" color=blue];
-* GECO[label="GECo" color=blue];
-* NARVAL[label="NARVAL" color=blue];
-*
-* //links
-* server->SC_client[label="SOAP"];SC_client->server
-* server->GECO[label="SOAP"];GECO->server
-* server->NARVAL[label="TCP"];
-**
-* }
-* \enddot
-* Note: a few nodes of the above graph are clickable and link to corresponding code
-* (in the HTML output), e.g. devices.
 **/
 

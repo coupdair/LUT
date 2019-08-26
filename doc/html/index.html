@@ -85,9 +85,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <ul>
 <li><a class="el" href="index.html#sectionCodeHistory">Modifications</a> </li>
 <li><a class="el" href="index.html#sectionCommandLine">command line options</a> </li>
-<li>sectionServerCommand </li>
-<li>sectionDriverCommand </li>
-<li><a class="el" href="index.html#sectionSCserverDocumentation">documentation outline</a> </li>
+<li><a class="el" href="index.html#sectionRunCommand">running processes</a> </li>
+<li><a class="el" href="index.html#sectionDocumentation">documentation outline</a> </li>
 <li><a class="el" href="index.html#sectionDoxygenSyntax">make documentation using Doxygen syntax</a></li>
 </ul>
 <h1><a class="anchor" id="sectionCodeHistory"></a>
@@ -98,9 +97,7 @@ Modifications</h1>
 </ul>
 <h1><a class="anchor" id="sectionCommandLine"></a>
 command line options</h1>
-<ul>
-<li>all process that have processing class might have <code>&ndash;use-GPU</code> CLI option if <code>DO_GPU</code> is set in <code>Makefile</code> </li>
-</ul>
+<dl class="section note"><dt>Note:</dt><dd>all process that have processing class might have <code>&ndash;use-GPU</code> CLI option if <code>DO_GPU</code> is set in <code>Makefile</code> </dd></dl>
 <ul>
 <li>process <pre class="fragment">
  process: generate, process and store data.
@@ -222,30 +219,78 @@ command line options</h1>
     --version        false                    show version (or -v option)
 </pre></li>
 </ul>
-<h1><a class="anchor" id="sectionSCserverDocumentation"></a>
-documentation outline</h1>
-<p>This is the reference documentation of <a href="http://wiki.ganil.fr/gap/">NUMEXO2 register server</a>, from the <a href="http://www.ganil-spiral2.eu">GANIL</a>.<br/>
-<br/>
- The main function is in <a href="SC__server__numexo_8cc.html">SC_server_numexo.cc</a> source file.<br/>
-<br/>
- This documentation has been automatically generated from the sources, using the tool <a href="http://www.doxygen.org">doxygen</a>. It should be readed as HTML, LaTex and man page.<br/>
- It contains both </p>
+<h1><a class="anchor" id="sectionCompile"></a>
+compiling processes</h1>
 <ul>
-<li>a detailed description of all classes and functions </li>
-<li>TODO: a user guide (cf. related pages)</li>
+<li>many current processes<br/>
+ <code>make</code> <code>all</code> </li>
 </ul>
-<p>that as been documented within the sources.</p>
+<ul>
+<li>single one, e.g. process<br/>
+ <code>make</code> <code>process</code> <dl class="section see"><dt>See also:</dt><dd><code>Makefile</code> and <code>_info.txt</code> </dd></dl>
+</li>
+<li>clear images<br/>
+ <code>make</code> <code>clear</code> </li>
+</ul>
+<ul>
+<li>clean all<br/>
+ <code>make</code> <code>clean</code> </li>
+</ul>
+<h1><a class="anchor" id="sectionRunCommand"></a>
+running processes</h1>
+<ul>
+<li>process* on their own<br/>
+ <code>make</code> <code>process_run</code> <dl class="section see"><dt>See also:</dt><dd><code>Makefile</code> and <code>_info.txt</code> </dd></dl>
+</li>
+<li>send and receive<br/>
+ <code>make</code> <code>receive_run</code> <code>make</code> <code>send_run</code> <dl class="section see"><dt>See also:</dt><dd><code>Makefile</code> and <code>_info.txt</code> </dd></dl>
+</li>
+</ul>
+<h1><a class="anchor" id="sectionDocumentation"></a>
+documentation outline</h1>
+<p>This is the reference documentation of <a href="http://wiki.ganil.fr/gap/">RockAMali</a> software suite, from the <a href="http://www.ganil-spiral2.eu">GANIL</a>.<br/>
+<br/>
+ The main functions are in several files (one source file for each process)</p>
+<ul>
+<li><a href="process_8cpp.html">process</a></li>
+<li><a href="process__sequential_8cpp.html">process sequential</a></li>
+<li><a href="receive_8cpp.html">receive</a></li>
+<li><a href="send_8cpp.html">send</a> <br/>
+ This documentation has been automatically generated from the sources, (and especially <a href="doxygen_8cpp.html">doxygen.cpp</a> for this main page -no C++ code-) using the tool <a href="http://www.doxygen.org">doxygen</a>. It should be readed as HTML, LaTex and man page.<br/>
+ It contains both <ul>
+<li>a detailed description of all classes and functions </li>
+<li>TODO: a user guide (cf. related pages) <dl class="section see"><dt>See also:</dt><dd><code>_info.txt</code> </dd></dl>
+that as been documented within the sources.</li>
+</ul>
 <dl class="section user"><dt>Additional needed libraries:</dt><dd></dd></dl>
 <ul>
-<li><code>gc_ref:</code> see <code>gc_liste_string.h</code>. </li>
-<li><code>FDT:</code> see <code>fdt.h</code> </li>
-<li><code>Drivers:</code> see <code>Device.hxx</code> </li>
+<li><code>CImg</code> </li>
+<li><code>BOOST::ASIO</code> </li>
+<li><code>BOOST::compute</code> </li>
+</ul>
+</li>
 </ul>
 <h1><a class="anchor" id="sectionDoxygenSyntax"></a>
 make documentation using Doxygen syntax</h1>
 <p>Each function in the source code should be commented using <b>doxygen</b> <b>syntax</b> in the same file. The documentation need to be written before the function. The basic syntax is presented in this part. </p>
-<pre class="fragment"></pre><p>Two kind of comments are needed for <b>declaration</b> and <b>explanation</b> <b>parts</b> of the function: Standart documentation should the following (<b>sample</b> of code documentation): </p>
-<pre class="fragment"></pre><p>In both declaration and explanation part, <b>writting</b> and <b>highlithing</b> syntax can be the following:<br/>
+<pre class="fragment">//!This comment will be both in declaration and explanation of the function
+/**
+ * This comment will be in explanation part only
+**/
+</pre><p>Two kind of comments are needed for <b>declaration</b> and <b>explanation</b> <b>parts</b> of the function: Standart documentation should the following (<b>sample</b> of code documentation): </p>
+<pre class="fragment">//!BothInDeclarationNExplanation
+/** 
+ * InExplanationPartOnly
+ * \param arg1 = ExplanationOnThisFunctionArgument
+ * \param arg2 = ExplanationOnThisFunctionArgument
+ *
+ * \code
+ *   AnExampleOfUse
+ * \endcode
+ *
+ * \see AnOtherFunctionOrAvariable
+**/
+</pre><p>In both declaration and explanation part, <b>writting</b> and <b>highlithing</b> syntax can be the following:<br/>
 <br/>
 </p>
 <ul>
@@ -272,7 +317,10 @@ make documentation using Doxygen syntax</h1>
 <li><code>\note</code> to add a few notes </li>
 <li><code>\attention</code> for SOMETHING NOT FULLY DEFINED YET </li>
 <li><code>\warning</code> to give a few warning on the function <dl class="section note"><dt>Note:</dt><dd>these keywords need to be closed using <code>\end*</code> </dd></dl>
-<pre class="fragment"></pre></li>
+<pre class="fragment">\code
+  WriteYourExample
+\endcode
+</pre></li>
 </ul>
 <p>Many other keywords are defined, so please read the documentation of <a href="http://www.doxygen.org/commands.html">doxygen</a>. </p>
 </div></div><!-- contents -->
