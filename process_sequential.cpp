@@ -30,7 +30,7 @@ typedef unsigned int  Tdata;
 int main(int argc,char **argv)
 {
   ///command arguments, i.e. CLI option
-  cimg_usage(std::string("generate, process and store data.\n" \
+  cimg_usage(std::string("generate, process and store data sequentialy.\n" \
   " It uses different GNU libraries (see --info option)\n\n" \
   " usage: ./process -h\n" \
   "        ./process -s 1024 -n 123 -X true -p 1234 -i 10.10.15.1 -w 1234657\n" \
