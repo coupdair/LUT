@@ -4,12 +4,11 @@
 set terminal postscript landscape enhanced color dashed lw 1 "DejaVuSans" 12
 set output "process_perfs.ps"
 
-set xlabel 'frame size (B)'
-set ylabel 'data rate (MB/s)'
-plot 'process_perfs.dat' u 1:5  w lp title 'data storing rate'
+set xlabel  'frame size (B)'
+set ylabel  'data rate (MB/s)' tc lt 1
+set ytics  nomirror tc lt 1
+set y2label 'frame rate (1/s)' tc lt 2
+set y2tics nomirror tc lt 2
 
-
-set xlabel 'frame size (B)'
-set ylabel 'elapsed time (s)'
-plot 'process_perfs.dat' u 1:3  w lp title 'elapsed time'
+plot 'process_perfs.dat' u 2:6  w lp title 'data storing rate' linetype 1, 'process_perfs.dat' u 2:($1/$4)  w lp title 'frame rate' linetype 2 axes x1y2
 
