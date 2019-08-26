@@ -17,9 +17,8 @@ do
   mv $ft $f
 done
 
-##git graph
-#dot -Gdpi=300 -Tpng graph.dot > graph.png
-convert graph.png -resize 23% doc/git_graph.png
+##graph
+cp -p process_perfs.png doc/store_plot.png
 
 ##make (html and prepare latex)
 doxygen
