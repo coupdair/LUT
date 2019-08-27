@@ -1,5 +1,5 @@
-process.v0.3.0
-process_sequential.v0.3.2
+process.v0.3.3
+process_sequential.v0.3.3
 receive.v0.3.1
 send.v0.3.1
-store.
+store.v0.2.1
