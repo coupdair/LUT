@@ -58,7 +58,7 @@ public:
   {
     //compute with lambda
     using compute::lambda::_1;
-    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
+    compute::transform(in.begin(), in.end(), out.begin(),
       _1 , queue);
   };//kernelGPU
 

@@ -59,12 +59,11 @@ public:
 
   //! compution kernel for an iteration (compution=copy, here)
   virtual void kernelGPU(compute::vector<Tdata> &in,compute::vector<Tdata> &out
-  , compute::command_queue &queue
-  , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
+  , compute::command_queue &queue)
   {
     //compute with lambda
     using compute::lambda::_1;
-    compute::transform(device_vector1.begin(), device_vector1.end(), device_vector3.begin(),
+    compute::transform(in.begin(), in.end(), out.begin(),
       _1 , queue);
   };//kernelGPU
 
