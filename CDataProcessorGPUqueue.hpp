@@ -94,7 +94,7 @@ public:
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
-    kernel(images[n],image_p[n] ,(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
+    kernel(images[n],(*image_p)[n] ,(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
     //unlock
     this->laccess.set_status(access[n],this->STATE_ENQUEUEING,/*this->set_status*/this->STATUS_QUEUED, this->class_name[5],i,n,c);//processing, processed
 
