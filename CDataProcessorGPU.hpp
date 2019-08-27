@@ -34,7 +34,6 @@ public:
 
   // create vectors on the device
   compute::vector<Tdata> device_vector1;
-  compute::vector<Tdata> device_vector2;
   compute::vector<Tdata> device_vector3;
 
   CDataProcessorGPU(std::vector<omp_lock_t*> &lock
@@ -46,7 +45,7 @@ public:
   )
   : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
   , ctx(device), queue(ctx, device)
-  , device_vector1(VECTOR_SIZE, ctx), device_vector2(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
+  , device_vector1(VECTOR_SIZE, ctx), device_vector3(VECTOR_SIZE, ctx)
   {
     this->debug=true;
     this->class_name="CDataProcessorGPU";
