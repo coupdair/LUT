@@ -72,6 +72,8 @@ public:
     kernelGPU(device_vector1,device_vector3);
     //copy GPU to CPU
     compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), queue);
+    //wait for completion
+    queue.finish();
   };//kernel
 
 };//CDataProcessorGPU
