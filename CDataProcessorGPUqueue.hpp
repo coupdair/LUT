@@ -56,6 +56,7 @@ public:
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
 (*image_p).print("CDataProcessorGPUqueue");
     //assign queue
+//??? wait list
     (*queue_p).clear();
 std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
     for(unsigned int i=0;i<(*image_p).size();++i) (*queue_p).push_back(this->queue);
