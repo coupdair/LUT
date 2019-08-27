@@ -122,7 +122,7 @@ public:
     this->laccess.wait_for_status(access[n],/*this->wait_status*/this->STATUS_QUEUED,this->STATE_PROCESSING, c);//filled, processing
     //compution in local
 //    (*queue_p)[n].finish();
-    queue.finish();
+    this->queue.finish();
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
