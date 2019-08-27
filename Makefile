@@ -50,7 +50,7 @@ process_run:
 	./process -c 3 -s $(FRAME_SIZE) -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
 
 process_sequential_run:
-	./process_sequential -s $(FRAME_SIZE) -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT)
+	./process_sequential -s $(FRAME_SIZE) -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT) -n 258 --do-check --use-GPU
 
 send_run:
 	./send    -c 2 -s $(FRAME_SIZE) -b  8 -n 256 -w 65432109

@@ -33,9 +33,9 @@ public:
   compute::command_queue queue;
 
   // create vectors on the device
-  compute::vector<char> device_vector1;
-  compute::vector<char> device_vector2;
-  compute::vector<char> device_vector3;
+  compute::vector<Tdata> device_vector1;
+  compute::vector<Tdata> device_vector2;
+  compute::vector<Tdata> device_vector3;
 
   CDataProcessorGPU(std::vector<omp_lock_t*> &lock
   , compute::device device, int VECTOR_SIZE
@@ -55,7 +55,7 @@ public:
   }//constructor
 
   //! compution kernel for an iteration (compution=copy, here)
-  virtual void kernelGPU(compute::vector<char> &in,compute::vector<char> &out)
+  virtual void kernelGPU(compute::vector<Tdata> &in,compute::vector<Tdata> &out)
   {
     //compute with lambda
     using compute::lambda::_1;
