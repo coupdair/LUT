@@ -47,11 +47,19 @@ public:
   {
     this->debug=true;
     this->class_name="CDataProcessorGPUqueue";
+    //check data size
     if((*image_p)(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
+    //check buffer size
     if( (*image_p).size()!=(*queue_p).size()
     ||  (*image_p).size()!=(*device_vector1_p).size()
     ||  (*image_p).size()!=(*device_vector3_p).size()
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
+(*image_p).print("CDataProcessorGPUqueue");
+    //assign queue
+    (*queue_p).clear();
+std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
+    for(unsigned int i=0;i<(*image_p).size();++i) (*queue_p).push_back(this->queue);
+std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
     this->check_locks(lock);
   }//constructor
 
@@ -132,8 +140,7 @@ public:
     c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
     //copy local to buffer
-//    results[n]=image_p(n);
-    results[n]=this->image;
+    results[n]=(*image_p)[n];
     //unlock
     this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
