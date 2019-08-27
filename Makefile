@@ -20,7 +20,7 @@ DO_GPU=-DDO_GPU $(LIB_BOOST_COMPUTE)
 #source package
 SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
 
-all: process send receive doc
+all: process_sequential process send receive doc
 #all: process_sequential
 
 gui: main.cpp
@@ -69,6 +69,7 @@ clean: clear
 	rm -f send.X    send
 	rm -f receive.X receive
 	rm -f process.X process
+	rm -f process_sequential.X process_sequential
 
 display:
 	convert -append $(DATA)/samples/sample*.png $(DATA)/samples.png && display samples.png &
