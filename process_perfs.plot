@@ -1,12 +1,12 @@
 #!/usr/bin/gnuplot
 
 #PostScript
-#set terminal postscript landscape enhanced color dashed lw 1 "DejaVuSans" 12
-#set output "process_perfs.ps"
+set terminal postscript landscape enhanced color dashed lw 1 "DejaVuSans" 12
+set output "process_perfs.ps"
 
 #PortableNetworkGraphics
-set terminal png size 1024,512
-set output "process_perfs.png"
+#set terminal png size 1024,512
+#set output "process_perfs.png"
 
 set xlabel  'frame size (B)'
 set ylabel  'data rate (MB/s)' tc lt 1

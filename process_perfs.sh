@@ -1,13 +1,15 @@
 #!/bin/bash
 
 fn=123456
+gpu=--use-GPU
+#gpu=
 
 #run program for several frame sizes
 for i in `cat frames.txt`
 do
   make clear
-  echo frame
-  time ./process -s  -n $fn -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg &>/dev/null
+  echo frame $i
+  time ./process -s $i $gpu -n $fn -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg &>/dev/null
   du -shc /media/temp/samples/
 done 2>&1 | grep -e frame -e real -e total > process_perfs.txt
 
