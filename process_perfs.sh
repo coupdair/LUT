@@ -2,7 +2,7 @@
 
 fn=123456
 gpu=--use-GPU
-#gpu=
+gpu=
 
 #run program for several frame sizes
 for i in `cat frames.txt`
