@@ -147,7 +147,7 @@ int main(int argc,char **argv)
       );
 */
       process=new CDataProcessorGPUqueue<Tdata, Taccess>(locks, gpu,width
-      , &limages,&queues, &device_vector1s,&device_vector3s
+//      , &limages,&queues, &device_vector1s,&device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );

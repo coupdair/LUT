@@ -26,39 +26,40 @@ template<typename Tdata, typename Taccess=unsigned char>
 class CDataProcessorGPUqueue : public CDataProcessorGPU<Tdata, Taccess>
 {
 public:
-  CImgList<Tdata> *image_p;
+/*  CImgList<Tdata> *image_p;
   std::vector<compute::command_queue> *queue_p;
   // create vectors on the device
   std::vector<compute::vector<Tdata> > *device_vector1_p;
   std::vector<compute::vector<Tdata> > *device_vector3_p;
-
+*/
   CDataProcessorGPU(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> *image_p, std::vector<compute::command_queue> *queue_p
-  , std::vector<compute::vector<Tdata> > *device_vector1_p
-  , std::vector<compute::vector<Tdata> > *device_vector3_p
+//  , CImgList<Tdata> *image_p, std::vector<compute::command_queue> *queue_p
+//  , std::vector<compute::vector<Tdata> > *device_vector1_p
+//  , std::vector<compute::vector<Tdata> > *device_vector3_p
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
   )
   : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR)
-  , image_p(image_p), queue_p(queue_p)
-  , device_vector1_p(device_vector1_p), device_vector3_p(device_vector3_p)
+//  , image_p(image_p), queue_p(queue_p)
+//  , device_vector1_p(device_vector1_p), device_vector3_p(device_vector3_p)
   {
     this->debug=true;
     this->class_name="CDataProcessorGPUqueue";
-    if((*image_p)(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
+/*    if((*image_p)(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
     if( (*image_p).size()!=(*queue_p).size()
     ||  (*image_p).size()!=(*device_vector1_p).size()
     ||  (*image_p).size()!=(*device_vector3_p).size()
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
+*/
     this->check_locks(lock);
   }//constructor
 
   //! compution kernel for an iteration (compution=copy, here)
   virtual void kernelGPU(compute::vector<Tdata> &in,compute::vector<Tdata> &out
-  ,compute::command_queue &queue
+  , compute::command_queue &queue
   , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
   {
     //compute with lambda
@@ -96,7 +97,8 @@ public:
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
-    kernel(images[n],image_p[n] ,(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
+//    kernel(images[n],image_p[n] ,(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
+    kernel(images[n],this->image ,this->queue,this->device_vector1,this->device_vector3);
     //unlock
     this->laccess.set_status(access[n],this->STATE_ENQUEUEING,/*this->set_status*/this->STATUS_QUEUED, this->class_name[5],i,n,c);//processing, processed
 
@@ -118,7 +120,8 @@ public:
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],/*this->wait_status*/this->STATUS_QUEUED,this->STATE_PROCESSING, c);//filled, processing
     //compution in local
-    (*queue_p)[n].finish();
+//    (*queue_p)[n].finish();
+    queue.finish();
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
@@ -134,7 +137,8 @@ public:
     c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
     //copy local to buffer
-    results[n]=image_p(n);
+//    results[n]=image_p(n);
+    results[n]=this->image;
     //unlock
     this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
