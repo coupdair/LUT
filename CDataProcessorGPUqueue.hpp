@@ -32,7 +32,7 @@ public:
   std::vector<compute::vector<Tdata> > *device_vector1_p;
   std::vector<compute::vector<Tdata> > *device_vector3_p;
 */
-  CDataProcessorGPU(std::vector<omp_lock_t*> &lock
+  CDataProcessorGPUqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
 //  , CImgList<Tdata> *image_p, std::vector<compute::command_queue> *queue_p
 //  , std::vector<compute::vector<Tdata> > *device_vector1_p
@@ -42,8 +42,7 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
   )
-  : CDataProcessor<Tdata, Taccess>(lock,wait_status,set_status,wait_statusR,set_statusR)
-//  : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR)
+  : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR)
 //  , image_p(image_p), queue_p(queue_p)
 //  , device_vector1_p(device_vector1_p), device_vector3_p(device_vector3_p)
   {
