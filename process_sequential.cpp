@@ -134,7 +134,12 @@ int main(int argc,char **argv)
       CDataProcessor<Tdata,Taccess> *process;
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
-      std::vector<compute::command_queue> queues(nbuffer);
+      std::vector<compute::command_queue> queues;//(nbuffer);
+
+compute::context context(gpu);
+compute::command_queue queue(context, gpu);
+queues.push_back(queue);
+     
       std::vector<compute::vector<Tdata> > device_vector1s(nbuffer);
       std::vector<compute::vector<Tdata> > device_vector3s(nbuffer);
       if(use_GPU)

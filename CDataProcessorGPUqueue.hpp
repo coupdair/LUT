@@ -55,6 +55,8 @@ public:
     ||  (*image_p).size()!=(*device_vector3_p).size()
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
 (*image_p).print("CDataProcessorGPUqueue");
+std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
+/*
     //assign queue
 //??? wait list
     (*queue_p).clear();
@@ -72,6 +74,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
     {(*device_vector1_p)[i].assign(this->device_vector1.begin(),this->device_vector1.end());
      (*device_vector3_p)[i].assign(this->device_vector3.begin(),this->device_vector3.end());} //x
 std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<<std::endl;
+*/
     this->check_locks(lock);
   }//constructor
 
