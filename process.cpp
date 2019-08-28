@@ -9,13 +9,13 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.0"
+#define VERSION "v0.3.3d"
 
 //thread lock
 #include "CDataGenerator.hpp"
 #include "CDataProcessor_morphomath.hpp"
 #ifdef DO_GPU
-#include "CDataProcessorGPU.hpp"
+#include "CDataProcessorGPUqueue.hpp"
 #endif
 #include "CDataStore.hpp"
 
@@ -105,7 +105,12 @@ int main(int argc,char **argv)
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
   boost::compute::device gpu = boost::compute::system::default_device();
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu)
+      CImgList<Tdata> limages(nbuffer,width,1,1,1);
+      compute::context context(gpu);
+      compute::command_queue queue(context, gpu);
+      compute::vector<Tdata> device_vector1(width,context);
+      compute::vector<Tdata> device_vector3(width,context);
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,queue,limages,device_vector1,device_vector3)
 #else
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
 #endif //!DO_GPU
@@ -114,7 +119,11 @@ int main(int argc,char **argv)
 
   #pragma omp single
   {
+#ifdef DO_GPU
+  if(tn<4) {printf("error: run error, this process need at least 4 threads (presently only %d available)\n",tn);exit(2);}
+#else
   if(tn<3) {printf("error: run error, this process need at least 3 threads (presently only %d available)\n",tn);exit(2);}
+#endif //!DO_GPU
   else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   }//single
 
@@ -133,7 +142,8 @@ int main(int argc,char **argv)
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
-      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
+      CDataProcessorGPUenqueue<Tdata, Taccess> process(locks, gpu,width
+      , &limages,&queue, &device_vector1,&device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
@@ -157,6 +167,21 @@ int main(int argc,char **argv)
       store.run(accessR,results, count);
       break;
     }//store
+#ifdef DO_GPU
+    case 3:
+    {//process
+      if(use_GPU)
+      {//GPU
+      std::cout<<"information: use GPU for processing (dequeue)."<<std::endl<<std::flush;
+      CDataProcessorGPUdequeue<Tdata, Taccess> process(locks, gpu,width
+      , &limages,&queue, &device_vector1,&device_vector3
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      );
+      process.run(access,images, accessR,results, count);
+      }//GPU
+    }//process
+#endif
   }//switch(id)
   }//parallel section
 
