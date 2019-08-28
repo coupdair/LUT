@@ -123,7 +123,16 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
 //    kernel(images[n],(*image_p)[n] ,this->queue(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
 //    kernel(images[n],(*image_p)[n] ,this->queue,this->device_vector1,this->device_vector3);
 //    kernel(images[n],(*image_p)[n] ,(*queue_p)[n],this->device_vector1,this->device_vector3);
-    kernel(images[n],(*image_p)[n] ,*queue_p,*device_vector1_p,*device_vector3_p);
+
+//    kernel(images[n],(*image_p)[n] ,*queue_p,*device_vector1_p,*device_vector3_p);
+    kernel(images[n],this->image ,*queue_p,*device_vector1_p,*device_vector3_p);
+
+        //check
+        if(this->do_check)
+        {
+          if(images[n] ==i) NULL; else {++(this->check_error);std::cout<<"compution error: bad generate class for this test."<<std::endl<<std::flush;}
+        }
+
     //unlock
     this->laccess.set_status(access[n],this->STATE_ENQUEUEING,/*this->set_status*/this->STATUS_QUEUED, this->class_name[5],i,n,c);//processing, processed
 
@@ -159,11 +168,21 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
       accessR.print("accessR",false);fflush(stderr);
       this->lprint.unset_lock();
     }
+
+        //check
+        if(this->do_check)
+        {
+//          if((*image_p)[n]==i) NULL;
+          if(this->image==i) NULL;
+          else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<"."<<std::endl<<std::flush;}
+        }
+
     //wait lock
     c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
     //copy local to buffer
-    results[n]=(*image_p)[n];
+//    results[n]=(*image_p)[n];
+    results[n]=this->image;
     //unlock
     this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 

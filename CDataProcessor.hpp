@@ -42,6 +42,7 @@ public:
       printf("code error: locks should have at least 3 locks for %s class.",this->class_name.c_str());
       exit(99);
     }
+    check_error=0;
   }//constructor
 
   //! compution kernel for an iteration
