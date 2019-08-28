@@ -172,9 +172,9 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
         //check
         if(this->do_check)
         {
-//          if((*image_p)[n]==i) NULL;
-          if(this->image==i) NULL;
-          else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<"."<<std::endl<<std::flush;}
+//          if(((*image_p)[n])==i) NULL;
+          if((this->image)==i) NULL;
+          else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<")."<<std::endl<<std::flush;}
         }
 
     //wait lock

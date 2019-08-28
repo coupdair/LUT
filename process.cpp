@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3f"
+#define VERSION "v0.3.3h"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -27,7 +27,7 @@ using namespace cimg_library;
 typedef unsigned char Taccess;
 typedef unsigned int  Tdata;
 
-//! \todo [high] add data test
+//! \todo [high] . add data test
 
 int main(int argc,char **argv)
 {

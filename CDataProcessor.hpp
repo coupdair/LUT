@@ -91,7 +91,7 @@ public:
         //check
         if(do_check)
         {
-          if(image==i) NULL; else {++check_error;std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<"."<<std::endl<<std::flush;}
+          if(image==i) NULL; else {++check_error;std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<")."<<std::endl<<std::flush;}
         }
 
     //wait lock
@@ -108,8 +108,9 @@ public:
   {
     if(do_check)
     {
-    if(check_error>0) std::cout<<"test: fail ("<<check_error<<" errors)."<<std::endl;
-    else std::cout<<"test: pass."<<std::endl;
+    if(check_error>0) std::cout<<"test: fail ("<<check_error<<" errors)";
+    else std::cout<<"test: pass";
+    std::cout<<" (for "<<this->class_name<<")."<<std::endl;
     }//do_check
   }//show_checking
 
