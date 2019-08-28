@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3i"
+#define VERSION "v0.3.3j"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -139,7 +139,7 @@ int main(int argc,char **argv)
 compute::context context(gpu);
 compute::command_queue queue(context, gpu);
 queues.push_back(queue);
-     
+
       std::vector<compute::vector<Tdata> > device_vector1s(nbuffer);
       std::vector<compute::vector<Tdata> > device_vector3s(nbuffer);
       if(use_GPU)

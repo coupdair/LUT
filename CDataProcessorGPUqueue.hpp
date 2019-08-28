@@ -118,7 +118,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
 //    kernel(images[n],(*image_p)[n] ,this->queue(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
-    kernel(images[n],(*image_p)[n] ,this->queue,this->device_vector1,this->device_vector3);
+//    kernel(images[n],(*image_p)[n] ,this->queue,this->device_vector1,this->device_vector3);
+    kernel(images[n],(*image_p)[n] ,(*queue_p)[n],this->device_vector1,this->device_vector3);
     //unlock
     this->laccess.set_status(access[n],this->STATE_ENQUEUEING,/*this->set_status*/this->STATUS_QUEUED, this->class_name[5],i,n,c);//processing, processed
 
@@ -140,8 +141,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],/*this->wait_status*/this->STATUS_QUEUED,this->STATE_PROCESSING, c);//filled, processing
     //compution in local
-//    (*queue_p)[n].finish();
-    this->queue.finish();
+    (*queue_p)[n].finish();
+//    this->queue.finish();
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
