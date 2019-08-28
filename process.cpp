@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3d"
+#define VERSION "v0.3.3e"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -49,6 +49,8 @@ int main(int argc,char **argv)
   const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
         bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"show GUI (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
 #endif //DO_GPU
+  const bool do_check_C=cimg_option("-C",false,NULL);//-G hidden option
+        bool do_check=cimg_option("--do-check",do_check_C,"do data check, e.g. test pass (or -C option)");do_check=do_check_C|do_check;//same --do_check or -C option
 
   ///standard options
   #if cimg_display!=0
@@ -156,8 +158,10 @@ int main(int argc,char **argv)
       CDataProcessor<Tdata,Taccess> process(locks
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
       );
       process.run(access,images, accessR,results, count);
+      process.show_checking();
       }//CPU
       break;
     }//process
@@ -190,6 +194,7 @@ int main(int argc,char **argv)
 
   access.print("accessR (free state)",false);fflush(stderr);
   images.print("CImgListR",false);
+
   return 0;
 }//main
 
