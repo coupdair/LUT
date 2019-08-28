@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3j"
+#define VERSION "v0.3.3k"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -134,14 +134,10 @@ int main(int argc,char **argv)
       CDataProcessor<Tdata,Taccess> *process;
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
-      std::vector<compute::command_queue> queues;//(nbuffer);
-
-compute::context context(gpu);
-compute::command_queue queue(context, gpu);
-queues.push_back(queue);
-
-      std::vector<compute::vector<Tdata> > device_vector1s(nbuffer);
-      std::vector<compute::vector<Tdata> > device_vector3s(nbuffer);
+      compute::context context(gpu);
+      compute::command_queue queue(context, gpu);
+      compute::vector<Tdata> device_vector1(width,context);
+      compute::vector<Tdata> device_vector3(width,context);
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
@@ -152,7 +148,7 @@ queues.push_back(queue);
       );
 */
       process=new CDataProcessorGPUqueue<Tdata, Taccess>(locks, gpu,width
-      , &limages,&queues, &device_vector1s,&device_vector3s
+      , &limages,&queue, &device_vector1,&device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
