@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3l"
+#define VERSION "v0.3.3"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -141,13 +141,14 @@ int main(int argc,char **argv)
       compute::vector<Tdata> device_vector3(width,context);
       if(use_GPU)
       {//GPU
-      std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
 /*
+      std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
       process=new CDataProcessorGPU<Tdata, Taccess>(locks, gpu,width
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
 */
+      std::cout<<"information: use GPU for processing (enqueue and dequeue)."<<std::endl<<std::flush;
       process=new CDataProcessorGPUenqueue<Tdata, Taccess>(locks, gpu,width
       , &limages,&queue, &device_vector1,&device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images

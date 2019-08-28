@@ -21,7 +21,7 @@ DO_GPU=-DDO_GPU $(LIB_BOOST_COMPUTE)
 SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
 
 all: process_sequential process send receive doc
-all: process_sequential process
+#all: process_sequential process
 #all: process_sequential
 
 gui: main.cpp
@@ -48,7 +48,7 @@ doc: doxygen.cpp process.cpp process_sequential.cpp send.cpp receive.cpp  $(SRC_
 	./doxygen.sh
 
 process_run:
-	./process -c 3 -s $(FRAME_SIZE) -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT) -n 258 --use-GPU --do-check 2>/dev/null | grep -e info -e test
+	./process -c 4 -s $(FRAME_SIZE) -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT) -n 258 --use-GPU --do-check 2>/dev/null | grep -e info -e test
 
 process_sequential_run:
 	./process_sequential -s $(FRAME_SIZE) -o $(DATA)$(DIN)$(FIN) -r $(DATA)$(DOUT)$(FOUT) -n 258 --do-check --use-GPU
