@@ -68,7 +68,9 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
 //    std::cout<<(*device_vector1_p)[i].capacity()<<" ";// v
 //    {(*device_vector1_p)[i].assign(vector_size,0,this->queue);(*device_vector3_p)[i].assign(vector_size,0,this->queue);} //x
 //    {(*device_vector1_p)[i]=this->device_vector1;(*device_vector3_p)[i]=this->device_vector3;} //x
-    {(*device_vector1_p)[i].assign(vector_size,(Tdata)0,this->queue);(*device_vector3_p)[i].assign(vector_size,(Tdata)0,this->queue);}
+//    {(*device_vector1_p)[i].assign(vector_size,(Tdata)0,this->queue);(*device_vector3_p)[i].assign(vector_size,(Tdata)0,this->queue);} //x
+    {(*device_vector1_p)[i].assign(this->device_vector1.begin(),this->device_vector1.end());
+     (*device_vector3_p)[i].assign(this->device_vector3.begin(),this->device_vector3.end());} //x
 std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<<std::endl;
     this->check_locks(lock);
   }//constructor
