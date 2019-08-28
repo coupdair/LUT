@@ -175,21 +175,67 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
 
 };//CDataProcessorGPUqueue
 
-/* \todo [highest] en/dequeue class implementation
-//CDataProcessorGPUenqueue
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+//! enqueueing for GPU process
+template<typename Tdata, typename Taccess=unsigned char>
+class CDataProcessorGPUenqueue : public CDataProcessorGPUqueue<Tdata, Taccess>
+{
+public:
+  CDataProcessorGPUenqueue(std::vector<omp_lock_t*> &lock
+  , compute::device device, int vector_size
+  , CImgList<Tdata> *image_p, compute::command_queue *queue_p
+  , compute::vector<Tdata> *device_vector1_p
+  , compute::vector<Tdata> *device_vector3_p
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
+  )
+  : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
+    ,image_p,queue_p,device_vector1_p,device_vector3_p
+    ,wait_status,set_status,wait_statusR,set_statusR
+    )
   {
-    this->iteration_enqueue(access,images, accessR,results, n,i);
-    this->iteration_dequeue(access,images, accessR,results, n,i);
-  }//iteration
+    this->debug=true;
+    this->class_name="CDataProcessorGPUenqueue";
+    this->check_locks(lock);
+  }//constructor
 
-//CDataProcessorGPUdequeue
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     this->iteration_enqueue(access,images, accessR,results, n,i);
+  }//iteration
+};//CDataProcessorGPUenqueue
+
+//! dequeueing for GPU process
+template<typename Tdata, typename Taccess=unsigned char>
+class CDataProcessorGPUdequeue : public CDataProcessorGPUqueue<Tdata, Taccess>
+{
+public:
+  CDataProcessorGPUdequeue(std::vector<omp_lock_t*> &lock
+  , compute::device device, int vector_size
+  , CImgList<Tdata> *image_p, compute::command_queue *queue_p
+  , compute::vector<Tdata> *device_vector1_p
+  , compute::vector<Tdata> *device_vector3_p
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
+  , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
+  , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
+  )
+  : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
+    ,image_p,queue_p,device_vector1_p,device_vector3_p
+    ,wait_status,set_status,wait_statusR,set_statusR
+    )
+  {
+    this->debug=true;
+    this->class_name="CDataProcessorGPUdequeue";
+    this->check_locks(lock);
+  }//constructor
+
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  {
     this->iteration_dequeue(access,images, accessR,results, n,i);
   }//iteration
-*/
+};//CDataProcessorGPUdequeue
 
 #endif //_DATA_PROCESSOR_GPU_QUEUE_
 

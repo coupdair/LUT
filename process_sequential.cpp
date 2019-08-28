@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3k"
+#define VERSION "v0.3.3l"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -132,6 +132,7 @@ int main(int argc,char **argv)
       CDataGenerator<Tdata,Taccess> generate(locks);
      //process
       CDataProcessor<Tdata,Taccess> *process;
+      CDataProcessor<Tdata,Taccess> *deprocess;
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
       compute::context context(gpu);
@@ -147,7 +148,12 @@ int main(int argc,char **argv)
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
 */
-      process=new CDataProcessorGPUqueue<Tdata, Taccess>(locks, gpu,width
+      process=new CDataProcessorGPUenqueue<Tdata, Taccess>(locks, gpu,width
+      , &limages,&queue, &device_vector1,&device_vector3
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      );
+      deprocess=new CDataProcessorGPUdequeue<Tdata, Taccess>(locks, gpu,width
       , &limages,&queue, &device_vector1,&device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
@@ -174,6 +180,9 @@ int main(int argc,char **argv)
       {
         generate.iteration(access,images,0,i);
         process->iteration(access,images, accessR,results, 0,i);
+#ifdef DO_GPU
+        deprocess->iteration(access,images, accessR,results, 0,i);
+#endif
         store.iteration(accessR,results, 0,i);
         //check
         if(do_check)
