@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3h"
+#define VERSION "v0.3.3i"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -107,6 +107,7 @@ int main(int argc,char **argv)
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
   boost::compute::device gpu = boost::compute::system::default_device();
+  //! GPU circular buffer
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
       compute::context context(gpu);
       compute::command_queue queue(context, gpu);
@@ -121,11 +122,7 @@ int main(int argc,char **argv)
 
   #pragma omp single
   {
-#ifdef DO_GPU
-  if(tn<4) {printf("error: run error, this process need at least 4 threads (presently only %d available)\n",tn);exit(2);}
-#else
   if(tn<3) {printf("error: run error, this process need at least 3 threads (presently only %d available)\n",tn);exit(2);}
-#endif //!DO_GPU
   else {printf("\ninfo: running %d threads\n",tn);fflush(stdout);}
   if(do_check) std::cout<<"information: checking data, i.e. test, activated (slow process !)\n";
   }//single
@@ -143,9 +140,20 @@ int main(int argc,char **argv)
     {//process
 #ifdef DO_GPU
       if(use_GPU)
-      {
       {//GPU
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
+      if(tn==3)
+      {//base GPU
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
+      );
+      process.run(access,images, accessR,results, count);
+      process.show_checking();
+      }//GPU
+      else
+      {//enqueue GPU
       CDataProcessorGPUenqueue<Tdata, Taccess> process(locks, gpu,width
       , &limages,&queue, &device_vector1,&device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
@@ -154,8 +162,8 @@ int main(int argc,char **argv)
       );
       process.run(access,images, accessR,results, count);
       process.show_checking();
+      }//enqueue GPU
       }//GPU
-      }
       else
 #endif
       {//CPU
@@ -178,7 +186,7 @@ int main(int argc,char **argv)
     }//store
 #ifdef DO_GPU
     case 3:
-    {//process
+    {//dequeue process
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing (dequeue)."<<std::endl<<std::flush;
@@ -191,7 +199,7 @@ int main(int argc,char **argv)
       process.run(access,images, accessR,results, count);
       process.show_checking();
       }//GPU
-    }//process
+    }//dequeue process
 #endif
   }//switch(id)
   }//parallel section
