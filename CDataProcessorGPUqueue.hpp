@@ -65,9 +65,10 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl
 //!\todo . assign compute::vector
 std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<<std::endl;
     for(int i=0;i<(*image_p).size();++i)
-//    std::cout<<(*device_vector1_p)[i].capacity()<<" ";
-    {(*device_vector1_p)[i]=this->device_vector1;(*device_vector3_p)[i]=this->device_vector3;}
-// {(*device_vector1_p)[i].assign(vector_size,0,this->queue);(*device_vector3_p)[i].assign(vector_size,0,this->queue);}
+//    std::cout<<(*device_vector1_p)[i].capacity()<<" ";// v
+//    {(*device_vector1_p)[i].assign(vector_size,0,this->queue);(*device_vector3_p)[i].assign(vector_size,0,this->queue);} //x
+//    {(*device_vector1_p)[i]=this->device_vector1;(*device_vector3_p)[i]=this->device_vector3;} //x
+    {(*device_vector1_p)[i].assign(vector_size,(Tdata)0,this->queue);(*device_vector3_p)[i].assign(vector_size,(Tdata)0,this->queue);}
 std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<<std::endl;
     this->check_locks(lock);
   }//constructor
