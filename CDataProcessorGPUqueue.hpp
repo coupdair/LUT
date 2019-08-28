@@ -31,6 +31,7 @@ public:
   // create vectors on the device
   compute::vector<Tdata> *device_vector1_p;
   compute::vector<Tdata> *device_vector3_p;
+
   CDataProcessorGPUqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
   , CImgList<Tdata> *image_p, compute::command_queue *queue_p
@@ -40,8 +41,9 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
+  , bool do_check=false
   )
-  : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR)
+  : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR,do_check)
   , image_p(image_p), queue_p(queue_p)
   , device_vector1_p(device_vector1_p), device_vector3_p(device_vector3_p)
   {
@@ -189,10 +191,12 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
+  , bool do_check=false
   )
   : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
     ,image_p,queue_p,device_vector1_p,device_vector3_p
     ,wait_status,set_status,wait_statusR,set_statusR
+    ,do_check
     )
   {
     this->debug=true;
@@ -220,10 +224,12 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
+  , bool do_check=false
   )
   : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
     ,image_p,queue_p,device_vector1_p,device_vector3_p
     ,wait_status,set_status,wait_statusR,set_statusR
+    ,do_check
     )
   {
     this->debug=true;

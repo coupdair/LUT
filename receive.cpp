@@ -117,6 +117,7 @@ int main(int argc,char **argv)
   {
   if(tn<4) {if(tn!=2) {printf("error: run error, this process need at least 2 (or 4) threads (presently only %d available)\n",tn);exit(2);}}
   else {printf("info: running %d threads\n",tn);fflush(stdout);}
+  if(do_check) std::cout<<"information: checking data, i.e. test, activated (slow process !)\n";
   }//single
 
   switch(id)
