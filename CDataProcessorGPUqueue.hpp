@@ -98,10 +98,13 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
   , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
   {
     //copy CPU to GPU
+std::cout<< __FILE__<<"/"<<__func__<<" 1. copy"<<std::endl<<std::flush;
     compute::copy(in.begin(), in.end(), device_vector1.begin(), this->queue);
     //compute
+std::cout<< __FILE__<<"/"<<__func__<<" 2. compute"<<std::endl<<std::flush;
     kernelGPU(device_vector1,device_vector3,this->queue);
     //copy GPU to CPU
+std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     fwait=compute::copy_async(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
   };//kernel
 #endif //SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
@@ -208,8 +211,11 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
 
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
+    std::cout<< __FILE__<<"/"<<__func__<<" 1. enqueue"<<std::endl<<std::flush;
     this->iteration_enqueue(access,bimages, accessR,results, n,i);
+    std::cout<< __FILE__<<"/"<<__func__<<" 2. dequeue"<<std::endl<<std::flush;
     this->iteration_dequeue(access,bimages, accessR,results, n,i);
+    std::cout<< __FILE__<<"/"<<__func__<<" v. done"<<std::endl<<std::flush;
   }//iteration
 
 };//CDataProcessorGPUqueue
