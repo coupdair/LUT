@@ -193,7 +193,7 @@ int main(int argc,char **argv)
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing (dequeue)."<<std::endl<<std::flush;
-      while(device_vector3s.size()!=nbuffer) {std::cout<<"info: dequeue wait for allocation."<<std::endl<<std::flush;usleep(1234);}
+      while(device_vector3s.size()!=nbuffer) {/*std::cout<<"info: dequeue wait for allocation."<<std::endl<<std::flush;*/usleep(1234);}
       CDataProcessorGPUdequeue<Tdata, Taccess> process(locks, gpu,width
       , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
