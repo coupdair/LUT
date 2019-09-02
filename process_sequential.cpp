@@ -9,17 +9,19 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.4f"
+#define VERSION "v0.3.4g"
 
 //thread lock
 #include "CDataGenerator.hpp"
 #include "CDataProcessor_morphomath.hpp"
 #ifdef DO_GPU
-/*
+#ifdef DO_GPU_NO_QUEUE
+#warning "DO_GPU_NO_QUEUE active (this must be CODE TEST only)"
 #include "CDataProcessorGPU.hpp"
-*/
+#else //DO_GPU_NO_QUEUE
 #include "CDataProcessorGPUqueue.hpp"
-#endif
+#endif //with queue
+#endif //DO_GPU
 #include "CDataStore.hpp"
 
 using namespace cimg_library;
@@ -144,13 +146,13 @@ int main(int argc,char **argv)
       for(int i=0;i<nbuffer;++i) queues[i]=new compute::command_queue(context, gpu);
       for(int i=0;i<nbuffer;++i) device_vector1s[i]=new compute::vector<Tdata>(width,context);
       for(int i=0;i<nbuffer;++i) device_vector3s[i]=new compute::vector<Tdata>(width,context);
-/*
+     #ifdef DO_GPU_NO_QUEUE
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
       process=new CDataProcessorGPU<Tdata, Taccess>(locks, gpu,width
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
-*/
+     #else
       std::cout<<"information: use GPU for processing (enqueue and dequeue)."<<std::endl<<std::flush;
       process=new CDataProcessorGPUenqueue<Tdata, Taccess>(locks, gpu,width
       , limages,queues, device_vector1s,device_vector3s
@@ -162,6 +164,7 @@ int main(int argc,char **argv)
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
+     #endif //!DO_GPU_NO_QUEUE
       }//GPU
       else
 #endif
@@ -185,7 +188,9 @@ int main(int argc,char **argv)
         generate.iteration(access,images,0,i);
         process->iteration(access,images, accessR,results, 0,i);
 #ifdef DO_GPU
+       #ifndef DO_GPU_NO_QUEUE
         deprocess->iteration(access,images, accessR,results, 0,i);
+       #endif //!DO_GPU_NO_QUEUE
 #endif
         store.iteration(accessR,results, 0,i);
         //check
