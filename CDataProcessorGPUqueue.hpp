@@ -180,7 +180,11 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
     c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
     //copy local to buffer
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+    results[n]=this->image;
+#else
     results[n]=images[n];
+#endif
     //unlock
     this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
