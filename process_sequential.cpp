@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.4i"
+#define VERSION "v0.3.4j"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -19,6 +19,9 @@
 #warning "DO_GPU_NO_QUEUE active (this must be CODE TEST only)"
 #include "CDataProcessorGPU.hpp"
 #else //DO_GPU_NO_QUEUE
+#ifdef DO_GPU_SEQ_QUEUE
+#warning "DO_GPU_SEQ_QUEUE active (this must be CODE TEST only)"
+#endif
 #include "CDataProcessorGPUqueue.hpp"
 #endif //with queue
 #endif //DO_GPU
@@ -152,7 +155,15 @@ int main(int argc,char **argv)
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
-     #else
+     #else //DO_GPU_NO_QUEUE
+     #ifdef  DO_GPU_SEQ_QUEUE
+      std::cout<<"information: use GPU for processing (sequential queue)."<<std::endl<<std::flush;
+      process=new CDataProcessorGPUqueue<Tdata, Taccess>(locks, gpu,width
+      , limages,queues, device_vector1s,device_vector3s
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      );
+     #else //!DO_GPU_SEQ_QUEUE
       std::cout<<"information: use GPU for processing (enqueue and dequeue)."<<std::endl<<std::flush;
       process=new CDataProcessorGPUenqueue<Tdata, Taccess>(locks, gpu,width
       , limages,queues, device_vector1s,device_vector3s
@@ -164,10 +175,11 @@ int main(int argc,char **argv)
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
+     #endif //!DO_GPU_SEQ_QUEUE
      #endif //!DO_GPU_NO_QUEUE
       }//GPU
       else
-#endif
+#endif //DO_GPU
       {//CPU
       std::cout<<"information: use CPU for processing."<<std::endl<<std::flush;
       process=new CDataProcessor<Tdata, Taccess>(locks
@@ -178,18 +190,15 @@ int main(int argc,char **argv)
      //store
       CDataStore<Tdata,Taccess> store(locksR, imagefilename,digit, CDataAccess::STATUS_FILLED);
       //run
-      /*
-      generate.run(access,images, count);
-      process.run(access,images, accessR,results, count);
-      store.run(accessR,results, count);
-      */
       for(unsigned int i=0;i<count;++i)
       {
         generate.iteration(access,images,0,i);
         process->iteration(access,images, accessR,results, 0,i);
 #ifdef DO_GPU
        #ifndef DO_GPU_NO_QUEUE
+       #ifndef DO_GPU_SEQ_QUEUE
         deprocess->iteration(access,images, accessR,results, 0,i);
+       #endif //!DO_GPU_SEQ_QUEUE
        #endif //!DO_GPU_NO_QUEUE
 #endif
         store.iteration(accessR,results, 0,i);
