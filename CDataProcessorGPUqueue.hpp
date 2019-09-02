@@ -20,7 +20,7 @@ using compute::lambda::_1;
 
 //#define SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
-#warning "SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS active"
+#warning "SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS active (this must be CODE TEST only)"
 #endif
 
 //! base queueing for GPU process (ment for enqueue and dequeue)
@@ -159,7 +159,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
         if(this->do_check)
         {
           if(images[n]==i) NULL;
-          else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<")."<<std::endl<<std::flush;}
+          else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<images[n](0)<<")."<<std::endl<<std::flush;}
         }
 
     //wait lock
