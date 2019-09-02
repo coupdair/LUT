@@ -257,6 +257,7 @@ public:
   virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     this->iteration_dequeue(access,bimages, accessR,results, n,i);
+usleep(123456);
   }//iteration
 };//CDataProcessorGPUdequeue
 
