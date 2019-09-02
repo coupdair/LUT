@@ -32,9 +32,11 @@ process: process.cpp $(SRC_DATA_BUFFER) CDataGenerator.hpp CDataProcessor.hpp CD
 	g++ -O0 -o process   process.cpp $(LIB_CIMG) -Dcimg_display=0 $(DO_GPU) && ./process -h -I && ./process -v > VERSION
 	./process -h 2> process_help.output
 
+#SEQ_GPU=
+SEQ_GPU=-DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+#SEQ_GPU=-DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS -DDO_GPU_NO_QUEUE
 process_sequential: process_sequential.cpp $(SRC_DATA_BUFFER) CDataGenerator.hpp CDataProcessor.hpp CDataProcessorGPU.hpp CDataStore.hpp
-#	g++ -O0 -o process_sequential   process_sequential.cpp $(LIB_CIMG) -Dcimg_display=0 $(DO_GPU) && ./process_sequential -h -I && ./process_sequential -v > VERSION
-	g++ -DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS -DDO_GPU_NO_QUEUE -O0 -o process_sequential   process_sequential.cpp $(LIB_CIMG) -Dcimg_display=0 $(DO_GPU) && ./process_sequential -h -I && ./process_sequential -v > VERSION
+	g++ $(SEQ_GPU) -O0 -o process_sequential   process_sequential.cpp $(LIB_CIMG) -Dcimg_display=0 $(DO_GPU) && ./process_sequential -h -I && ./process_sequential -v > VERSION
 	./process_sequential -h 2> process_sequential_help.output
 
 send: send.cpp $(SRC_DATA_BUFFER) CDataGenerator.hpp CDataSend.hpp

@@ -107,7 +107,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
-    kernel(bimages[n],images[n] ,this->queue,this->device_vector1,this->device_vector3);
+    kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3);
 #else
     kernel(bimages[n],images[n] ,*(queues[n]),*(device_vector1s[n]),*(device_vector3s[n]));
 #endif
@@ -158,8 +158,22 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
         //check
         if(this->do_check)
         {
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+          if(this->image==i) NULL;
+#else
           if(images[n]==i) NULL;
-          else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<images[n](0)<<")."<<std::endl<<std::flush;}
+#endif
+          else
+          {
+            ++(this->check_error);
+            std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+            this->image(0)
+#else
+            images[n](0)
+#endif
+            <<")."<<std::endl<<std::flush;
+          }
         }
 
     //wait lock
