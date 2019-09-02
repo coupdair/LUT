@@ -85,11 +85,11 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
   , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
   {
     //copy CPU to GPU
-    compute::copy(in.begin(), in.end(), device_vector1.begin(), queue);
+    compute::copy(in.begin(), in.end(), device_vector1.begin(), this->queue);
     //compute
-    kernelGPU(device_vector1,device_vector3,queue);
+    kernelGPU(device_vector1,device_vector3,this->queue);
     //copy GPU to CPU
-    compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), queue);
+    compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
   };//kernel
 #else
   //! compution kernel for an enqueue iteration (using future that waits for last copy, i.e. device to host)
