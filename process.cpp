@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3"
+#define VERSION "v0.3.4d"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -108,12 +108,12 @@ int main(int argc,char **argv)
   //Choosing the target for OpenCL computing
   boost::compute::device gpu = boost::compute::system::default_device();
   //! GPU circular buffer
-      CImgList<Tdata> limages(nbuffer,width,1,1,1);
-      compute::context context(gpu);
-      compute::command_queue queue(context, gpu);
-      compute::vector<Tdata> device_vector1(width,context);
-      compute::vector<Tdata> device_vector3(width,context);
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,queue,limages,device_vector1,device_vector3)
+  CImgList<Tdata> limages(nbuffer,width,1,1,1);
+  compute::context context(gpu);
+  std::vector<compute::command_queue*> queues;
+  std::vector<compute::vector<Tdata>*> device_vector1s;
+  std::vector<compute::vector<Tdata>*> device_vector3s;
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,queues,limages,device_vector1s,device_vector3s)
 #else
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
 #endif //!DO_GPU
@@ -154,8 +154,11 @@ int main(int argc,char **argv)
       }//GPU
       else
       {//enqueue GPU
+      for(int i=0;i<nbuffer;++i) queues.push_back(new compute::command_queue(context, gpu));
+      for(int i=0;i<nbuffer;++i) device_vector1s.push_back(new compute::vector<Tdata>(width,context));
+      for(int i=0;i<nbuffer;++i) device_vector3s.push_back(new compute::vector<Tdata>(width,context));
       CDataProcessorGPUenqueue<Tdata, Taccess> process(locks, gpu,width
-      , &limages,&queue, &device_vector1,&device_vector3
+      , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
@@ -190,8 +193,9 @@ int main(int argc,char **argv)
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing (dequeue)."<<std::endl<<std::flush;
+      while(device_vector3s.size()!=nbuffer) {std::cout<<"info: dequeue wait for allocation."<<std::endl<<std::flush;usleep(1234);}
       CDataProcessorGPUdequeue<Tdata, Taccess> process(locks, gpu,width
-      , &limages,&queue, &device_vector1,&device_vector3
+      , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
