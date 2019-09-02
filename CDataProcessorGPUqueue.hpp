@@ -34,14 +34,14 @@ class CDataProcessorGPUqueue : public CDataProcessorGPU<Tdata, Taccess>
 public:
   CImgList<Tdata> images;
 //!\todo [high] . setup circular GPU buffer, i.e. with vector for queue_p, device_vector?_p (WiP: compilation or run errors for assign, so try vector<queue*> and vector<vector*>)
-  std::vector<compute::command_queue* >queues;
+  std::vector<compute::future<void> >waits;
   // create vectors on the device
   std::vector<compute::vector<Tdata>* >device_vector1s;
   std::vector<compute::vector<Tdata>* >device_vector3s;
 
   CDataProcessorGPUqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> &images, std::vector<compute::command_queue* >&queues
+  , CImgList<Tdata> &images, std::vector<compute::future<void> >&waits
   , std::vector<compute::vector<Tdata>* >&device_vector1s
   , std::vector<compute::vector<Tdata>* >&device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
@@ -51,7 +51,7 @@ public:
   , bool do_check=false
   )
   : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR,do_check)
-  , images(images), queues(queues)
+  , images(images), waits(waits)
   , device_vector1s(device_vector1s), device_vector3s(device_vector3s)
   {
     this->debug=true;
@@ -59,12 +59,12 @@ public:
     //check data size
     if(images(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
     //check buffer size
-    if( images.size()!=queues.size()
+    if( images.size()!=waits.size()
     ||  images.size()!=device_vector1s.size()
     ||  images.size()!=device_vector3s.size()
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
 images.print("CDataProcessorGPUqueue");
-std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
+std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
     this->check_locks(lock);
   }//constructor
 
@@ -78,7 +78,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
       _1 , queue);
   };//kernelGPU
 
-  //! compution kernel for an enqueue iteration
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+  //! compution kernel for an enqueue iteration (using queue)
   virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out
   , compute::command_queue &queue
   , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
@@ -90,6 +91,20 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
     //copy GPU to CPU
     compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), queue);
   };//kernel
+#else
+  //! compution kernel for an enqueue iteration (using future that waits for last copy, i.e. device to host)
+  virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out
+  , compute::future<void> &fwait
+  , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
+  {
+    //copy CPU to GPU
+    compute::copy(in.begin(), in.end(), device_vector1.begin(), this->queue);
+    //compute
+    kernelGPU(device_vector1,device_vector3,this->queue);
+    //copy GPU to CPU
+    fwait=compute::copy_async(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
+  };//kernel
+#endif //SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
 
   //! one iteration for any enqueue loop
   virtual void iteration_enqueue(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
@@ -110,7 +125,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
     kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3);
 #else
-    kernel(bimages[n],images[n] ,*(queues[n]),*(device_vector1s[n]),*(device_vector3s[n]));
+    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
 #endif
         //check
         if(this->do_check)
@@ -142,7 +157,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
     this->queue.finish();
 #else
-    queues[n]->finish();
+    waits[n].wait();
 #endif
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
@@ -206,7 +221,7 @@ class CDataProcessorGPUenqueue : public CDataProcessorGPUqueue<Tdata, Taccess>
 public:
   CDataProcessorGPUenqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> &images, std::vector<compute::command_queue *> &queues
+  , CImgList<Tdata> &images, std::vector<compute::future<void> > &waits
   , std::vector<compute::vector<Tdata> *> &device_vector1s
   , std::vector<compute::vector<Tdata> *> &device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
@@ -216,7 +231,7 @@ public:
   , bool do_check=false
   )
   : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
-    ,images,queues,device_vector1s,device_vector3s
+    ,images,waits,device_vector1s,device_vector3s
     ,wait_status,set_status,wait_statusR,set_statusR
     ,do_check
     )
@@ -239,7 +254,7 @@ class CDataProcessorGPUdequeue : public CDataProcessorGPUqueue<Tdata, Taccess>
 public:
   CDataProcessorGPUdequeue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> &images, std::vector<compute::command_queue *> &queues
+  , CImgList<Tdata> &images, std::vector<compute::future<void> > &waits
   , std::vector<compute::vector<Tdata> *> &device_vector1s
   , std::vector<compute::vector<Tdata> *> &device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
@@ -249,7 +264,7 @@ public:
   , bool do_check=false
   )
   : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
-    ,images,queues,device_vector1s,device_vector3s
+    ,images,waits,device_vector1s,device_vector3s
     ,wait_status,set_status,wait_statusR,set_statusR
     ,do_check
     )

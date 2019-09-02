@@ -141,12 +141,11 @@ int main(int argc,char **argv)
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
       compute::context context(gpu);
-      std::vector<compute::command_queue*> queues(nbuffer);
+      std::vector<compute::future<void> > waits(nbuffer);//this may be filled in kernel
       std::vector<compute::vector<Tdata>*> device_vector1s(nbuffer);
       std::vector<compute::vector<Tdata>*> device_vector3s(nbuffer);
       if(use_GPU)
       {//GPU
-      for(int i=0;i<nbuffer;++i) queues[i]=new compute::command_queue(context, gpu);
       for(int i=0;i<nbuffer;++i) device_vector1s[i]=new compute::vector<Tdata>(width,context);
       for(int i=0;i<nbuffer;++i) device_vector3s[i]=new compute::vector<Tdata>(width,context);
      #ifdef DO_GPU_NO_QUEUE
@@ -160,7 +159,7 @@ int main(int argc,char **argv)
      #ifdef  DO_GPU_SEQ_QUEUE
       std::cout<<"information: use GPU for processing (sequential queue)."<<std::endl<<std::flush;
       process=new CDataProcessorGPUqueue<Tdata, Taccess>(locks, gpu,width
-      , limages,queues, device_vector1s,device_vector3s
+      , limages,waits, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
@@ -168,13 +167,13 @@ int main(int argc,char **argv)
      #else //!DO_GPU_SEQ_QUEUE
       std::cout<<"information: use GPU for processing (enqueue and dequeue)."<<std::endl<<std::flush;
       process=new CDataProcessorGPUenqueue<Tdata, Taccess>(locks, gpu,width
-      , limages,queues, device_vector1s,device_vector3s
+      , limages,waits, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
       );
       deprocess=new CDataProcessorGPUdequeue<Tdata, Taccess>(locks, gpu,width
-      , limages,queues, device_vector1s,device_vector3s
+      , limages,waits, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check

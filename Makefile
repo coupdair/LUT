@@ -22,9 +22,9 @@ SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
 
 #all: process_sequential process send receive doc
 #all: process
-#all: process_sequential
-all: time_copy
+all: process_sequential
 
+#all: time_copy
 time_copy: time_copy.cpp
 	g++ -O0 -o time_copy time_copy.cpp $(DO_GPU) && ./time_copy
 
@@ -38,8 +38,8 @@ process: process.cpp $(SRC_DATA_BUFFER) CDataGenerator.hpp CDataProcessor.hpp CD
 
 #SEQ_GPU=
 #SEQ_GPU=-DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
-#SEQ_GPU=-DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS -DDO_GPU_SEQ_QUEUE
-SEQ_GPU=-DDO_GPU_SEQ_QUEUE
+SEQ_GPU=-DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS -DDO_GPU_SEQ_QUEUE
+#SEQ_GPU=-DDO_GPU_SEQ_QUEUE
 #SEQ_GPU=-DSEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS -DDO_GPU_NO_QUEUE
 process_sequential: process_sequential.cpp $(SRC_DATA_BUFFER) CDataGenerator.hpp CDataProcessor.hpp CDataProcessorGPU.hpp CDataStore.hpp
 	g++ $(SEQ_GPU) -O0 -o process_sequential   process_sequential.cpp $(LIB_CIMG) -Dcimg_display=0 $(DO_GPU) && ./process_sequential -h -I && ./process_sequential -v > VERSION
