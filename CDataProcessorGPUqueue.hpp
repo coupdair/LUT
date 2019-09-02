@@ -18,6 +18,11 @@ using compute::lambda::_1;
 
 #include "CDataProcessorGPU.hpp"
 
+//#define SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+#warning "SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS active"
+#endif
+
 //! base queueing for GPU process (ment for enqueue and dequeue)
 /**
  * This class might be used for debug or test only.
@@ -101,9 +106,11 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
-//    kernel(bimages[n],images[n] ,this->queue,this->device_vector1,this->device_vector3);
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+    kernel(bimages[n],images[n] ,this->queue,this->device_vector1,this->device_vector3);
+#else
     kernel(bimages[n],images[n] ,*(queues[n]),*(device_vector1s[n]),*(device_vector3s[n]));
-
+#endif
         //check
         if(this->do_check)
         {
@@ -131,8 +138,11 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],/*this->wait_status*/this->STATUS_QUEUED,this->STATE_PROCESSING, c);//filled, processing
     //compution in local
-//    this->queue.finish();
+#ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+    this->queue.finish();
+#else
     queues[n]->finish();
+#endif
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
