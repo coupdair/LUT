@@ -22,7 +22,11 @@ SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
 
 #all: process_sequential process send receive doc
 #all: process
-all: process_sequential
+#all: process_sequential
+all: time_copy
+
+time_copy: time_copy.cpp
+	g++ -O0 -o time_copy time_copy.cpp $(DO_GPU) && ./time_copy
 
 gui: main.cpp
 	g++ -O0 -o generate.X main.cpp -I../CImg -Wall -W -ansi -pedantic -Dcimg_use_vt100 -lpthread -lm -fopenmp -lboost_system $(LIB_XWINDOWS) && ./generate.X -h -I && ./generate.X -v > VERSION

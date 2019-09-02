@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <boost/compute.hpp>
+#include <boost/compute/async/future.hpp>
 
 //Package CImg
 #include <CImg.h>
