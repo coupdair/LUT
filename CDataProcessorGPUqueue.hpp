@@ -26,17 +26,18 @@ template<typename Tdata, typename Taccess=unsigned char>
 class CDataProcessorGPUqueue : public CDataProcessorGPU<Tdata, Taccess>
 {
 public:
-  CImgList<Tdata> *image_p;
-  compute::command_queue *queue_p;
+  CImgList<Tdata> images;
+//!\todo [high] . setup circular GPU buffer, i.e. with vector for queue_p, device_vector?_p (WiP: compilation or run errors for assign, so try vector<queue*> and vector<vector*>)
+  std::vector<compute::command_queue* >queues;
   // create vectors on the device
-  compute::vector<Tdata> *device_vector1_p;
-  compute::vector<Tdata> *device_vector3_p;
+  std::vector<compute::vector<Tdata>* >device_vector1s;
+  std::vector<compute::vector<Tdata>* >device_vector3s;
 
   CDataProcessorGPUqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> *image_p, compute::command_queue *queue_p
-  , compute::vector<Tdata> *device_vector1_p
-  , compute::vector<Tdata> *device_vector3_p
+  , CImgList<Tdata> &images, std::vector<compute::command_queue* >&queues
+  , std::vector<compute::vector<Tdata>* >&device_vector1s
+  , std::vector<compute::vector<Tdata>* >&device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
@@ -44,40 +45,20 @@ public:
   , bool do_check=false
   )
   : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR,do_check)
-  , image_p(image_p), queue_p(queue_p)
-  , device_vector1_p(device_vector1_p), device_vector3_p(device_vector3_p)
+  , images(images), queues(queues)
+  , device_vector1s(device_vector1s), device_vector3s(device_vector3s)
   {
     this->debug=true;
     this->class_name="CDataProcessorGPUqueue";
     //check data size
-    if((*image_p)(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
-/*
+    if(images(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
     //check buffer size
-    if( (*image_p).size()!=(*queue_p).size()
-    ||  (*image_p).size()!=(*device_vector1_p).size()
-    ||  (*image_p).size()!=(*device_vector3_p).size()
+    if( images.size()!=queues.size()
+    ||  images.size()!=device_vector1s.size()
+    ||  images.size()!=device_vector3s.size()
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
-(*image_p).print("CDataProcessorGPUqueue");
-std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
-/*
-    //assign queue
-//??? wait list
-    (*queue_p).clear();
-std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
-    for(unsigned int i=0;i<(*image_p).size();++i) (*queue_p).push_back(this->queue);
-std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<(*queue_p).size()<<std::endl;
-    //assign vectors
-//!\todo . assign compute::vector
-std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<<std::endl;
-    for(int i=0;i<(*image_p).size();++i)
-//    std::cout<<(*device_vector1_p)[i].capacity()<<" ";// v
-//    {(*device_vector1_p)[i].assign(vector_size,0,this->queue);(*device_vector3_p)[i].assign(vector_size,0,this->queue);} //x
-//    {(*device_vector1_p)[i]=this->device_vector1;(*device_vector3_p)[i]=this->device_vector3;} //x
-//    {(*device_vector1_p)[i].assign(vector_size,(Tdata)0,this->queue);(*device_vector3_p)[i].assign(vector_size,(Tdata)0,this->queue);} //x
-    {(*device_vector1_p)[i].assign(this->device_vector1.begin(),this->device_vector1.end());
-     (*device_vector3_p)[i].assign(this->device_vector3.begin(),this->device_vector3.end());} //x
-std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<<std::endl;
-*/
+images.print("CDataProcessorGPUqueue");
+std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<queues.size()<<std::endl;
     this->check_locks(lock);
   }//constructor
 
@@ -105,7 +86,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
   };//kernel
 
   //! one iteration for any enqueue loop
-  virtual void iteration_enqueue(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration_enqueue(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     if(this->debug)
     {
@@ -120,15 +101,13 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
-//    kernel(images[n],(*image_p)[n] ,this->queue(*queue_p)[n],(*device_vector1_p)[n],(*device_vector3_p)[n]);
-//    kernel(images[n],(*image_p)[n] ,this->queue,this->device_vector1,this->device_vector3);
-//    kernel(images[n],(*image_p)[n] ,(*queue_p)[n],this->device_vector1,this->device_vector3);
-    kernel(images[n],(*image_p)[n] ,*queue_p,*device_vector1_p,*device_vector3_p);
+//    kernel(bimages[n],images[n] ,this->queue,this->device_vector1,this->device_vector3);
+    kernel(bimages[n],images[n] ,*(queues[n]),*(device_vector1s[n]),*(device_vector3s[n]));
 
         //check
         if(this->do_check)
         {
-          if(images[n] ==i) NULL; else {++(this->check_error);std::cout<<"compution error: bad generate class for this test."<<std::endl<<std::flush;}
+          if(bimages[n]==i) NULL; else {++(this->check_error);std::cout<<"compution error: bad generate class for this test."<<std::endl<<std::flush;}
         }
 
     //unlock
@@ -137,7 +116,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
   }//iteration_enqueue
 
   //! one iteration for any dequeue loop
-  virtual void iteration_dequeue(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration_dequeue(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
     if(this->debug)
     {
@@ -152,9 +131,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
     unsigned int c=0;
     this->laccess.wait_for_status(access[n],/*this->wait_status*/this->STATUS_QUEUED,this->STATE_PROCESSING, c);//filled, processing
     //compution in local
-//    (*queue_p)[n].finish();
 //    this->queue.finish();
-    (*queue_p).finish();
+    queues[n]->finish();
     //unlock
     this->laccess.set_status(access[n],this->STATE_PROCESSING,this->set_status, this->class_name[5],i,n,c);//processing, processed
 
@@ -170,7 +148,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
         //check
         if(this->do_check)
         {
-          if(((*image_p)[n])==i) NULL;
+          if(images[n]==i) NULL;
           else {++(this->check_error);std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<")."<<std::endl<<std::flush;}
         }
 
@@ -178,16 +156,16 @@ std::cout<< __FILE__<<"/"<<__func__<<"vector size="<<(*device_vector1_p).size()<
     c=0;
     this->laccessR.wait_for_status(accessR[n],this->wait_statusR,this->STATE_PROCESSING, c);//filled, processing
     //copy local to buffer
-    results[n]=(*image_p)[n];
+    results[n]=images[n];
     //unlock
     this->laccessR.set_status(accessR[n],this->STATE_PROCESSING,this->set_statusR, this->class_name[5],i,n,c);//processing, processed
 
   }//iteration_dequeue
 
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
-    this->iteration_enqueue(access,images, accessR,results, n,i);
-    this->iteration_dequeue(access,images, accessR,results, n,i);
+    this->iteration_enqueue(access,bimages, accessR,results, n,i);
+    this->iteration_dequeue(access,bimages, accessR,results, n,i);
   }//iteration
 
 };//CDataProcessorGPUqueue
@@ -199,9 +177,9 @@ class CDataProcessorGPUenqueue : public CDataProcessorGPUqueue<Tdata, Taccess>
 public:
   CDataProcessorGPUenqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> *image_p, compute::command_queue *queue_p
-  , compute::vector<Tdata> *device_vector1_p
-  , compute::vector<Tdata> *device_vector3_p
+  , CImgList<Tdata> &images, std::vector<compute::command_queue *> &queues
+  , std::vector<compute::vector<Tdata> *> &device_vector1s
+  , std::vector<compute::vector<Tdata> *> &device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
@@ -209,7 +187,7 @@ public:
   , bool do_check=false
   )
   : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
-    ,image_p,queue_p,device_vector1_p,device_vector3_p
+    ,images,queues,device_vector1s,device_vector3s
     ,wait_status,set_status,wait_statusR,set_statusR
     ,do_check
     )
@@ -219,9 +197,9 @@ public:
     this->check_locks(lock);
   }//constructor
 
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
-    this->iteration_enqueue(access,images, accessR,results, n,i);
+    this->iteration_enqueue(access,bimages, accessR,results, n,i);
   }//iteration
 };//CDataProcessorGPUenqueue
 
@@ -232,9 +210,9 @@ class CDataProcessorGPUdequeue : public CDataProcessorGPUqueue<Tdata, Taccess>
 public:
   CDataProcessorGPUdequeue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> *image_p, compute::command_queue *queue_p
-  , compute::vector<Tdata> *device_vector1_p
-  , compute::vector<Tdata> *device_vector3_p
+  , CImgList<Tdata> &images, std::vector<compute::command_queue *> &queues
+  , std::vector<compute::vector<Tdata> *> &device_vector1s
+  , std::vector<compute::vector<Tdata> *> &device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
@@ -242,7 +220,7 @@ public:
   , bool do_check=false
   )
   : CDataProcessorGPUqueue<Tdata, Taccess>(lock,device,vector_size
-    ,image_p,queue_p,device_vector1_p,device_vector3_p
+    ,images,queues,device_vector1s,device_vector3s
     ,wait_status,set_status,wait_statusR,set_statusR
     ,do_check
     )
@@ -252,9 +230,9 @@ public:
     this->check_locks(lock);
   }//constructor
 
-  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &images, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
+  virtual void iteration(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
   {
-    this->iteration_dequeue(access,images, accessR,results, n,i);
+    this->iteration_dequeue(access,bimages, accessR,results, n,i);
   }//iteration
 };//CDataProcessorGPUdequeue
 

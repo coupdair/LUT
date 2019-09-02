@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.3"
+#define VERSION "v0.3.4d"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -136,11 +136,14 @@ int main(int argc,char **argv)
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
       compute::context context(gpu);
-      compute::command_queue queue(context, gpu);
-      compute::vector<Tdata> device_vector1(width,context);
-      compute::vector<Tdata> device_vector3(width,context);
+      std::vector<compute::command_queue*> queues(nbuffer);
+      std::vector<compute::vector<Tdata>*> device_vector1s(nbuffer);
+      std::vector<compute::vector<Tdata>*> device_vector3s(nbuffer);
       if(use_GPU)
       {//GPU
+      for(int i=0;i<nbuffer;++i) queues[i]=new compute::command_queue(context, gpu);
+      for(int i=0;i<nbuffer;++i) device_vector1s[i]=new compute::vector<Tdata>(width,context);
+      for(int i=0;i<nbuffer;++i) device_vector3s[i]=new compute::vector<Tdata>(width,context);
 /*
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
       process=new CDataProcessorGPU<Tdata, Taccess>(locks, gpu,width
@@ -150,12 +153,12 @@ int main(int argc,char **argv)
 */
       std::cout<<"information: use GPU for processing (enqueue and dequeue)."<<std::endl<<std::flush;
       process=new CDataProcessorGPUenqueue<Tdata, Taccess>(locks, gpu,width
-      , &limages,&queue, &device_vector1,&device_vector3
+      , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
       deprocess=new CDataProcessorGPUdequeue<Tdata, Taccess>(locks, gpu,width
-      , &limages,&queue, &device_vector1,&device_vector3
+      , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       );
