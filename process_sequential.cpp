@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.4j"
+#define VERSION "v0.3.4k"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -154,6 +154,7 @@ int main(int argc,char **argv)
       process=new CDataProcessorGPU<Tdata, Taccess>(locks, gpu,width
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
       );
      #else //DO_GPU_NO_QUEUE
      #ifdef  DO_GPU_SEQ_QUEUE
@@ -162,6 +163,7 @@ int main(int argc,char **argv)
       , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
       );
      #else //!DO_GPU_SEQ_QUEUE
       std::cout<<"information: use GPU for processing (enqueue and dequeue)."<<std::endl<<std::flush;
@@ -169,11 +171,13 @@ int main(int argc,char **argv)
       , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
       );
       deprocess=new CDataProcessorGPUdequeue<Tdata, Taccess>(locks, gpu,width
       , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
       );
      #endif //!DO_GPU_SEQ_QUEUE
      #endif //!DO_GPU_NO_QUEUE
@@ -185,6 +189,7 @@ int main(int argc,char **argv)
       process=new CDataProcessor<Tdata, Taccess>(locks
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
       );
       }//CPU
      //store
@@ -205,8 +210,8 @@ int main(int argc,char **argv)
         //check
         if(do_check)
         {
-          if(images[0] ==i) NULL; else {++check_error;std::cout<<"compution error: bad generate class for this test."<<std::endl<<std::flush;}
-          if(results[0]==i) NULL; else {++check_error;std::cout<<"compution error: bad check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<"."<<std::endl<<std::flush;}
+          if(images[0] ==i) NULL; else {++check_error;std::cout<<"compution error: bad main generate class for this test."<<std::endl<<std::flush;}
+          if(results[0]==i) NULL; else {++check_error;std::cout<<"compution error: bad main check (i.e. test failed) on iteration #"<<i<<" (value="<<results[0](0)<<")."<<std::endl<<std::flush;}
         }
       }//vector loop
       break;
