@@ -130,7 +130,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     //compution in local
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
 //    kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3); 
-    kernel(bimages[n],this->image ,this->lwait,this->device_vector1,this->device_vector3); 
+//    kernel(bimages[n],this->image ,this->lwait,this->device_vector1,this->device_vector3); 
+    kernel(bimages[n],this->image ,waits[n],this->device_vector1,this->device_vector3); 
 #else
     kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n])); 
 #endif
@@ -163,7 +164,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     //compution in local
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
 //    this->queue.finish();
-    this->lwait.wait();
+//    this->lwait.wait();
+    waits[n].wait();
 #else
     waits[n].wait();
 #endif
