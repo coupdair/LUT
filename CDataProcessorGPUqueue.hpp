@@ -62,6 +62,7 @@ public:
 
 /**/
 //! \bug this not working for en/dequeue (as 2 allocation time !)
+//! \todo need push_back (for dequeueing, so no 2 allocation times !)
       for(int i=0;i<images.size();++i) device_vector1s[i]=new compute::vector<Tdata>(vector_size,this->ctx);
       for(int i=0;i<images.size();++i) device_vector3s[i]=new compute::vector<Tdata>(vector_size,this->ctx);
 /**/

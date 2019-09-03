@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.5k"
+#define VERSION "v0.3.5l"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -140,17 +140,11 @@ int main(int argc,char **argv)
       CDataProcessor<Tdata,Taccess> *deprocess;
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
-      compute::context context(gpu);
       std::vector<compute::future<void> > waits(nbuffer);//this may be filled in kernel
       std::vector<compute::vector<Tdata>*> device_vector1s(nbuffer);
       std::vector<compute::vector<Tdata>*> device_vector3s(nbuffer);
       if(use_GPU)
       {//GPU
-//! \todo . move alloc. ? (to queue class)
-/** /
-      for(int i=0;i<nbuffer;++i) device_vector1s[i]=new compute::vector<Tdata>(width,context);
-      for(int i=0;i<nbuffer;++i) device_vector3s[i]=new compute::vector<Tdata>(width,context);
-/**/
      #ifdef DO_GPU_NO_QUEUE
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
       process=new CDataProcessorGPU<Tdata, Taccess>(locks, gpu,width

@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.4d"
+#define VERSION "v0.3.5l"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -110,6 +110,7 @@ int main(int argc,char **argv)
   //! GPU circular buffer
   CImgList<Tdata> limages(nbuffer,width,1,1,1);
   compute::context context(gpu);
+//! \todo replace queues by fwaits
   std::vector<compute::command_queue*> queues;
   std::vector<compute::vector<Tdata>*> device_vector1s;
   std::vector<compute::vector<Tdata>*> device_vector3s;
@@ -154,6 +155,7 @@ int main(int argc,char **argv)
       }//GPU
       else
       {//enqueue GPU
+//! \todo remove allocation from here
       for(int i=0;i<nbuffer;++i) queues.push_back(new compute::command_queue(context, gpu));
       for(int i=0;i<nbuffer;++i) device_vector1s.push_back(new compute::vector<Tdata>(width,context));
       for(int i=0;i<nbuffer;++i) device_vector3s.push_back(new compute::vector<Tdata>(width,context));
