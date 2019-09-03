@@ -61,10 +61,14 @@ public:
     if(images(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
 
 /**/
-//! \bug this not working for en/dequeue (as 2 allocation time !)
-//! \todo need push_back (for dequeueing, so no 2 allocation times !)
-      for(int i=0;i<images.size();++i) device_vector1s[i]=new compute::vector<Tdata>(vector_size,this->ctx);
-      for(int i=0;i<images.size();++i) device_vector3s[i]=new compute::vector<Tdata>(vector_size,this->ctx);
+//! \bug  . this not working for en/dequeue (as 2 allocation time !)
+//! \todo . need push_back (for dequeueing, so no 2 allocation times !)
+    if(device_vector3s.size()==0)
+    {
+std::cout<< __FILE__<<"/"<<__func__<<"information: allocating device vectors"<<std::endl;
+      for(int i=0;i<images.size();++i) device_vector1s.push_back(new compute::vector<Tdata>(vector_size,this->ctx));
+      for(int i=0;i<images.size();++i) device_vector3s.push_back(new compute::vector<Tdata>(vector_size,this->ctx));
+    }
 /**/
 
     //check buffer size
