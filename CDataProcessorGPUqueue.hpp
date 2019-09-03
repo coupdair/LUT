@@ -34,6 +34,7 @@ class CDataProcessorGPUqueue : public CDataProcessorGPU<Tdata, Taccess>
 public:
   CImgList<Tdata> images;
 //!\todo [high] . setup circular GPU buffer, i.e. with vector for queue_p, device_vector?_p (WiP: compilation or run errors for assign, so try vector<queue*> and vector<vector*>)
+  compute::future<void>lwait;
   std::vector<compute::future<void> >waits;
   // create vectors on the device
   std::vector<compute::vector<Tdata>* >device_vector1s;
@@ -81,7 +82,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
   //! compution kernel for an enqueue iteration (using queue)
   virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out
-  , compute::command_queue &queue
+//  , compute::command_queue &queue
+  , compute::future<void> &fwait
   , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
   {
     //copy CPU to GPU
@@ -89,7 +91,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
     //compute
     kernelGPU(device_vector1,device_vector3,this->queue);
     //copy GPU to CPU
-    compute::copy(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
+//        compute::copy      (device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
+    fwait=compute::copy_async(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
   };//kernel
 #else
   //! compution kernel for an enqueue iteration (using future that waits for last copy, i.e. device to host)
@@ -126,9 +129,10 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
-    kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3);
+//    kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3); 
+    kernel(bimages[n],this->image ,this->lwait,this->device_vector1,this->device_vector3); 
 #else
-    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
+    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n])); 
 #endif
         //check
         if(this->do_check)
