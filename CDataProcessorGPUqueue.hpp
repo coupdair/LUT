@@ -146,7 +146,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
 //    kernel(bimages[n],this->image ,waits[n],this->device_vector1,this->device_vector3);
     kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #else
-    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
+//    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
+    kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #endif
         //check
         if(this->do_check)
