@@ -59,6 +59,13 @@ public:
     this->class_name="CDataProcessorGPUqueue";
     //check data size
     if(images(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
+
+/**/
+//! \bug this not working for en/dequeue (as 2 allocation time !)
+      for(int i=0;i<images.size();++i) device_vector1s[i]=new compute::vector<Tdata>(vector_size,this->ctx);
+      for(int i=0;i<images.size();++i) device_vector3s[i]=new compute::vector<Tdata>(vector_size,this->ctx);
+/**/
+
     //check buffer size
     if( images.size()!=waits.size()
     ||  images.size()!=device_vector1s.size()
@@ -110,7 +117,7 @@ std::cout<< __FILE__<<"/"<<__func__<<" 2. compute"<<std::endl<<std::flush;
 std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     fwait=compute::copy_async(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
   };//kernel
-#endif //SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
+#endif //!SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
 
   //! one iteration for any enqueue loop
   virtual void iteration_enqueue(CImg<Taccess> &access,CImgList<Tdata> &bimages, CImg<Taccess> &accessR,CImgList<Tdata> &results, int n, int i)
@@ -129,11 +136,11 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     this->laccess.wait_for_status(access[n],this->wait_status,this->STATE_ENQUEUEING, c);//filled, processing
     //compution in local
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
-//    kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3); 
-//    kernel(bimages[n],this->image ,this->lwait,this->device_vector1,this->device_vector3); 
-    kernel(bimages[n],this->image ,waits[n],this->device_vector1,this->device_vector3); 
+//    kernel(bimages[n],this->image ,this->queue,this->device_vector1,this->device_vector3);
+//    kernel(bimages[n],this->image ,this->lwait,this->device_vector1,this->device_vector3);
+    kernel(bimages[n],this->image ,waits[n],this->device_vector1,this->device_vector3);
 #else
-    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n])); 
+    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
 #endif
         //check
         if(this->do_check)
