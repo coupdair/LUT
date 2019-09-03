@@ -37,6 +37,7 @@ public:
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_statusR=CDataAccess::STATUS_FILLED
   , bool do_check=false
+  , bool do_out=true
   )
   : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR,do_check)
   , lwait(lwait)
@@ -45,8 +46,11 @@ public:
     this->class_name="CDataProcessorGPUqueue";
     //check data size
     if(images(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
-    ldevice_vector1=&(this->device_vector1);
-    ldevice_vector3=&(this->device_vector3);
+    if(do_out)
+    {
+      ldevice_vector1=&(this->device_vector1);
+      ldevice_vector3=&(this->device_vector3);
+    }//out
     this->check_locks(lock);
   }//constructor
 
@@ -215,10 +219,16 @@ public:
     ,images, lwait,ldevice_vector1,ldevice_vector3
     ,wait_status,set_status,wait_statusR,set_statusR
     ,do_check
+    ,false
     )
   {
     this->debug=true;
     this->class_name="CDataProcessorGPUdequeue";
+    //in
+    this->lwait=lwait;
+    this->device_vector1=*ldevice_vector1;
+    this->device_vector3=*ldevice_vector3;
+
     this->check_locks(lock);
   }//constructor
 
