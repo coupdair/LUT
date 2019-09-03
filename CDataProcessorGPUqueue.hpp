@@ -162,7 +162,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     this->laccess.wait_for_status(access[n],/*this->wait_status*/this->STATUS_QUEUED,this->STATE_PROCESSING, c);//filled, processing
     //compution in local
 #ifdef SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
-    this->queue.finish();
+//    this->queue.finish();
+    this->lwait.wait();
 #else
     waits[n].wait();
 #endif
