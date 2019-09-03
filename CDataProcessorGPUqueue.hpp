@@ -65,7 +65,7 @@ public:
 //! \todo . need push_back (for dequeueing, so no 2 allocation times !)
     if(device_vector3s.size()==0)
     {
-std::cout<< __FILE__<<"/"<<__func__<<"information: allocating device vectors"<<std::endl;
+std::cout<< __FILE__<<"/"<<__func__<<"(...) information: allocating device vectors"<<std::endl;
       for(int i=0;i<images.size();++i) device_vector1s.push_back(new compute::vector<Tdata>(vector_size,this->ctx));
       for(int i=0;i<images.size();++i) device_vector3s.push_back(new compute::vector<Tdata>(vector_size,this->ctx));
     }
@@ -110,17 +110,21 @@ std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
   //! compution kernel for an enqueue iteration (using future that waits for last copy, i.e. device to host)
   virtual void kernel(CImg<Tdata> &in,CImg<Tdata> &out
   , compute::future<void> &fwait
-  , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
+//  , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
+  , compute::vector<Tdata> *device_vector1, compute::vector<Tdata> *device_vector3)
   {
     //copy CPU to GPU
 std::cout<< __FILE__<<"/"<<__func__<<" 1. copy"<<std::endl<<std::flush;
-    compute::copy(in.begin(), in.end(), device_vector1.begin(), this->queue);
+//    compute::copy(in.begin(), in.end(), device_vector1.begin(), this->queue);
+    compute::copy(in.begin(), in.end(), (*device_vector1).begin(), this->queue);
     //compute
 std::cout<< __FILE__<<"/"<<__func__<<" 2. compute"<<std::endl<<std::flush;
-    kernelGPU(device_vector1,device_vector3,this->queue);
+//    kernelGPU(device_vector1,device_vector3,this->queue);
+    kernelGPU(*device_vector1,*device_vector3,this->queue);
     //copy GPU to CPU
 std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
-    fwait=compute::copy_async(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
+//    fwait=compute::copy_async(device_vector3.begin(), device_vector3.end(), out.begin(), this->queue);
+    fwait=compute::copy_async((*device_vector3).begin(), (*device_vector3).end(), out.begin(), this->queue);
   };//kernel
 #endif //!SEQUENTIAL_USE_SINGLE_LOCAL_CONTAINERS
 
@@ -147,7 +151,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
     kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #else
 //    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
-    kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
+    kernel(bimages[n],images[n] , waits[n],device_vector1s[n],device_vector3s[n]);
+//    kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #endif
         //check
         if(this->do_check)
