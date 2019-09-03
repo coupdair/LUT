@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.5l"
+#define VERSION "v0.3.6d"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -109,12 +109,7 @@ int main(int argc,char **argv)
   boost::compute::device gpu = boost::compute::system::default_device();
   //! GPU circular buffer
   CImgList<Tdata> limages(nbuffer,width,1,1,1);
-  compute::context context(gpu);
-//! \todo replace queues by fwaits
-  std::vector<compute::command_queue*> queues;
-  std::vector<compute::vector<Tdata>*> device_vector1s;
-  std::vector<compute::vector<Tdata>*> device_vector3s;
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,queues,limages,device_vector1s,device_vector3s)
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,limages)
 #else
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
 #endif //!DO_GPU
@@ -155,10 +150,6 @@ int main(int argc,char **argv)
       }//GPU
       else
       {//enqueue GPU
-//! \todo remove allocation from here
-      for(int i=0;i<nbuffer;++i) queues.push_back(new compute::command_queue(context, gpu));
-      for(int i=0;i<nbuffer;++i) device_vector1s.push_back(new compute::vector<Tdata>(width,context));
-      for(int i=0;i<nbuffer;++i) device_vector3s.push_back(new compute::vector<Tdata>(width,context));
       CDataProcessorGPUenqueue<Tdata, Taccess> process(locks, gpu,width
       , limages,queues, device_vector1s,device_vector3s
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
