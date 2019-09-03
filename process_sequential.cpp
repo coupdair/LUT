@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6e"
+#define VERSION "v0.3.6f"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -114,9 +114,11 @@ int main(int argc,char **argv)
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
   boost::compute::device gpu = boost::compute::system::default_device();
+  CImgList<Tdata> limages(nbuffer,width,1,1,1);
   std::vector<compute::future<void>  > waits(nbuffer);//this may be filled in kernel
-  compute::vector<Tdata> device_vector1;compute::vector<Tdata> device_vector3;//need more in process
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, check_error, gpu,waits)
+  compute::context context(gpu);
+  compute::vector<Tdata> device_vector1(width,context);compute::vector<Tdata> device_vector3(width,context);//need more in process
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, check_error, gpu,limages,waits,device_vector1,device_vector3)
 #else
   #pragma omp parallel shared(print_lock, access,images, accessR,results, check_error)
 #endif //!DO_GPU
