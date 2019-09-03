@@ -102,6 +102,7 @@ std::cout<<std::endl<<std::flush;
   , compute::future<void> &fwait
   , compute::vector<Tdata> &device_vector1, compute::vector<Tdata> &device_vector3)
   {
+//! \note async op.: https://github.com/boostorg/compute/issues/303 (enqueue_nd_range_kernel() are already asynchronous: boost::compute::event e = queue.enqueue_barrier();)
     //copy CPU to GPU
     compute::copy(in.begin(), in.end(), device_vector1.begin(), this->queue);
     //compute
