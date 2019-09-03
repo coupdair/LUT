@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6d"
+#define VERSION "v0.3.6w"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -109,7 +109,9 @@ int main(int argc,char **argv)
   boost::compute::device gpu = boost::compute::system::default_device();
   //! GPU circular buffer
   CImgList<Tdata> limages(nbuffer,width,1,1,1);
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,limages)
+  std::vector<compute::future<void>  > waits(nbuffer);//this may be filled in kernel
+  compute::vector<Tdata> *device_vector1;compute::vector<Tdata> *device_vector3;//need more in process
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,limages,waits,device_vector1,device_vector3)
 #else
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
 #endif //!DO_GPU
@@ -149,16 +151,17 @@ int main(int argc,char **argv)
       process.show_checking();
       }//GPU
       else
-      {//enqueue GPU
-      CDataProcessorGPUenqueue<Tdata, Taccess> process(locks, gpu,width
-      , limages,queues, device_vector1s,device_vector3s
+      {//queue GPU
+//! \todo [next] is more GPUqueue in stride
+      CDataProcessorGPUqueue<Tdata, Taccess> process(locks, gpu,width
+      , limages,waits[0], device_vector1,device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
       );
       process.run(access,images, accessR,results, count);
       process.show_checking();
-      }//enqueue GPU
+      }//queue GPU
       }//GPU
       else
 #endif
@@ -180,24 +183,6 @@ int main(int argc,char **argv)
       store.run(accessR,results, count);
       break;
     }//store
-#ifdef DO_GPU
-    case 3:
-    {//dequeue process
-      if(use_GPU)
-      {//GPU
-      std::cout<<"information: use GPU for processing (dequeue)."<<std::endl<<std::flush;
-      while(device_vector3s.size()!=nbuffer) {/*std::cout<<"info: dequeue wait for allocation."<<std::endl<<std::flush;*/usleep(1234);}
-      CDataProcessorGPUdequeue<Tdata, Taccess> process(locks, gpu,width
-      , limages,queues, device_vector1s,device_vector3s
-      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
-      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
-      , do_check
-      );
-      process.run(access,images, accessR,results, count);
-      process.show_checking();
-      }//GPU
-    }//dequeue process
-#endif
   }//switch(id)
   }//parallel section
 
