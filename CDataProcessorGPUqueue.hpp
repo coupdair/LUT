@@ -72,7 +72,10 @@ std::cout<< __FILE__<<"/"<<__func__<<"(...) information: allocating device vecto
     ||  images.size()!=device_vector3s.size()
     ) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: different buffer sizes"); exit(99);}
 images.print("CDataProcessorGPUqueue");
-std::cout<< __FILE__<<"/"<<__func__<<"queue size="<<waits.size()<<std::endl;
+std::cout<< __FILE__<<"/"<<__func__<<" wait size="<<waits.size()<<std::endl;
+std::cout<< __FILE__<<"/"<<__func__<<" device_vector3s size="<<device_vector3s.size()<<std::endl<<std::flush;
+for(int i=0;i<images.size();++i) std::cout<<", "<<(*device_vector3s[i]).size();
+std::cout<<std::endl<<std::flush;
     this->check_locks(lock);
   }//constructor
 

@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.5p"
+#define VERSION "v0.3.5q"
 
 //thread lock
 #include "CDataGenerator.hpp"
