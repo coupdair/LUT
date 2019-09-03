@@ -28,12 +28,10 @@ class CDataProcessorGPUqueue : public CDataProcessorGPU<Tdata, Taccess>
 {
 public:
   compute::future<void> lwait;
-  compute::vector<Tdata> ldevice_vector1;
-  compute::vector<Tdata> ldevice_vector3;
   CDataProcessorGPUqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
-  , CImgList<Tdata> &images, compute::future<void> &lwait
-  , compute::vector<Tdata> &ldevice_vector1, compute::vector<Tdata> &ldevice_vector3
+  , CImgList<Tdata> &images, compute::future<void> &lwait //out
+  , compute::vector<Tdata> *ldevice_vector1, compute::vector<Tdata> *ldevice_vector3 //out (or in)
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
@@ -42,12 +40,13 @@ public:
   )
   : CDataProcessorGPU<Tdata, Taccess>(lock,device,vector_size,wait_status,set_status,wait_statusR,set_statusR,do_check)
   , lwait(lwait)
-  , ldevice_vector1(ldevice_vector1), ldevice_vector3(ldevice_vector3)
   {
     this->debug=true;
     this->class_name="CDataProcessorGPUqueue";
     //check data size
     if(images(0).width()!=vector_size) {std::cout<< __FILE__<<"/"<<__func__;printf("(...) code error: bad image size"); exit(99);}
+    ldevice_vector1=&(this->device_vector1);
+    ldevice_vector3=&(this->device_vector3);
     this->check_locks(lock);
   }//constructor
 
@@ -66,11 +65,11 @@ public:
   {
 //! \note async op.: https://github.com/boostorg/compute/issues/303 (enqueue_nd_range_kernel() are already asynchronous: boost::compute::event e = queue.enqueue_barrier();)
     //copy CPU to GPU
-    compute::copy(in.begin(), in.end(), this->ldevice_vector1.begin(), this->queue);
+    compute::copy(in.begin(), in.end(), this->device_vector1.begin(), this->queue);
     //compute
-    kernelGPU(this->ldevice_vector1,this->ldevice_vector3,this->queue);
+    kernelGPU(this->device_vector1,this->device_vector3,this->queue);
     //copy GPU to CPU
-    lwait=compute::copy_async(this->ldevice_vector3.begin(), this->ldevice_vector3.end(), out.begin(), this->queue);
+    lwait=compute::copy_async(this->device_vector3.begin(), this->device_vector3.end(), out.begin(), this->queue);
   };//kernel
 
   //! one iteration for any enqueue loop
