@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.5r"
+#define VERSION "v0.3.5s"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -140,9 +140,9 @@ int main(int argc,char **argv)
       CDataProcessor<Tdata,Taccess> *deprocess;
 #ifdef DO_GPU
       CImgList<Tdata> limages(nbuffer,width,1,1,1);
-      std::vector<compute::future<void> > waits(nbuffer);  //this may be filled in kernel
-      std::vector<compute::vector<Tdata>*> device_vector1s;//this may be allocated in constructor (only once)
-      std::vector<compute::vector<Tdata>*> device_vector3s;//this may be allocated in constructor (only once)
+      std::vector<compute::future<void>  > waits(nbuffer);  //this may be filled in kernel
+      std::vector<compute::vector<Tdata> > device_vector1s;//this may be allocated in constructor (only once)
+      std::vector<compute::vector<Tdata> > device_vector3s;//this may be allocated in constructor (only once)
       if(use_GPU)
       {//GPU
      #ifdef DO_GPU_NO_QUEUE

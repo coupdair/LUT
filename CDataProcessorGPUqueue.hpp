@@ -37,14 +37,14 @@ public:
   compute::future<void>lwait;
   std::vector<compute::future<void> >waits;
   // create vectors on the device
-  std::vector<compute::vector<Tdata>* >device_vector1s;
-  std::vector<compute::vector<Tdata>* >device_vector3s;
+  std::vector<compute::vector<Tdata> >device_vector1s;
+  std::vector<compute::vector<Tdata> >device_vector3s;
 
   CDataProcessorGPUqueue(std::vector<omp_lock_t*> &lock
   , compute::device device, int vector_size
   , CImgList<Tdata> &images, std::vector<compute::future<void> >&waits
-  , std::vector<compute::vector<Tdata>* >&device_vector1s
-  , std::vector<compute::vector<Tdata>* >&device_vector3s
+  , std::vector<compute::vector<Tdata> >&device_vector1s
+  , std::vector<compute::vector<Tdata> >&device_vector3s
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_status=CDataAccess::STATUS_FILLED
   , CDataAccess::ACCESS_STATUS_OR_STATE  set_status=CDataAccess::STATUS_PROCESSED
   , CDataAccess::ACCESS_STATUS_OR_STATE wait_statusR=CDataAccess::STATUS_FREE
@@ -69,8 +69,8 @@ std::cout<< __FILE__<<"/"<<__func__<<"(...) information: allocating device vecto
 */
 //! \bug for test purpose !
 std::cout<< __FILE__<<"/"<<__func__<<"(...) information: setting device vectors (as size==1)"<<std::endl;
-      for(int i=0;i<images.size();++i) device_vector1s.push_back(&(this->device_vector1));
-      for(int i=0;i<images.size();++i) device_vector3s.push_back(&(this->device_vector3));
+      for(int i=0;i<images.size();++i) device_vector1s.push_back(this->device_vector1);
+      for(int i=0;i<images.size();++i) device_vector3s.push_back(this->device_vector3);
     }//allocation
     //check buffer size
     if( images.size()!=waits.size()
@@ -80,7 +80,7 @@ std::cout<< __FILE__<<"/"<<__func__<<"(...) information: setting device vectors 
 images.print("CDataProcessorGPUqueue");
 std::cout<< __FILE__<<"/"<<__func__<<" wait size="<<waits.size()<<std::endl;
 std::cout<< __FILE__<<"/"<<__func__<<" device_vector3s size="<<device_vector3s.size()<<std::endl<<std::flush;
-for(int i=0;i<images.size();++i) std::cout<<", "<<(*device_vector3s[i]).size();
+for(int i=0;i<images.size();++i) std::cout<<", "<<device_vector3s[i].size();
 std::cout<<std::endl<<std::flush;
     this->check_locks(lock);
   }//constructor
@@ -150,7 +150,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
 //    kernel(bimages[n],this->image ,waits[n],this->device_vector1,this->device_vector3);
     kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #else
-    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
+//    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
+    kernel(bimages[n],images[n] , waits[n],device_vector1s[n],device_vector3s[n]);
 //    kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #endif
         //check
