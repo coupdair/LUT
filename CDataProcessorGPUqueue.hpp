@@ -62,9 +62,15 @@ public:
     //! single allocation for en/dequeueing, so no 2 allocation times !
     if(device_vector3s.size()==0)
     {
+/*
 std::cout<< __FILE__<<"/"<<__func__<<"(...) information: allocating device vectors"<<std::endl;
       for(int i=0;i<images.size();++i) device_vector1s.push_back(new compute::vector<Tdata>(vector_size,this->ctx));
       for(int i=0;i<images.size();++i) device_vector3s.push_back(new compute::vector<Tdata>(vector_size,this->ctx));
+*/
+//! \bug for test purpose !
+std::cout<< __FILE__<<"/"<<__func__<<"(...) information: setting device vectors (as size==1)"<<std::endl;
+      for(int i=0;i<images.size();++i) device_vector1s.push_back(&(this->device_vector1));
+      for(int i=0;i<images.size();++i) device_vector3s.push_back(&(this->device_vector3));
     }//allocation
     //check buffer size
     if( images.size()!=waits.size()
@@ -144,8 +150,8 @@ std::cout<< __FILE__<<"/"<<__func__<<" 3. copy async"<<std::endl<<std::flush;
 //    kernel(bimages[n],this->image ,waits[n],this->device_vector1,this->device_vector3);
     kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #else
-//    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
-    kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
+    kernel(bimages[n],images[n] , waits[n],*(device_vector1s[n]),*(device_vector3s[n]));
+//    kernel(bimages[n],images[n] ,waits[n],this->device_vector1,this->device_vector3);
 #endif
         //check
         if(this->do_check)
