@@ -63,7 +63,7 @@ public:
       //circular buffer
 //! \bug needed: nbuffer should be a multiple of process thread number
       n+=stride;
-      if(n>nbuffer-1) n=start-1;
+      if(n>nbuffer-1) n=start;
      }//vector loop
   }//run
 
