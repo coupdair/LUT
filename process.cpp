@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6v"
+#define VERSION "v0.3.6u"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -186,12 +186,12 @@ int main(int argc,char **argv)
       break;
     }//store
 //! \todo [.] is more GPUqueue in stride
-    case 3:
+    default:
     {//process
 #ifdef DO_GPU
       if(use_GPU)
       {//GPU
-      start=1;
+      start=id-2;//e.g. #3 -> 1
       std::cout<<"information: use GPU for processing (from "<<start<<" by step of "<<stride<<")."<<std::endl<<std::flush;
       CDataProcessorGPUqueue<Tdata, Taccess> process(locks, gpu,width
       , limages ,waits[0],device_vector1,device_vector3
