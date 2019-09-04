@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6t"
+#define VERSION "v0.3.6s"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -107,11 +107,7 @@ int main(int argc,char **argv)
 #ifdef DO_GPU
   //Choosing the target for OpenCL computing
   boost::compute::device gpu = boost::compute::system::default_device();
-  //! GPU circular buffer
-  CImgList<Tdata> limages(nbuffer,width,1,1,1);
-  std::vector<compute::future<void>  > waits(nbuffer);//this may be filled in kernel
-  compute::vector<Tdata> *device_vector1;compute::vector<Tdata> *device_vector3;//need more in process
-  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu,limages,waits,device_vector1,device_vector3)
+  #pragma omp parallel shared(print_lock, access,images, accessR,results, gpu)
 #else
   #pragma omp parallel shared(print_lock, access,images, accessR,results)
 #endif //!DO_GPU
@@ -142,28 +138,13 @@ int main(int argc,char **argv)
       if(use_GPU)
       {//GPU
       std::cout<<"information: use GPU for processing."<<std::endl<<std::flush;
-      if(tn==3)
-      {//base GPU
       CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
-      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
-      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
-      , do_check
-      );
-      process.run(access,images, accessR,results, count);
-      process.show_checking();
-      }//GPU
-      else
-      {//queue GPU
-      start=0;
-      CDataProcessorGPUqueue<Tdata, Taccess> process(locks, gpu,width
-      , limages ,waits[0],device_vector1,device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
       );
       process.run(access,images, accessR,results, count, stride,start);
       process.show_checking();
-      }//queue GPU
       }//GPU
       else
 #endif
@@ -193,8 +174,7 @@ int main(int argc,char **argv)
       {//GPU
       start=id-2;//e.g. #3 -> 1
       std::cout<<"information: use GPU for processing (from "<<start<<" by step of "<<stride<<")."<<std::endl<<std::flush;
-      CDataProcessorGPUqueue<Tdata, Taccess> process(locks, gpu,width
-      , limages ,waits[0],device_vector1,device_vector3
+      CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
