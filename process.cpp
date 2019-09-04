@@ -9,13 +9,13 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6s"
+#define VERSION "v0.3.6"
 
 //thread lock
 #include "CDataGenerator.hpp"
 #include "CDataProcessor_morphomath.hpp"
 #ifdef DO_GPU
-#include "CDataProcessorGPUqueue.hpp"
+#include "CDataProcessorGPU.hpp"
 #endif
 #include "CDataStore.hpp"
 

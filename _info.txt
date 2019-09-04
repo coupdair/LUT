@@ -26,6 +26,31 @@ ssh rock64@193.48.111.156
 ./send -c 2 -s 4096 -b 8 -n 1256 -w 65432109
 ##700kB/s
 
+#4 GPU process threads
+tn=4; mi=4096; make clear; ./process -c `echo $tn+2   | bc` -s 4096 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg -b `echo $tn*4   | bc` -n `echo $tn*$mi| bc` --use-GPU --do-check 2>&1 | grep -e info -e test -e failed -e double -e fault
+rm -fr /media/temp//samples/ /media/temp//results/
+mkdir  /media/temp//samples/ /media/temp//results/
+rm -f sample_??????.cimg
+info: running 6 threads
+information: checking data, i.e. test, activated (slow process !)
+information: use GPU for processing (from 1 by step of 4)
+test: pass (for CDataProcessorGPU).
+test: pass (for CDataProcessorGPU).
+test: pass (for CDataProcessorGPU).
+test: pass (for CDataProcessorGPU).
+double free or corruption (fasttop)
+#32MB/s storage
+
+test: pass (for CDataProcessor).
+#1 CPU 130MB/s
+#seqCPU 64MB/s
+
+#1 GPU   4MB/s
+#2 GPU   8MB/s
+#4 GPU  32MB/s
+#8 GPU  40MB/s
+#seqGPU  5MB/s
+
 exit
 
 #show wait
