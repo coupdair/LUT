@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6u"
+#define VERSION "v0.3.6t"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -117,7 +117,7 @@ int main(int argc,char **argv)
 #endif //!DO_GPU
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
-  unsigned int stride=2;
+  unsigned int stride=tn-2;
   unsigned int start=0;
 
   #pragma omp single
