@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6w"
+#define VERSION "v0.3.6v"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -117,6 +117,8 @@ int main(int argc,char **argv)
 #endif //!DO_GPU
   {
   int id=omp_get_thread_num(),tn=omp_get_num_threads();
+  unsigned int stride=2;
+  unsigned int start=0;
 
   #pragma omp single
   {
@@ -152,14 +154,14 @@ int main(int argc,char **argv)
       }//GPU
       else
       {//queue GPU
-//! \todo [next] is more GPUqueue in stride
+      start=0;
       CDataProcessorGPUqueue<Tdata, Taccess> process(locks, gpu,width
-      , limages,waits[0], device_vector1,device_vector3
+      , limages ,waits[0],device_vector1,device_vector3
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
       );
-      process.run(access,images, accessR,results, count);
+      process.run(access,images, accessR,results, count, stride,start);
       process.show_checking();
       }//queue GPU
       }//GPU
@@ -183,6 +185,26 @@ int main(int argc,char **argv)
       store.run(accessR,results, count);
       break;
     }//store
+//! \todo [.] is more GPUqueue in stride
+    case 3:
+    {//process
+#ifdef DO_GPU
+      if(use_GPU)
+      {//GPU
+      start=1;
+      std::cout<<"information: use GPU for processing (from "<<start<<" by step of "<<stride<<")."<<std::endl<<std::flush;
+      CDataProcessorGPUqueue<Tdata, Taccess> process(locks, gpu,width
+      , limages ,waits[0],device_vector1,device_vector3
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
+      );
+      process.run(access,images, accessR,results, count, stride,start);
+      process.show_checking();
+      }//GPU
+#endif
+      break;
+    }//process
   }//switch(id)
   }//parallel section
 

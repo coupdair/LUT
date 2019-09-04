@@ -54,14 +54,16 @@ public:
      }//vector loop
   }//run
   //! run for loop
-  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images,  CImg<Taccess> &accessR,CImgList<Tdata> &results, unsigned int count)
+  virtual void run(CImg<Taccess> &access,CImgList<Tdata> &images,  CImg<Taccess> &accessR,CImgList<Tdata> &results, unsigned int count, unsigned int stride=1, unsigned int start=0)
   {
     unsigned int nbuffer=images.size();
-    for(unsigned int n=0,i=0;i<count;++i,++n)
+    for(unsigned int n=start,i=start;i<count;i+=stride)
     {
       this->iteration(access,images, accessR,results, n,i);
       //circular buffer
-      if(n==nbuffer-1) n=-1;
+//! \bug needed: nbuffer should be a multiple of process thread number
+      n+=stride;
+      if(n>nbuffer-1) n=start-1;
      }//vector loop
   }//run
 
