@@ -20,8 +20,8 @@ DO_GPU=-DDO_GPU $(LIB_BOOST_COMPUTE)
 #source package
 SRC_DATA_BUFFER=thread_lock.hpp CDataAccess.hpp CDataBuffer.hpp
 
-#all: process_sequential process send receive doc
-all: process process_sequential
+all: process_sequential process send receive doc
+#all: process process_sequential
 
 #all: time_copy
 time_copy: time_copy.cpp
