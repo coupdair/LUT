@@ -1,6 +1,2 @@
-1pc 8cbpc 4096BoF 0min+36s 36s 2.4GB 66MB/s
-2pc 8cbpc 4096BoF 0min+36s 36s 4.8GB 133MB/s
-4pc 8cbpc 4096BoF 1min+10s 70s 9.5GB 135MB/s
-8pc 8cbpc 4096BoF 2min+30s 150s 19GB 126MB/s
-16pc 8cbpc 4096BoF 5min+11s 311s 38GB 122MB/s
-
+1pc 8cbpc 4096BoF 0min+41s 41s 242MB 5MB/s
+2pc 8cbpc 4096BoF 0min+49s 49s 484MB 9MB/s

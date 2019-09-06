@@ -42,26 +42,20 @@ double free or corruption (fasttop)
 #32MB/s storage
 
 test: pass (for CDataProcessor).
-#1 CPU 109MB/s (v0.3.0) &>/dev/null
-#1 CPU 109MB/s (v0.3.3)
-#1 CPU 109MB/s (v0.3.6)
 #1 CPU 109MB/s (v0.3.7) &>/dev/null
 #1 CPU 100MB/s (v0.3.7) 2>&1 | grep info
-rm -fr /media/temp//samples /media/temp//results; mkdir /media/temp//samples /media/temp//results; time ./process -s 4096 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg  -n  123456 2>&1 | grep info && du -shc /media/temp/*s*
 
-warning: buffer == thread !!
-#1 CPU  32MB/s (v0.3.7 and .6 home remote ?! )
-#2 CPU  43MB/s
-#4 CPU 102MB/s
-#8 CPU 107MB/s
+#1 CPU  66MB/s (v0.3.7)
+#2 CPU 133MB/s
+#4 CPU 135MB/s
+#8 CPU 126MB/s
+#16CPU 122MB/s
 #seqCPU 64MB/s (v0.3.6 or .7)
-tn=1; mi=4096*12; make clear; time ./process -c `echo $tn+2   | bc` -s 4096 -o /media/temp/samples/sample.cimg -r /media/temp/results/sample.cimg -b `echo $tn*16   | bc` -n `echo $tn*$mi| bc` 2>&1 | grep -e info -e test -e failed -e double -e fault  -e real && du -shc /media/temp/*s*
 
-#1 GPU   5MB/s (v0.3.0)
-#1 GPU   4MB/s (v0.3.6)
-#2 GPU   8MB/s
-#4 GPU  32MB/s
-#8 GPU  40MB/s
+#1 GPU   5MB/s (v0.3.6)
+#2 GPU   9MB/s
+#4 GPU  23MB/s
+#8 GPU  43MB/s
 #seqGPU  5MB/s
 
 exit

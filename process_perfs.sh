@@ -1,15 +1,17 @@
 #!/bin/bash
 
 #fn=123456
-fnpc=123456
+fnpc=12345
 bnpc=8
 gpu=--use-GPU
-gpu=
+pnl='1 2'
+#gpu=
+#pnl='1 2 4 8 16'
 
 #run program for several frame sizes
 #for fs in `cat frames.txt`
 fs=4096
-for pn in 1 2 4 8 16
+for pn in $pnl
 do
   make clear
   ((tn=pn+2))
@@ -23,7 +25,7 @@ done 2>&1 | grep -e frame -e thread -e real -e total | tee process_perfs.txt
 
 #lines to one frame per line
 #for i in `cat frames.txt`
-for pn in 1 2 4 8 16
+for pn in $pnl
 do
   s=`grep "thread $pn" -B 1 -A 2 process_perfs.txt`
   f=`echo $s | cut -d' ' -f2`
