@@ -1,21 +1,8 @@
 frame 4096
 processing thread 1
-real	0m36.346s
-2.4G	total
+real	0m41.157s
+242M	total
 frame 4096
 processing thread 2
-real	0m36.468s
-4.8G	total
-frame 4096
-processing thread 4
-real	1m10.868s
-9.5G	total
-frame 4096
-processing thread 8
-real	2m30.164s
-19G	total
-frame 4096
-processing thread 16
-real	5m11.095s
-38G	total
-
+real	0m49.579s
+484M	total
