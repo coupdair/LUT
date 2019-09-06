@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #get version
-./process --version > VERSION
+make process && ./process --version > VERSION
 
 #documentation
 ##logo

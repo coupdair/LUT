@@ -6,7 +6,7 @@
         ./process -s 1024 -n 123 -X true -p 1234 -i 10.10.15.1 -w 1234657
 
  version: v0.3.7
- compilation date: (Sep  6 2019, 14:38:10)
+ compilation date: (Sep  6 2019, 17:13:46)
 
     -o               sample.cimg              output file name (e.g. "-o data.cimg -d 3" gives data_???.cimg)[0;0;0m
     -d               6                        number of digit for file names[0;0;0m
@@ -14,7 +14,6 @@
     -n               256                      number of frames[0;0;0m
     -b               12                       size   of vector buffer (total size is b*s*4 Bytes)[0;0;0m
     -c               3                        thread count (threads above 2 are processing one)[0;0;0m
-    --use-GPU        false                    use GPU for compution (or -G option)[0;0;0m
     --do-check       false                    do data check, e.g. test pass (or -C option)[0;0;0m
     --help           true                     help (or -h option)[0;0;0m
     --info           false                    show compilation options (or -I option)[0;0;0m

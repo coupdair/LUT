@@ -8,17 +8,17 @@
  version: v0.3.1
  compilation date: (Sep  6 2019, 14:41:31)
 
-    -o               samples/sample.png       output file name (e.g. "-o data.png -d 3" gives data_???.png)[0;0;0m
-    -r               results/sample.png       result file name (e.g. "-o proc.png -d 3" gives proc_???.png)[0;0;0m
-    -d               6                        number of digit for file names[0;0;0m
-    -s               1024                     size   of udp buffer[0;0;0m
-    -n               123                      number of vector[0;0;0m
-    -b               12                       size   of vector buffer (total size is b*s*4 Bytes)[0;0;0m
-    -c               0                        thread count (2 for receiving only and 4 for processing)[0;0;0m
-    -p               1234                     port where the packets are sent on the receiving device[0;0;0m
-    --use-GPU        false                    show GUI (or -G option)[0;0;0m
-    --do-check       false                    do data check, e.g. test pass (or -C option)[0;0;0m
-    --do-check-exit  false                    do data check exit on first error (or -E option)[0;0;0m
-    --help           true                     help (or -h option)[0;0;0m
-    --info           false                    show compilation options (or -I option)[0;0;0m
-    --version        false                    show version (or -v option)[0;0;0m
+    -o               samples/sample.png       output file name (e.g. "-o data.png -d 3" gives data_???.png)
+    -r               results/sample.png       result file name (e.g. "-o proc.png -d 3" gives proc_???.png)
+    -d               6                        number of digit for file names
+    -s               1024                     size   of udp buffer
+    -n               123                      number of vector
+    -b               12                       size   of vector buffer (total size is b*s*4 Bytes)
+    -c               0                        thread count (2 for receiving only and 4 for processing)
+    -p               1234                     port where the packets are sent on the receiving device
+    --use-GPU        false                    show GUI (or -G option)
+    --do-check       false                    do data check, e.g. test pass (or -C option)
+    --do-check-exit  false                    do data check exit on first error (or -E option)
+    --help           true                     help (or -h option)
+    --info           false                    show compilation options (or -I option)
+    --version        false                    show version (or -v option)
