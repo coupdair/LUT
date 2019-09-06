@@ -9,7 +9,7 @@
 //OpenMP
 #include <omp.h>
 
-#define VERSION "v0.3.6"
+#define VERSION "v0.3.7d"
 
 //thread lock
 #include "CDataGenerator.hpp"
@@ -27,8 +27,6 @@ using namespace cimg_library;
 typedef unsigned char Taccess;
 typedef unsigned int  Tdata;
 
-//! \todo [high] . add data test
-
 int main(int argc,char **argv)
 {
   ///command arguments, i.e. CLI option
@@ -44,7 +42,7 @@ int main(int argc,char **argv)
   const int width=cimg_option("-s",1024, "size   of udp buffer");
   const int count=cimg_option("-n",256,  "number of frames");
   const int nbuffer=cimg_option("-b",12, "size   of vector buffer (total size is b*s*4 Bytes)");
-  const int threadCount=cimg_option("-c",3,"thread count");
+  const int threadCount=cimg_option("-c",3,"thread count (threads above 2 are processing one)");
 #ifdef DO_GPU
   const bool use_GPU_G=cimg_option("-G",false,NULL);//-G hidden option
         bool use_GPU=cimg_option("--use-GPU",use_GPU_G,"show GUI (or -G option)");use_GPU=use_GPU_G|use_GPU;//same --use-GPU or -G option
@@ -155,7 +153,7 @@ int main(int argc,char **argv)
       , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
       , do_check
       );
-      process.run(access,images, accessR,results, count);
+      process.run(access,images, accessR,results, count, stride,start);
       process.show_checking();
       }//CPU
       break;
@@ -166,13 +164,12 @@ int main(int argc,char **argv)
       store.run(accessR,results, count);
       break;
     }//store
-//! \todo [.] is more GPUqueue in stride
     default:
     {//process
+      start=id-2;//e.g. #3 -> 1
 #ifdef DO_GPU
       if(use_GPU)
       {//GPU
-      start=id-2;//e.g. #3 -> 1
       std::cout<<"information: use GPU for processing (from "<<start<<" by step of "<<stride<<")."<<std::endl<<std::flush;
       CDataProcessorGPU<Tdata, Taccess> process(locks, gpu,width
       , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
@@ -182,7 +179,18 @@ int main(int argc,char **argv)
       process.run(access,images, accessR,results, count, stride,start);
       process.show_checking();
       }//GPU
+      else
 #endif
+      {//CPU
+      std::cout<<"information: use CPU for processing (from "<<start<<" by step of "<<stride<<"."<<std::endl<<std::flush;
+      CDataProcessor<Tdata,Taccess> process(locks
+      , CDataAccess::STATUS_FILLED, CDataAccess::STATUS_FREE  //images
+      , CDataAccess::STATUS_FREE,   CDataAccess::STATUS_FILLED//results
+      , do_check
+      );
+      process.run(access,images, accessR,results, count, stride,start);
+      process.show_checking();
+      }//CPU
       break;
     }//process
   }//switch(id)
